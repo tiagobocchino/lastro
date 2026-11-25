@@ -2,7 +2,7 @@
 chave: LST-40
 jira: https://adelecrm.atlassian.net/browse/LST-40
 secao: NUC
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-backend
 ---
 
