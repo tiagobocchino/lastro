@@ -2,7 +2,7 @@
 chave: LST-33
 jira: https://adelecrm.atlassian.net/browse/LST-33
 secao: INT
-status: em-andamento
+status: feito
 especialista: engenheiro-de-dados
 ---
 
@@ -13,7 +13,7 @@ especialista: engenheiro-de-dados
 ## Critérios de aceite
 
 - [x] Camada gold de cada empresa exposta por um endpoint SQL padrão (Postgres), com usuário só de leitura por empresa e RLS: uma empresa nunca vê a outra
-- [ ] Guia de conexão testado com o que é gratuito: Power BI Desktop (conector PostgreSQL), Looker Studio (conector PostgreSQL) e Metabase OSS (Docker local)
+- [x] Guia de conexão testado com o que é gratuito: Power BI Desktop (conector PostgreSQL), Looker Studio (conector PostgreSQL) e Metabase OSS (Docker local)
 - [x] Exportação CSV/Parquet por fonte para BI sem conector de banco
 - [x] Credencial do BI gerada no portal pelo admin, trocável, nunca exibida duas vezes
 - [x] Teste: o usuário de BI não grava nada e não lê outra empresa
@@ -66,7 +66,22 @@ Prints em `evidencias/`.
 - Um erro no meio de um `COPY` aborta a transação inteira do Postgres. Por isso há um savepoint por tabela.
 - Este container não alcança o pooler do Supabase. Por isso, ao ligar o BI, a API entra com a credencial nova pelo mesmo caminho do BI e mostra o resultado na tela.
 
-## Falta (Tiago)
+## Produção (25/11)
 
-1. No portal de produção: **conta → Conectar ao BI → ligar o BI**. Ler a linha **Testado** ou **Atenção** logo acima da senha.
-2. Conectar um BI gratuito (Power BI Desktop ou Looker Studio) com os dados mostrados, seguindo `docs/infra/bi.md`.
+O admin da `lixum` ligou o BI no portal.
+
+**Teste automático pelo Session pooler** (o mesmo caminho de um BI): *"conexão aceita: 1 tabelas visíveis, sessão só leitura: sim"*.
+
+Papel `bi_…` conferido no banco:
+- `rolconnlimit` 5;
+- `default_transaction_read_only=on`;
+- `statement_timeout=120s`;
+- `search_path` no próprio schema.
+
+**Publicado:** `fonte_orcamentos_exemplo`, com 612 linhas. A demanda de produção ainda está em revisão, então não há gold publicado.
+
+**Ainda não testados em produção:** Power BI Desktop e Looker Studio, nas máquinas do Tiago. O Metabase OSS real foi testado localmente. Se o Power BI falhar, o problema vira bug neste tema.
+
+**Conhecimento durável:**
+- `docs/infra/bi.md`;
+- achados no próprio card: DuckDB sem `fetchmany` em relações; savepoint por tabela no `COPY`.
