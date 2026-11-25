@@ -2,7 +2,7 @@
 chave: LST-10
 jira: https://adelecrm.atlassian.net/browse/LST-10
 secao: INT
-status: backlog
+status: em-andamento
 especialista: pesquisador-de-apis
 ---
 
