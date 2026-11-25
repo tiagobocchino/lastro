@@ -48,3 +48,21 @@ def test_serve_cria_demo_so_fora_de_producao(monkeypatch, tmp_path):
     monkeypatch.setenv("LASTRO_SEGREDO", "x" * 40)
     cli.main(["serve"])
     assert chamadas == [9090]  # produção: sem contas de demonstração
+
+
+def test_dockerfile_so_copia_o_que_esta_no_contexto():
+    """Deploy do LST-43 quebrou no Render: `COPY site` com `site` no .dockerignore ("failed to compute cache key ...
+    not found"). Todo COPY do contexto tem que existir e não pode estar ignorado."""
+    import fnmatch
+    import re
+    from pathlib import Path
+
+    raiz = Path(__file__).parent.parent
+    ignorados = [l.strip() for l in (raiz / ".dockerignore").read_text().splitlines() if l.strip() and not l.startswith("#")]
+    copias = re.findall(r"^COPY\s+(?!--from)(.+)$", (raiz / "Dockerfile").read_text(), re.MULTILINE)
+    assert copias
+    for linha in copias:
+        *origens, _destino = linha.split()
+        for origem in origens:
+            assert (raiz / origem).exists(), f"COPY {origem}: não existe no repositório"
+            assert not any(fnmatch.fnmatch(origem, p) or origem == p for p in ignorados), f"COPY {origem}: está no .dockerignore"
