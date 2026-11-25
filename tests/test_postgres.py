@@ -438,6 +438,9 @@ def test_bi_publica_fontes_e_gold_e_isola_as_empresas(banco_pg, url_pg, monkeypa
         # o BI enxerga só o próprio schema, já no search_path
         assert c.execute("SELECT count(*) FROM fonte_orcamentos_2025").fetchone()[0] == linhas_csv
         assert c.execute(f"SELECT sum(valor_vendido) FROM d{did}_fato").fetchone()[0] is not None
+        painel = next(n for n in nomes if n.startswith(f"painel_{did}_"))  # LST-46: tabela pronta, mesmo total da fato
+        assert c.execute(f"SELECT round(sum(valor_vendido)::numeric, 2), sum(registros) FROM {painel}").fetchone() == \
+            c.execute(f"SELECT round(sum(valor_vendido)::numeric, 2), count(*) FROM d{did}_fato").fetchone()
         visiveis = {r[0] for r in c.execute(
             "SELECT table_schema FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog','information_schema')")}
         assert visiveis == {cred_a["usuario"]}

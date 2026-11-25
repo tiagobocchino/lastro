@@ -11,6 +11,7 @@ Um schema só, com o mesmo nome do usuário (`bi_<10 letras e números>`). O nom
 | `fonte_<nome>` | cada fonte de arquivo da empresa. Numa fonte SQLite, uma tabela por tabela |
 | `d<id>_fato`, `d<id>_dim_*` | o gold de cada demanda **aprovada**, em esquema estrela: a fato liga nas dimensões pelas colunas `*_id` |
 | `d<id>_silver` | a tabela limpa da demanda, antes do modelo dimensional |
+| `painel_<id>_<pergunta>` | **tabela pronta** (LST-46): a fato já ligada às dimensões, com `data`, `ano`, `mes`, `ano_mes`, as medidas e `registros` (= 1, some para contar). Escolha esta no Data Studio ou no Power BI: sem consulta personalizada e sem relações |
 
 O Lastro atualiza essas tabelas:
 - quando o admin clica em **publicar agora**;
@@ -59,6 +60,8 @@ Passos conferidos na documentação oficial (`docs/infra/fontes/datastudio-conne
 2. Aba **BÁSICO**: nome do host, porta `5432`, banco `postgres`, usuário e senha do portal.
 3. **SSL:** marque **Ativar SSL**. O Data Studio pede o arquivo do certificado do servidor: baixe em **Supabase → Database → Settings → SSL Configuration → Download certificate** e envie esse arquivo.
 4. **AUTENTICAR**: aparece a lista de tabelas do seu schema. Escolha uma e clique em **CONECTAR**.
+
+**O caminho mais simples (LST-46):** escolha a tabela `painel_<id>_…` da demanda. Ela já traz as dimensões e a data; some `registros` para contar. Categoria vazia aparece vazia: se ela deve virar um rótulo, isso é regra do seu negócio (ADR 0011).
 
 Cada fonte de dados do Data Studio é **uma tabela ou uma consulta personalizada**. Para usar o esquema estrela de uma demanda aprovada numa fonte só, escolha **CONSULTA PERSONALIZADA**, por exemplo:
 

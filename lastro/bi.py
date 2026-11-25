@@ -100,6 +100,33 @@ def _rel_sqlite(caminho: str, tabela: str):
     return ler
 
 
+def _rel_painel(gold: Path):
+    """LST-46: a fato já ligada às dimensões, numa tabela só: o usuário escolhe uma tabela, sem relações nem SQL.
+    Vazio continua vazio (ADR 0011: rótulo para o vazio é regra do cliente). `registros = 1` permite contar."""
+    def q(p: Path) -> str:
+        return str(p).replace("'", "''")
+
+    def ler(con: duckdb.DuckDBPyConnection):
+        fato = gold / "fato.parquet"
+        cols = [r[0] for r in con.sql(f"DESCRIBE SELECT * FROM read_parquet('{q(fato)}')").fetchall()]
+        sel, juncoes = [], []
+        for c in cols:
+            dim = gold / f"dim_{c[:-3]}.parquet"
+            if c.endswith("_id") and dim.exists():
+                n = c[:-3]
+                juncoes.append(f'LEFT JOIN read_parquet(\'{q(dim)}\') AS "d_{n}" ON "d_{n}"."{c}" = f."{c}"')
+                sel.append(f'"d_{n}"."{n}"')
+            elif c == "data":
+                sel += ["CAST(f.data AS DATE) AS data", "year(f.data) AS ano", "month(f.data) AS mes",
+                        "strftime(f.data, '%Y-%m') AS ano_mes"]
+            else:
+                sel.append(f'f."{c}"')
+        sel.append("1 AS registros")
+        return con.sql(f"SELECT {', '.join(sel)} FROM read_parquet('{q(fato)}') AS f {' '.join(juncoes)}")
+
+    return ler
+
+
 def tabelas_da_empresa(repo: Any, pasta: Path) -> list[Tabela]:
     """Tudo o que a empresa tem pronto para o BI: fontes e o gold das demandas aprovadas."""
     out: list[Tabela] = []
@@ -118,6 +145,9 @@ def tabelas_da_empresa(repo: Any, pasta: Path) -> list[Tabela]:
         gold = pasta / "demandas" / str(d["id"]) / "gold"
         for arq in sorted(gold.glob("*.parquet")):
             out.append(Tabela(f"d{d['id']}_{ident(arq.stem)}", f"demanda {d['id']} · {arq.stem}", _rel_arquivo(arq)))
+        if (gold / "fato.parquet").exists():
+            nome = f"painel_{d['id']}_{ident(d['pergunta'])}"[:60].rstrip("_")
+            out.append(Tabela(nome, f"demanda {d['id']} · tabela pronta (fato + dimensões)", _rel_painel(gold)))
     vistos: dict[str, int] = {}
     for t in out:  # nomes únicos mesmo com fontes de nomes parecidos
         n = vistos.get(t.nome, 0)
