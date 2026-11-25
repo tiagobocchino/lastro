@@ -358,7 +358,14 @@ def _cliente_oauth() -> httpx.Client:  # trocado nos testes pelo transporte do s
 
 
 def _url_publica(request: Request) -> str:
-    return os.environ.get("LASTRO_URL_PUBLICA") or str(request.base_url).rstrip("/")
+    """Endereço público pelo próprio pedido (Host + X-Forwarded-Proto, que o Render envia): vale no Render e no
+    domínio próprio. A variável LASTRO_URL_PUBLICA só entra se o pedido não trouxer Host (em 25/11 ela estava com
+    um endereço que não existe e mandava o OAuth e o Power BI para o lugar errado)."""
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host")
+    if not host:
+        return (os.environ.get("LASTRO_URL_PUBLICA") or str(request.base_url)).rstrip("/")
+    proto = request.headers.get("x-forwarded-proto", request.url.scheme).split(",")[0].strip()
+    return f"{proto}://{host}".rstrip("/")
 
 
 def _contrato_oauth(saas: str) -> dict:
@@ -591,7 +598,7 @@ def publicar_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, 
 
 
 @app.post("/api/bi/chave")
-def chave_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+def chave_bi(request: Request, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
     """Chave de leitura do BI por HTTPS (LST-47). Gera ou troca; a chave volta só nesta resposta."""
     _papel(s, {"admin"})
     try:
@@ -599,7 +606,7 @@ def chave_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Dep
     except BIIndisponivel as e:
         raise HTTPException(409, str(e)) from e
     p.repo.registrar(s.email, "gerou_chave_bi", {})
-    return {"chave": chave, "cabecalho": CABECALHO_CHAVE, "base": f"{_base_publica()}/bi/v1/"}
+    return {"chave": chave, "cabecalho": CABECALHO_CHAVE, "base": f"{_url_publica(request)}/bi/v1/"}
 
 
 @app.delete("/api/bi/chave")
@@ -612,10 +619,6 @@ def revogar_chave_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Platafo
 
 # ---- BI por HTTPS (LST-47): o Power BI lê as tabelas publicadas sem certificado do Supabase e sem gateway ----
 CABECALHO_CHAVE = "X-Lastro-Chave"
-
-
-def _base_publica() -> str:
-    return os.environ.get("LASTRO_URL_PUBLICA", "https://lastro-api-73zx.onrender.com").rstrip("/")
 
 
 def _pela_chave(chave: str | None) -> tuple[AcessoBI, dict]:
@@ -782,8 +785,8 @@ def painel_html(did: int, p: Annotated[Plataforma, Depends(plataforma)]) -> File
 
 
 @app.get("/api/demandas/{did}/painel/powerbi")
-def painel_powerbi(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)],
-                   via: str = "https") -> Response:
+def painel_powerbi(did: int, request: Request, s: Annotated[Sessao, Depends(sessao)],
+                   p: Annotated[Plataforma, Depends(plataforma)], via: str = "https") -> Response:
     """Projeto aberto do Power BI (PBIP) num .zip. Padrão: lê o BI da empresa por HTTPS com a chave de leitura
     (LST-47, sem certificado nem gateway). via=postgres gera a conexão direta ao Postgres (LST-33)."""
     import io
@@ -805,7 +808,7 @@ def painel_powerbi(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated
     except BIIndisponivel:
         pass
     if via != "postgres":
-        con = {"via": "https", "api": _base_publica() + "/"}
+        con = {"via": "https", "api": _url_publica(request) + "/"}
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         for caminho, conteudo in paineis.projeto_powerbi(spec, gold, con).items():

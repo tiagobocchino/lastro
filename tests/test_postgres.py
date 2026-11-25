@@ -629,11 +629,16 @@ def test_bi_por_https_com_chave_de_leitura(url_pg, monkeypatch, tmp_path: Path):
         assert c.post("/api/bi/chave", headers=cab).status_code == 409  # sem BI ligado não há chave
         c.post("/api/bi/credencial", headers=cab)
         r = c.post("/api/bi/chave", headers=cab).json()
-        assert r["chave"].startswith("lst_") and r["cabecalho"] == "X-Lastro-Chave" and r["base"].endswith("/bi/v1/")
+        assert r["chave"].startswith("lst_") and r["cabecalho"] == "X-Lastro-Chave" and r["base"] == "http://testserver/bi/v1/"
         estado = c.get("/api/bi", headers=cab).json()
         assert estado["chave_ativa"] and r["chave"] not in str(estado)  # a chave não volta de novo
         empresas[t] = (cab, r["chave"])
     (_, (cab1, chave1)), (t2, (_, chave2)) = empresas.items()
+    # o endereço público vem do pedido (Render manda Host e X-Forwarded-Proto), não de variável de ambiente
+    monkeypatch.setenv("LASTRO_URL_PUBLICA", "https://endereco-errado.exemplo")
+    r = c.post("/api/bi/chave", headers=cab1 | {"X-Forwarded-Proto": "https", "Host": "lastro.exemplo"}).json()
+    assert r["base"] == "https://lastro.exemplo/bi/v1/"
+    chave1 = r["chave"]
 
     assert c.get("/bi/v1/").status_code == 200  # a URL base responde sem chave (teste de conexão do Service)
     assert c.get("/bi/v1/tabelas").status_code == 401
@@ -660,3 +665,30 @@ def test_bi_por_https_com_chave_de_leitura(url_pg, monkeypatch, tmp_path: Path):
     assert c.delete("/api/bi/credencial", headers=empresas[t2][0]).status_code == 200
     assert c.get("/bi/v1/tabelas", headers={"X-Lastro-Chave": chave2}).status_code == 401
     modulo.banco.fechar()
+
+
+def test_bi_parquet_mantem_os_tipos_do_postgres_com_vazios(banco_pg, url_pg):
+    """Achado em produção (25/11): id com vazio virava DOUBLE e coluna toda vazia virava NULL no Parquet."""
+    import duckdb
+
+    from lastro.bi import AcessoBI
+
+    t = f"k{uuid.uuid4().hex[:6]}"
+    banco_pg.criar_tenant(t, t)
+    bi = AcessoBI(banco_pg, url_pg)
+    esquema = bi.gerar_credencial(t)["usuario"].split(".")[0]
+    with banco_pg._dono() as con:
+        con.execute(f'CREATE TABLE "{esquema}".tipos (id bigint, dim_id bigint, vazio_id bigint, valor numeric(12,2), '
+                    "nome text, vazio_txt text, ok boolean, dia date)")
+        con.execute(f'INSERT INTO "{esquema}".tipos VALUES (1, 10, NULL, 1.5, %s, NULL, true, %s), (2, NULL, NULL, NULL, NULL, NULL, NULL, NULL)',
+                    ("Ana", "2026-01-02"))
+    import tempfile
+    from pathlib import Path as P
+
+    with tempfile.TemporaryDirectory() as d:
+        arq = P(d) / "t.parquet"
+        arq.write_bytes(bi.parquet(esquema, "tipos"))
+        tipos = {r[0]: r[1] for r in duckdb.sql(f"DESCRIBE SELECT * FROM '{arq}'").fetchall()}
+        assert tipos == {"id": "BIGINT", "dim_id": "BIGINT", "vazio_id": "BIGINT", "valor": "DOUBLE", "nome": "VARCHAR",
+                         "vazio_txt": "VARCHAR", "ok": "BOOLEAN", "dia": "DATE"}
+        assert duckdb.sql(f"SELECT sum(valor), count(dim_id) FROM '{arq}'").fetchall() == [(1.5, 1)]

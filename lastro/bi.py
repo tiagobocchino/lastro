@@ -303,7 +303,6 @@ class AcessoBI:
         """A tabela publicada no BI da empresa, em Parquet. Lê do Postgres (o que foi publicado), não do disco:
         sobrevive a deploy. Só tabela que existe no schema da própria empresa; o nome nunca entra cru no SQL."""
         import tempfile
-        from decimal import Decimal
 
         import pandas as pd
         from psycopg import sql
@@ -313,15 +312,21 @@ class AcessoBI:
         with self.banco._dono() as con:
             cur = con.execute(sql.SQL("SELECT * FROM {}.{} LIMIT %s").format(sql.Identifier(esquema), sql.Identifier(tabela)),
                               (LIMITE_LINHAS,))
-            nomes = [d.name for d in cur.description]
+            tipos = {d.name: d.type_code for d in cur.description}
             linhas = cur.fetchall()
-        df = pd.DataFrame([[r[n] for n in nomes] for r in linhas], columns=nomes)
-        for c in df.columns:
-            vals = df[c].dropna()
-            if vals.map(lambda v: isinstance(v, Decimal)).any():  # numeric do Postgres: DOUBLE, que o Power BI lê direto
-                df[c] = df[c].astype(float)
-            elif len(vals) and vals.map(lambda v: isinstance(v, int) and not isinstance(v, bool)).all():
-                df[c] = df[c].astype("Int64")  # inteiro com vazio não vira float: as relações do modelo continuam batendo
+        nomes = list(tipos)
+        df = pd.DataFrame({n: pd.Series([r[n] for r in linhas], dtype="object") for n in nomes}, columns=nomes)
+        # O tipo vem da coluna no Postgres, não dos valores: coluna toda vazia ou inteiro com vazio mantém o tipo
+        # (senão o pandas vira float/NULL e as relações do modelo do Power BI deixam de bater).
+        for n, oid in tipos.items():
+            if oid in (20, 21, 23):
+                df[n] = df[n].astype("Int64")
+            elif oid in (700, 701, 1700):
+                df[n] = df[n].map(lambda v: None if v is None else float(v)).astype("Float64")
+            elif oid == 16:
+                df[n] = df[n].astype("boolean")
+            elif oid in (25, 1043, 1042):
+                df[n] = df[n].astype("string")
         with tempfile.TemporaryDirectory() as tmp:
             destino = Path(tmp) / "t.parquet"
             duck = duckdb.connect()
