@@ -62,13 +62,27 @@ Ferramentas de conta pessoal do Google têm limites (por exemplo, reuniões em g
 | --- | --- | --- | --- |
 | LST-19 | Conta Google Cloud, projeto `lastro-prod`, orçamento com alerta | — | Tiago (cartão, aceite dos termos) |
 | LST-20 | Container da API (Dockerfile, health check, modelo vindo do Cloud Storage) | — | — |
-| LST-21 | Arquivos das empresas no Cloud Storage e sandbox com acesso externo desligado | LST-20 | — |
+| LST-21 | Arquivos das empresas no Cloud Storage e sandbox com acesso externo desligado (feito; ADR 0007) | LST-20 | — |
 | LST-6 | Supabase em produção e keepalive diário | LST-19 | Tiago (criar projeto) |
 | LST-22 | Deploy da API no Cloud Run pelo GitHub Actions, segredos no Secret Manager | LST-19, LST-20, LST-21, LST-6 | Tiago (autorizar Workload Identity) |
 | LST-23 | Site e portal no Firebase Hosting, `/api` apontando para o Cloud Run, domínio | LST-22 | Tiago (DNS do domínio) |
 | LST-24 | Funil de atendimento: Forms → Planilha → Apps Script → Gmail → Agenda | — | Tiago (conta Google) |
 | LST-25 | Entregas no Drive do cliente (relatório e notebook do Colab) | LST-22 | — |
 | LST-26 | Monitoramento: verificação de disponibilidade, alerta de erro e de custo | LST-22 | — |
+
+## Bucket das empresas no Cloud Run (ADR 0007)
+
+O deploy do LST-22 monta o bucket como volume e aponta o Lastro para ele:
+
+```bash
+gcloud run deploy lastro-api --image <imagem> --region us-central1 \
+  --execution-environment gen2 --max-instances 2 --min-instances 0 \
+  --add-volume name=tenants,type=cloud-storage,bucket=<bucket> \
+  --add-volume-mount volume=tenants,mount-path=/dados/tenants \
+  --set-env-vars LASTRO_AMBIENTE=producao,LASTRO_TENANTS=/dados/tenants
+```
+
+A conta de serviço da API precisa do papel `roles/storage.objectUser` só nesse bucket. Os nomes das flags e a exigência de `gen2` devem ser conferidos na documentação do Cloud Run no dia do deploy.
 
 ## Riscos
 
@@ -78,4 +92,5 @@ Ferramentas de conta pessoal do Google têm limites (por exemplo, reuniões em g
 | Supabase pausa por inatividade | Portal fora do ar | Job diário no Cloud Scheduler |
 | Partida a frio do Cloud Run com o modelo de 240 MB | Primeira busca do dia lenta | Embeddings desligados na v1 ou modelo carregado em segundo plano |
 | Dados de cliente em região dos EUA | Exigência da LGPD | Cláusula de transferência internacional; região do Brasil quando houver receita |
+| Duas instâncias gravando o mesmo arquivo no bucket | Última gravação vence | Máx. 2 instâncias; notas de decisão pequenas (ADR 0007) |
 | Estourar limite gratuito | Cobrança | Orçamento com alerta, cotas máximas no Cloud Run (instâncias máx. 2) |

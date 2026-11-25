@@ -10,7 +10,7 @@ Glossário. Um termo por linha; agentes e código usam estes nomes.
 - **Grill**: as perguntas que o Orquestrador faz antes de construir. Cada pergunta tem uma sugestão padrão.
 - **Decisão**: resposta de grill gravada na Caixa do tenant. As da fonte (data, chave, revisor) ficam em `decisoes/` e não voltam ao grill; as da demanda (medida, recorte) ficam em `decisoes/historico/`: a busca acha, mas o grill pergunta de novo.
 - **Fonte primária**: dado do cliente conectado à plataforma. Só leitura.
-- **Sandbox**: DuckDB da demanda, onde o pipeline escreve.
+- **Sandbox**: DuckDB da demanda, onde o pipeline escreve. Recebe cópia das fontes e depois é travado: só alcança a pasta da própria demanda (ADR 0007).
 - **Staging**: pasta da demanda com o gold em Parquet, o `pipeline.py`, o notebook e o relatório.
 - **Caixa de Ferramenta** (ou Caixa): acervo de notas buscado por índice. Escopos: global, tenant, demanda.
 - **Nota**: um arquivo Markdown da Caixa, um assunto, com frontmatter. Tipos: playbook, metodo, erro-conhecido, trilha, fonte, decisao.

@@ -19,13 +19,15 @@ class Config:
     llm_url: str
     llm_chave: str
     embedder: str = "nenhum"
+    tenants: Path | None = None
 
     @property
     def banco(self) -> Path:
         return self.home / "lastro.db"
 
     def pasta_tenant(self, tenant: str) -> Path:
-        return self.home / "tenants" / tenant
+        # Em produção, LASTRO_TENANTS aponta para o bucket montado (gs://<bucket>/tenants/<tenant>/).
+        return (self.tenants or self.home / "tenants") / tenant
 
 
 def carregar() -> Config:
@@ -42,6 +44,7 @@ def carregar() -> Config:
         llm_url=os.environ.get("LASTRO_LLM_URL", ""),
         llm_chave=os.environ.get("LASTRO_LLM_CHAVE", ""),
         embedder=os.environ.get("LASTRO_EMBEDDER", "nenhum"),
+        tenants=Path(os.environ["LASTRO_TENANTS"]).resolve() if os.environ.get("LASTRO_TENANTS") else None,
     )
 
 

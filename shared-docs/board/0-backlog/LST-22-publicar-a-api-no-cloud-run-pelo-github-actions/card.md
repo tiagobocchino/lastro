@@ -16,6 +16,7 @@ especialista: engenheiro-backend
 - [ ] Workload Identity Federation, nenhuma chave JSON
 - [ ] Segredos no Secret Manager; LASTRO_AMBIENTE=producao
 - [ ] Máx. 2 instâncias, mín. 0; /saude = 200
+- [ ] Bucket das empresas montado em /dados/tenants com LASTRO_TENANTS (ADR 0007, comando no plano de nuvem)
 
 ## Verificação
 

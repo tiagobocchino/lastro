@@ -49,9 +49,10 @@ class Plataforma:
 
     def _contexto(self, demanda: dict) -> Contexto:
         pasta = self.pasta_demanda(demanda["id"])
-        sb = Sandbox(pasta / "staging")
+        sb = Sandbox(pasta / "staging", gravavel=pasta)
         for f in self.repo.fontes(demanda["fontes"]):
             sb.anexar(Fonte(f["nome"], f["tipo"], f["caminho"]))
+        sb.travar()
         ctx = Contexto(
             demanda_id=demanda["id"],
             pergunta=demanda["pergunta"],
