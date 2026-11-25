@@ -121,12 +121,14 @@ async function abrirDemanda(id) {
   if (d.status === "grill") html += grillHtml(d);
   if (d.status === "pronta") html += `<div class="bloco"><p>Grill respondido. Os agentes vão modelar, construir o pipeline no sandbox, responder e auditar.</p><div class="linha-btn"><button class="btn ouro" id="b-exec">rodar agentes</button></div><p class="erro-msg" id="msg"></p></div>`;
   if (d.resposta) html += resultadoHtml(d);
+  if (d.status === "aprovada") html += `<div id="painel-dem"></div>`;
   if (d.eventos?.length) html += `<h2>Rastro dos agentes</h2><div class="bloco rastro">${d.eventos.map((e) => `<div><b>${esc(e.ator.split("@")[0])}</b><span>${esc(e.acao)} · ${esc(e.detalhe.slice(0, 220))}</span></div>`).join("")}</div>`;
   p.innerHTML = html;
   if ($("#f-grill")) $("#f-grill").onsubmit = (e) => enviarGrill(e, d);
   if ($("#b-exec")) $("#b-exec").onclick = () => executar(d.id);
   document.querySelectorAll("[data-baixar]").forEach((b) => (b.onclick = () => baixar(d.id, b.dataset.baixar)));
   if ($("#f-rev")) $("#f-rev").onsubmit = (e) => revisar(e, d.id);
+  if ($("#painel-dem")) await telaPainel(d.id);
 }
 
 function grillHtml(d) {
@@ -438,4 +440,55 @@ async function telaBI(nova = null, teste = null) {
     if (b.dataset.confirmar !== "1") { b.dataset.confirmar = "1"; b.textContent = "confirmar: o BI perde o acesso"; return; }
     acao(b, async () => { await api("/api/bi/credencial", { method: "DELETE" }); await telaBI(); });
   };
+}
+
+// ---- Painel da demanda (LST-34) -----------------------------------------------------------
+const TIPOS_VISUAL = { kpi: "número (KPI)", barras: "barras", linha: "linha no tempo", tabela: "tabela" };
+const AGREG = { soma: "soma", media: "média", contagem: "contagem", distintos: "distintos", minimo: "mínimo", maximo: "máximo" };
+
+async function telaPainel(did, aviso = "") {
+  const alvo = $("#painel-dem");
+  const pode = ["admin", "demandante"].includes(sessao.papel);
+  const e = await (await api(`/api/demandas/${did}/painel`)).json();
+  if (!e.spec) {
+    alvo.innerHTML = `<h2>Painel</h2><div class="bloco"><p class="quem">O designer do Lastro monta um painel com o resultado aprovado: o número principal, a quebra que você pediu e a evolução no tempo. Ele sai em HTML (abre em qualquer navegador) e como projeto do Power BI, ligado ao BI da sua empresa.</p>
+      ${pode ? `<div class="linha-btn"><button class="btn ouro" id="p-criar">montar painel</button></div>` : `<p class="quem">Quem demanda ou o admin pode montar o painel.</p>`}<p class="erro-msg" id="p-msg"></p></div>`;
+    if ($("#p-criar")) $("#p-criar").onclick = async (ev) => { ev.target.disabled = true; try { await api(`/api/demandas/${did}/painel`, { method: "POST" }); await abrirDemanda(did); } catch (err) { $("#p-msg").textContent = err.message; ev.target.disabled = false; } };
+    return;
+  }
+  const s = e.spec, med = Object.fromEntries(s.medidas.map((m) => [m.id, m]));
+  const opts = (lista, rot = (x) => x) => lista.map((x) => `<option value="${esc(x)}">${esc(rot(x))}</option>`).join("");
+  alvo.innerHTML = `<h2>Painel <span class="quem">· versão ${s.versao} de ${e.versoes.length}</span></h2>
+    <div class="bloco">
+      <iframe id="p-previa" title="Prévia do painel" style="width:100%;height:520px;border:1px solid var(--linha);border-radius:8px;background:var(--sup)"></iframe>
+      <div class="linha-btn"><button class="btn sec" id="p-html">baixar HTML</button><button class="btn sec" id="p-pbi">baixar projeto do Power BI</button></div>
+      <div class="tabela"><table><thead><tr><th>visual</th><th>tipo</th><th>medida</th><th>eixo</th>${pode ? "<th></th>" : ""}</tr></thead><tbody>
+        ${s.visuais.map((v) => `<tr><td><code>${esc(v.id)}</code> ${esc(v.titulo)}</td><td>${esc(TIPOS_VISUAL[v.tipo] || v.tipo)}</td><td>${esc(med[v.medida]?.nome || v.medida)}</td><td>${esc(v.eixo || "—")}</td>${pode ? `<td style="text-align:right"><button class="btn sec" data-rem="${esc(v.id)}">remover</button></td>` : ""}</tr>`).join("")}
+      </tbody></table></div>
+      ${pode ? `<form id="p-pedir" style="display:grid;gap:8px"><label for="p-texto">Peça uma mudança ao designer <small>ex.: "adicione um gráfico de barras de valor vendido por estado", "nova medida média de valor orçado", "remova o v3"</small>
+        <input id="p-texto" type="text" required></label><div class="linha-btn"><button class="btn" type="submit">pedir</button></div></form>
+      <details><summary>ou monte pelo formulário</summary>
+        <form id="p-visual" class="duas-col" style="align-items:end;margin-top:10px">
+          <label for="p-tipo">Visual<select id="p-tipo">${opts(e.opcoes.tipos, (x) => TIPOS_VISUAL[x] || x)}</select></label>
+          <label for="p-med">Medida<select id="p-med">${opts(s.medidas.map((m) => m.id), (x) => med[x].nome)}</select></label>
+          <label for="p-eixo">Eixo<select id="p-eixo"><option value="">— (KPI)</option>${opts(e.opcoes.eixos)}</select></label>
+          <button class="btn" type="submit">adicionar visual</button></form>
+        <form id="p-medida" class="duas-col" style="align-items:end;margin-top:10px">
+          <label for="p-agg">Agregação<select id="p-agg">${opts(e.opcoes.agregacoes, (x) => AGREG[x] || x)}</select></label>
+          <label for="p-col">Coluna<select id="p-col">${opts(e.opcoes.colunas)}</select></label>
+          <button class="btn" type="submit">adicionar medida</button></form></details>` : ""}
+      <p class="${aviso.startsWith("ok:") ? "ok" : "erro-msg"}" id="p-msg" role="status">${esc(aviso.replace(/^ok:/, ""))}</p>
+    </div>`;
+  try { $("#p-previa").srcdoc = await (await api(`/api/demandas/${did}/painel/html`)).text(); } catch { /* prévia é conveniência */ }
+  $("#p-html").onclick = (ev) => baixarArquivo(`/api/demandas/${did}/painel/html`, ev.target);
+  $("#p-pbi").onclick = (ev) => baixarArquivo(`/api/demandas/${did}/painel/powerbi`, ev.target);
+  if (!pode) return;
+  const mudar = async (corpo) => {
+    try { const r = await (await api(`/api/demandas/${did}/painel/mudancas`, { method: "POST", json: corpo })).json(); await abrirDemanda(did); await telaPainel(did, `ok:Versão ${r.versao} gravada no rastro.`); }
+    catch (err) { $("#p-msg").className = "erro-msg"; $("#p-msg").textContent = err.message; }
+  };
+  $("#p-pedir").onsubmit = (ev) => { ev.preventDefault(); mudar({ pedido: $("#p-texto").value }); };
+  $("#p-visual").onsubmit = (ev) => { ev.preventDefault(); const op = { op: "adicionar_visual", tipo: $("#p-tipo").value, medida: $("#p-med").value }; if ($("#p-eixo").value) op.eixo = $("#p-eixo").value; mudar({ op }); };
+  $("#p-medida").onsubmit = (ev) => { ev.preventDefault(); mudar({ op: { op: "adicionar_medida", coluna: $("#p-col").value, agregacao: $("#p-agg").value } }); };
+  document.querySelectorAll("[data-rem]").forEach((b) => (b.onclick = () => mudar({ op: { op: "remover_visual", id: b.dataset.rem } })));
 }

@@ -71,3 +71,14 @@ Em **conta → Exportar fontes**, o admin ou o demandante baixa cada fonte em **
 ## Desligar
 
 Use **desligar** no portal: o usuário perde o login na hora. Ao ligar de novo, o usuário e o schema continuam os mesmos e a senha é nova.
+
+## Painel pronto da demanda (LST-34)
+
+Numa demanda **aprovada**, o bloco **Painel** monta o painel e deixa pedir mudanças em português ("adicione um gráfico de barras de valor vendido por estado"). O painel sai de dois jeitos:
+- **baixar HTML:** abre em qualquer navegador, sem servidor e sem custo;
+- **baixar projeto do Power BI:** um `.zip` com o projeto aberto (`.pbip`).
+  - Abra o `.pbip` no Power BI Desktop gratuito, informe o usuário e a senha do BI e clique em **Atualizar**.
+  - Com o BI da empresa ligado, o projeto já aponta para o servidor e o schema dela.
+  - Sem o BI ligado, os parâmetros `Servidor`, `Banco` e `Esquema` vêm para preencher em **Transformar dados → Gerenciar parâmetros**.
+
+Cada mudança vira uma nova versão e fica no rastro da demanda. O Lastro não sobrescreve o projeto que você já baixou e editou.

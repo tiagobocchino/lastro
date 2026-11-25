@@ -615,3 +615,126 @@ def exportar_fonte(fid: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated
     p.repo.registrar(s.email, "exportou_fonte", {"fonte": fid, "formato": formato})
     tipo = "text/csv" if formato == "csv" else "application/vnd.apache.parquet"
     return FileResponse(destino, media_type=tipo, filename=destino.name)
+
+
+# ---- Painel da demanda (LST-34): o agente monta e edita; HTML e Power BI saem da mesma especificação ----
+
+def _painel_ctx(did: int, p: Plataforma) -> tuple[dict, Path, dict]:
+    from . import paineis
+
+    d = p.repo.demanda(did)
+    if not d:
+        raise HTTPException(404, "demanda não encontrada")
+    if d["status"] != "aprovada":
+        raise HTTPException(409, "o painel nasce do gold aprovado: aprove a demanda antes")
+    gold = p.pasta_demanda(did) / "gold"
+    try:
+        cat = paineis.catalogo(gold, d["resultado"]["modelo"])
+    except paineis.PedidoInvalido as e:
+        raise HTTPException(409, str(e)) from e
+    return d, gold, cat
+
+
+def _salvar_painel(p: Plataforma, did: int, spec: dict, gold: Path) -> None:
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    from . import paineis
+
+    pasta = p.pasta_demanda(did)
+    paineis.gravar(pasta, spec)
+    agora = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M")
+    (paineis.pasta(pasta) / "painel.html").write_text(paineis.html_painel(spec, gold, agora), encoding="utf-8")
+
+
+@app.get("/api/demandas/{did}/painel")
+def ver_painel(did: int, p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    from . import paineis
+
+    _, _, cat = _painel_ctx(did, p)
+    pasta = p.pasta_demanda(did)
+    return {"spec": paineis.atual(pasta), "versoes": paineis.versoes(pasta),
+            "opcoes": {"colunas": cat["medidas"], "eixos": cat["dimensoes"] + cat["tempo"],
+                       "agregacoes": sorted(paineis.AGREGACOES), "tipos": sorted(paineis.TIPOS)}}
+
+
+@app.post("/api/demandas/{did}/painel")
+def criar_painel(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    from . import paineis
+
+    _papel(s, PAPEIS_QUE_DEMANDAM)
+    d, gold, _ = _painel_ctx(did, p)
+    if paineis.atual(p.pasta_demanda(did)):
+        raise HTTPException(409, "esta demanda já tem painel: peça mudanças a ele")
+    try:
+        spec = paineis.inicial(d, gold)
+    except paineis.PedidoInvalido as e:
+        raise HTTPException(400, str(e)) from e
+    _salvar_painel(p, did, spec, gold)
+    p.repo.registrar("designer", "criou_painel", {"versao": 1, "visuais": [v["titulo"] for v in spec["visuais"]], "pedido_por": s.email}, did)
+    return spec
+
+
+class MudancaPainel(BaseModel):
+    pedido: str | None = None  # em português: "adicione um gráfico de barras de valor vendido por estado"
+    op: dict | None = None  # ou a operação já estruturada (formulário do portal)
+
+
+@app.post("/api/demandas/{did}/painel/mudancas")
+def mudar_painel(did: int, dados: MudancaPainel, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    from . import paineis
+
+    _papel(s, PAPEIS_QUE_DEMANDAM)
+    _, gold, cat = _painel_ctx(did, p)
+    spec = paineis.atual(p.pasta_demanda(did))
+    if not spec:
+        raise HTTPException(409, "crie o painel antes de pedir mudanças")
+    try:
+        op = dados.op or paineis.interpretar(dados.pedido or "", spec, cat)
+        novo, frase = paineis.mudar(spec, op, cat)
+    except paineis.PedidoInvalido as e:
+        p.repo.registrar("designer", "recusou_mudanca_painel", {"pedido": dados.pedido or dados.op, "motivo": str(e), "pedido_por": s.email}, did)
+        raise HTTPException(400, str(e)) from e
+    _salvar_painel(p, did, novo, gold)
+    p.repo.registrar("designer", "alterou_painel", {"versao": novo["versao"], "mudanca": frase, "pedido": dados.pedido or op, "pedido_por": s.email}, did)
+    return novo
+
+
+@app.get("/api/demandas/{did}/painel/html")
+def painel_html(did: int, p: Annotated[Plataforma, Depends(plataforma)]) -> FileResponse:
+    from . import paineis
+
+    arq = paineis.pasta(p.pasta_demanda(did)) / "painel.html"
+    if not p.repo.demanda(did) or not arq.exists():
+        raise HTTPException(404, "painel não encontrado")
+    return FileResponse(arq, media_type="text/html", filename=f"painel_demanda_{did}.html")
+
+
+@app.get("/api/demandas/{did}/painel/powerbi")
+def painel_powerbi(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> Response:
+    """Projeto aberto do Power BI (PBIP) num .zip. Aponta para o BI da empresa quando ele está ligado (LST-33)."""
+    import io
+    import zipfile
+
+    from . import paineis
+
+    _, gold, _ = _painel_ctx(did, p)
+    spec = paineis.atual(p.pasta_demanda(did))
+    if not spec:
+        raise HTTPException(409, "crie o painel antes de baixar o projeto do Power BI")
+    con = {"host": "SEU_SERVIDOR", "porta": 5432, "banco": "postgres", "esquema": "SEU_SCHEMA"}
+    try:
+        bi = AcessoBI(banco, os.environ.get("LASTRO_BANCO_URL", ""))
+        a = bi.acesso(s.tenant)
+        if a and a["ativo"]:
+            c = bi.conexao(a["nome"])
+            con = {"host": c["host"], "porta": c["porta"], "banco": c["banco"], "esquema": a["nome"]}
+    except BIIndisponivel:
+        pass
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for caminho, conteudo in paineis.projeto_powerbi(spec, gold, con).items():
+            z.writestr(caminho, conteudo)
+    p.repo.registrar(s.email, "baixou_powerbi", {"versao": spec["versao"], "aponta_para_bi": con["esquema"] != "SEU_SCHEMA"}, did)
+    return Response(buf.getvalue(), media_type="application/zip",
+                    headers={"Content-Disposition": f'attachment; filename="lastro_demanda_{did}_powerbi.zip"'})

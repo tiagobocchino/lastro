@@ -10,3 +10,4 @@ Armadilhas e fatos operacionais. Uma linha por nota.
 - [supabase-chave-secreta-no-apikey](supabase-chave-secreta-no-apikey.md) — sb_secret_ só no cabeçalho apikey; conferir o espelho com scripts/conferir_espelho.py.
 - [postgres-on-conflict-where-silencioso](postgres-on-conflict-where-silencioso.md) — upsert com WHERE de tenant não falha no Postgres: use RETURNING; teste isolamento nos dois bancos; pg_cron ausente no Postgres local.
 - [vault-conferir-formato-sem-ler](vault-conferir-formato-sem-ler.md) — conferir segredo do Vault pelo formato, sem ler o valor; exemplo das instruções costuma ir parar no Vault; responder em português.
+- [portal-app-js-nome-repetido](portal-app-js-nome-repetido.md) — app.js sem módulos: função de mesmo nome apaga a outra em silêncio; teste em tests/test_portal_js.py.
