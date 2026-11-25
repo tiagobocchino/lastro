@@ -7,6 +7,7 @@ from .base import Agente, Contexto
 
 NUMERICOS = ("INT", "DECIMAL", "DOUBLE", "FLOAT", "REAL", "NUMERIC", "HUGEINT", "BIGINT")
 DATAS = ("DATE", "TIMESTAMP")
+MAX_CATEGORIAS = 30
 
 
 def _eh_data_por_nome(col: str) -> bool:
@@ -36,9 +37,13 @@ class Explorador(Agente):
                     papel = "numero"
                 if t.startswith(DATAS) or (_eh_data_por_nome(nome_col) and t.startswith(("VARCHAR", "DATE", "TIMESTAMP"))):
                     papel = "data"
-                colunas.append(
-                    {"nome": nome_col, "tipo": tipo, "papel": papel, "distintos": distintos, "nulos": nulos, "amostra": [str(a) for a in amostra]}
-                )
+                coluna = {"nome": nome_col, "tipo": tipo, "papel": papel, "distintos": distintos, "nulos": nulos, "amostra": [str(a) for a in amostra]}
+                # Coluna categórica (poucos valores): guarda os valores para o grill achar o recorte citado na pergunta.
+                if papel == "texto" and 0 < distintos <= MAX_CATEGORIAS and distintos < total:
+                    coluna["valores"] = [
+                        str(r[0]) for r in ctx.sandbox.consultar(f"SELECT DISTINCT {q} FROM {view} WHERE {q} IS NOT NULL ORDER BY 1")[1]
+                    ]
+                colunas.append(coluna)
             # Chave candidata: única, ou quase única (>= 95%) com nome de identificador.
             # Quase única é o caso comum de registro reenviado: vira chave e a silver deduplica.
             chaves = [

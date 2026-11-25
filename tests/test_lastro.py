@@ -165,3 +165,46 @@ def test_executar_fora_de_ordem_falha(ambiente):
     d = plat.abrir("ana@acme", "Total orçado", [fid])
     with pytest.raises(ValueError):
         plat.executar(d["id"], "ana@acme")
+
+
+# --- LST-27: o grill sugere o recorte que a pergunta cita -----------------------------
+
+@pytest.mark.parametrize(
+    ("pergunta", "sugestao"),
+    [
+        ("Quanto cada vendedor vendeu, em valor vendido, nos contratos fechados?", "status = 'Fechado'"),
+        ("Total orçado dos orçamentos em aberto por estado", "status = 'Em Aberto'"),
+        ("Quanto o segmento industrial vendeu nos contratos perdidos?", "segmento = 'industrial' AND status = 'Perdido'"),
+        ("Como evoluiu o valor orçado por mês em cada segmento?", "nenhum"),
+    ],
+)
+def test_grill_sugere_filtro_citado_na_pergunta(ambiente, pergunta, sugestao):
+    cfg, con, repo, fid, _ = ambiente
+    d = Plataforma(cfg, repo).abrir("ana@acme", pergunta, [fid])
+    filtro = next(q for q in d["grill"] if q["id"] == "orcamentos:filtro")
+    assert filtro["sugestao"] == sugestao
+
+
+def test_aceitar_sugestoes_responde_so_os_fechados(ambiente):
+    cfg, con, repo, fid, _ = ambiente
+    plat = Plataforma(cfg, repo)
+    d = plat.abrir("ana@acme", "Quanto cada vendedor vendeu, em valor vendido, nos contratos fechados?", [fid])
+    d = plat.executar(plat.responder_grill(d["id"], "ana@acme", {})["id"], "ana@acme")
+    import duckdb
+
+    esperado = duckdb.connect().execute(
+        f"SELECT round(sum(valor_vendido), 2) FROM (SELECT DISTINCT ON (contrato_id) * FROM read_csv('{EXEMPLO}')) WHERE status = 'Fechado'"
+    ).fetchone()[0]
+    assert d["resultado"]["resposta"]["total"] == pytest.approx(esperado, abs=0.01)
+
+
+# --- LST-28: o parecer do revisor fica gravado ------------------------------------------
+
+def test_parecer_do_revisor_fica_gravado(ambiente):
+    cfg, con, repo, fid, _ = ambiente
+    plat = Plataforma(cfg, repo)
+    d = plat.abrir("ana@acme", "Total orçado", [fid])
+    d = plat.executar(plat.responder_grill(d["id"], "ana@acme", {"geral:revisor": "Rui"})["id"], "ana@acme")
+    d = plat.revisar(d["id"], "rui@acme", True, "Números conferem com o notebook.")
+    assert d["status"] == "aprovada"
+    assert repo.demanda(d["id"])["resultado"]["revisao"]["parecer"] == "Números conferem com o notebook."

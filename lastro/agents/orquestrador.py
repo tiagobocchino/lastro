@@ -34,6 +34,29 @@ def colunas_citadas(pergunta: str, colunas: list[str]) -> list[str]:
     return sorted(pontos, key=lambda c: -pontos[c])
 
 
+def _normalizar(texto: str) -> list[str]:
+    """Palavras sem acento, minúsculas, sem plural nem gênero: "Fechados" e "fechada" viram "fechad"."""
+    sem_acento = unicodedata.normalize("NFKD", texto.lower()).encode("ascii", "ignore").decode()
+    palavras = []
+    for p in re.findall(r"[a-z0-9]+", sem_acento):
+        p = p[:-1] if len(p) > 3 and p.endswith("s") else p
+        p = p[:-1] if len(p) > 3 and p[-1] in "ao" else p
+        palavras.append(p)
+    return palavras
+
+
+def filtro_citado(pergunta: str, colunas: list[dict]) -> str:
+    """Recorte que a pergunta cita pelo valor ("contratos fechados" -> status = 'Fechado'), ou 'nenhum'."""
+    texto = f" {' '.join(_normalizar(pergunta))} "
+    condicoes = []
+    for c in colunas:
+        achados = [v for v in c.get("valores", []) if _normalizar(v) and f" {' '.join(_normalizar(v))} " in texto]
+        if len(achados) == 1:  # um valor só por coluna; dois valores da mesma coluna é ambíguo, o demandante decide
+            valor = achados[0].replace("'", "''")
+            condicoes.append(f"{c['nome']} = '{valor}'")
+    return " AND ".join(condicoes) or "nenhum"
+
+
 class Orquestrador(Agente):
     nome = "orquestrador"
 
@@ -84,7 +107,7 @@ class Orquestrador(Agente):
             add(
                 "filtro",
                 f"Existe um recorte obrigatório em '{fonte}' (ex.: só um status ou uma empresa)? Escreva como condição SQL ou deixe 'nenhum'.",
-                "nenhum",
+                filtro_citado(ctx.pergunta, cols),
                 [],
                 persistir=False,
             )
