@@ -2,7 +2,7 @@
 chave: LST-32
 jira: https://adelecrm.atlassian.net/browse/LST-32
 secao: NUC
-status: em-andamento
+status: feito
 especialista: engenheiro-backend
 ---
 
@@ -51,3 +51,8 @@ Print em `evidencias/obrigatoria-375.png`. O print da equipe ficou fora do git p
 **Conhecimento durável:** `docs/memory/postgres-on-conflict-where-silencioso.md`.
 
 **Para o Tiago:** sua senha de admin em produção já pode ser trocada pela aba conta.
+
+**Produção (25/11):**
+- A versão nova foi ao ar cerca de 60 s depois do push.
+- Sem login, as três rotas novas (`/api/conta/senha`, `/api/usuarios`, `/api/eu`) respondem 401.
+- Login com senha errada continua respondendo "e-mail ou senha inválidos".
