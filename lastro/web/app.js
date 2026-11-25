@@ -20,7 +20,7 @@ async function api(caminho, opcoes = {}) {
 
 function sair() { sessao = null; try { sessionStorage.removeItem("lastro"); } catch {} telaLogin(); }
 
-function logo() { return `<span class="logo"><i><b></b><b></b><b></b></i>lastro</span>`; }
+function logo() { return `<span class="logo"><svg width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="8" y="8" width="32" height="32" rx="3" stroke="var(--tinta)" stroke-width="6"/><rect x="24" y="24" width="32" height="32" rx="3" stroke="var(--prata)" stroke-width="6"/><rect x="27" y="27" width="10" height="10" fill="var(--ouro)"/></svg>lastro</span>`; }
 
 function telaLogin(msg = "") {
   $("#app").innerHTML = `<div class="login"><form class="bloco" id="f-login">

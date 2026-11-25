@@ -37,3 +37,11 @@ QA do portal: subir `uv run lastro serve`, fazer o fluxo login → demanda → g
 ## Segredos
 
 Nunca em arquivo versionado. `.env` local copiado de `.env.example`; em produção, variáveis do servidor e Supabase Vault.
+
+## Fluxo do projeto (Atlassian)
+
+Quatro seções (NUC, INT, MKT, CON) em `docs/agents/secoes.yaml`. Cada uma tem PO (`/po-secao`), gerente (`/gerente-secao`) e QA (`/qa-secao`); regras de estados e modelo de card em `.claude/skills/fluxo-jira/`. Especialistas em `.claude/agents/`. Jira: projeto `LST` em adelecrm.atlassian.net; enquanto não existir, o espelho é `shared-docs/board/`.
+
+## Conectores SaaS
+
+Contratos em `lastro/saas/catalogo.yaml` (11 sistemas), motor somente leitura em `lastro/saas/motor.py`, simuladores com as armadilhas reais em `lastro/saas/simulador.py`. O portal tem a aba "conectores" (teste no sandbox, importação como fonte, coleção Postman). O servidor expõe `/sandbox/<saas>/...` para o Postman/Newman. Docs baixadas em `docs/fontes-saas/_bruto/`. Ao mudar o catálogo: `uv run python -m lastro.saas.notas` regera as notas da Caixa.

@@ -1,0 +1,30 @@
+# Seções do projeto. Cada seção tem PO, QA e gerente (skills po-secao, qa-secao, gerente-secao)
+# e um time de especialistas (.claude/agents/). No Jira, cada seção é um épico com o rótulo `secao-<chave>`.
+
+NUC:
+  nome: Núcleo de agentes
+  escopo: orquestrador, Caixa de Ferramenta, agentes do produto, auditoria, API e portal
+  caminhos: [lastro/agents/, lastro/caixa.py, lastro/servico.py, lastro/api.py, lastro/web/, skills/]
+  especialistas: [engenheiro-backend, engenheiro-de-dados, engenheiro-frontend]
+  verificacao: ["uv run pytest -q", "uv run lastro demo", "QA do portal em 375px e 1440px (Playwright)"]
+
+INT:
+  nome: Integrações SaaS
+  escopo: catálogo de contratos, motor de leitura, simuladores, sandbox, coleções Postman
+  caminhos: [lastro/saas/, docs/fontes-saas/, tests/test_saas.py]
+  especialistas: [pesquisador-de-apis, engenheiro-de-dados]
+  verificacao: ["uv run pytest -q tests/test_saas.py", "newman run da coleção do SaaS contra /sandbox"]
+
+MKT:
+  nome: Marca e site
+  escopo: nome, logo (Figma), identidade, site de apresentação, copy
+  caminhos: [BRAND.md, site/, lastro/web/marca.css]
+  especialistas: [designer-de-marca, redator-de-copy, engenheiro-frontend]
+  verificacao: ["site sem rolagem horizontal em 375px", "contraste AA nos dois temas", "toda afirmação do site tem prova no produto"]
+
+CON:
+  nome: Conhecimento
+  escopo: playbooks, trilhas AWS/Google/Microsoft, notas de fonte, glossário e ADRs
+  caminhos: [caixa/global/, CONTEXT.md, docs/adr/, docs/memory/]
+  especialistas: [pesquisador-de-apis, engenheiro-de-dados]
+  verificacao: ["uv run lastro buscar \"<assunto>\" acha a nota nova entre as 3 primeiras", "frontmatter válido"]

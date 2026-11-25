@@ -1,281 +1,241 @@
 <title>Lastro</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: coluna editorial de 1080px; o hero mostra uma demanda real auditada, as seções seguem o ciclo da demanda. */
+/* Layout: perguntas do empresário à esquerda, resposta e prova (tela real do produto) à direita. */
 :root {
   --chao: #EEF1F3; --sup: #FFFFFF; --sup-2: #F6F8F9; --tinta: #111820; --quieta: #56606B; --linha: #D6DCE2;
-  --ouro: #B58324; --ouro-tx: #8A6214; --ouro-f: #F4EAD3; --bronze: #A4602F; --prata: #8E98A3; --ok: #2E6B4E; --aviso: #8D6210;
+  --ouro: #B58324; --ouro-tx: #8A6214; --ouro-f: #F4EAD3; --prata: #8E98A3; --ok: #2E6B4E; --aviso: #8D6210;
   --f-disp: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
   --f-texto: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
-  --f-dado: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+  --f-dado: 'IBM Plex Mono', ui-monospace, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --chao: #0D1116; --sup: #151B22; --sup-2: #1B222B; --tinta: #E7ECF1; --quieta: #98A3AE; --linha: #26303A;
-  --ouro: #E1B24F; --ouro-tx: #E8C06A; --ouro-f: #2E2716; --bronze: #C98552; --prata: #AEB7C0; --ok: #7CC4A0; --aviso: #E7C06B; color-scheme: dark } }
+  --ouro: #E1B24F; --ouro-tx: #E8C06A; --ouro-f: #2E2716; --prata: #AEB7C0; --ok: #7CC4A0; --aviso: #E7C06B; color-scheme: dark } }
 :root[data-theme="dark"] {
   --chao: #0D1116; --sup: #151B22; --sup-2: #1B222B; --tinta: #E7ECF1; --quieta: #98A3AE; --linha: #26303A;
-  --ouro: #E1B24F; --ouro-tx: #E8C06A; --ouro-f: #2E2716; --bronze: #C98552; --prata: #AEB7C0; --ok: #7CC4A0; --aviso: #E7C06B; color-scheme: dark }
+  --ouro: #E1B24F; --ouro-tx: #E8C06A; --ouro-f: #2E2716; --prata: #AEB7C0; --ok: #7CC4A0; --aviso: #E7C06B; color-scheme: dark }
 
 * { box-sizing: border-box }
 body { margin: 0; background: var(--chao); color: var(--tinta); font: 17px/1.6 var(--f-texto); -webkit-font-smoothing: antialiased }
-.casca { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.casca { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
 a { color: inherit }
 :focus-visible { outline: 2px solid var(--ouro); outline-offset: 3px }
-.rot { font: 500 12px var(--f-dado); text-transform: uppercase; letter-spacing: .09em; color: var(--quieta) }
-h1, h2, h3 { font-family: var(--f-disp); text-wrap: balance; margin: 0 }
-h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; font-weight: 700; letter-spacing: -.015em }
-h3 { font-size: 19px; font-weight: 700 }
-p { margin: 0; max-width: 62ch }
+p { margin: 0 }
+h1, h2, h3 { font-family: var(--f-disp); margin: 0; text-wrap: balance; letter-spacing: -.02em }
+.rot { font: 500 12px var(--f-dado); text-transform: uppercase; letter-spacing: .08em; color: var(--quieta) }
 
-/* Topo */
 .topo { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 20px; flex-wrap: wrap }
-.logo { display: inline-flex; align-items: center; gap: 10px; font: 800 22px var(--f-disp); letter-spacing: -.02em; text-decoration: none }
-.barras { display: grid; gap: 3px; width: 22px } .barras i { display: block; height: 5px; border-radius: 1.5px }
-.barras i:nth-child(1) { background: var(--ouro) } .barras i:nth-child(2) { background: var(--prata) } .barras i:nth-child(3) { background: var(--bronze) }
-nav { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; font-size: 15px }
-nav a { text-decoration: none; color: var(--quieta) } nav a:hover { color: var(--tinta) }
-.cta { display: inline-block; text-decoration: none; background: var(--tinta); color: var(--chao); font-weight: 600; padding: 11px 18px; border-radius: 8px; border: 0; cursor: pointer; font-size: 15px; font-family: var(--f-texto) }
+.logo { display: inline-flex; align-items: center; gap: 10px; font: 800 22px var(--f-disp); letter-spacing: -.03em; text-decoration: none }
+.topo nav { display: flex; gap: 20px; align-items: center; font-size: 15px; flex-wrap: wrap }
+.topo nav a:not(.cta) { color: var(--quieta); text-decoration: none }
+.cta { display: inline-block; text-decoration: none; border-radius: 8px; padding: 12px 18px; font-weight: 600; font-size: 15px; background: var(--tinta); color: var(--chao); border: 0; cursor: pointer; font-family: var(--f-texto) }
 .cta.ouro { background: var(--ouro); color: #1a1408 }
-.cta.sec { background: transparent; color: var(--tinta); border: 1px solid var(--linha) }
+.cta.leve { background: transparent; color: var(--tinta); border: 1px solid var(--linha) }
 
-/* Hero */
-.hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; padding-block: 48px 72px }
-.hero > * { min-width: 0 }
-.tese { font: 800 clamp(44px, 7vw, 84px)/0.98 var(--f-disp); letter-spacing: -.035em; margin: 14px 0 22px }
-.tese em { font-style: normal; color: var(--ouro-tx); position: relative; white-space: nowrap }
-.hero p.lead { font-size: 19px; color: var(--quieta); margin-bottom: 28px }
+.abre { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; padding-block: 40px 80px }
+.abre > * { min-width: 0 }
+.abre h1 { font-size: clamp(40px, 6vw, 68px); line-height: 1.02; font-weight: 800; margin: 14px 0 22px }
+.abre p.lead { font-size: 19px; color: var(--quieta); max-width: 52ch; margin-bottom: 28px }
 .acoes { display: flex; gap: 12px; flex-wrap: wrap }
 
-/* Relatório do hero: a demanda real da demo */
-.rel { background: var(--sup); border: 1px solid var(--linha); border-radius: 12px; padding: 20px; display: grid; gap: 14px; box-shadow: 0 18px 40px -28px rgba(17, 24, 32, .45) }
-.rel-cab { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap }
-.rel q { font: 600 16px/1.35 var(--f-disp); quotes: none; display: block }
-.selo { font: 500 11px var(--f-dado); padding: 3px 9px; border-radius: 99px; background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); white-space: nowrap }
-.linha-v { display: grid; grid-template-columns: 110px 1fr auto; gap: 12px; align-items: center; font-size: 14px }
-.linha-v span:last-child { font: 13px var(--f-dado); font-variant-numeric: tabular-nums; text-align: right }
-.trilho { height: 9px; background: var(--sup-2); border-radius: 2px; overflow: hidden }
-.trilho i { display: block; height: 100%; background: var(--ouro); border-radius: 2px; transform-origin: left }
-.chk { border-top: 1px dashed var(--linha); padding-top: 12px; display: grid; gap: 5px; font: 12.5px/1.45 var(--f-dado); color: var(--quieta) }
-.chk b { font-weight: 500; color: var(--ok) } .chk b.av { color: var(--aviso) }
-.nota-demo { font: 12px var(--f-dado); color: var(--quieta) }
+.janela { background: var(--sup); border: 1px solid var(--linha); border-radius: 12px; overflow: hidden; box-shadow: 0 24px 48px -32px rgba(17, 24, 32, .5) }
+.janela .barra { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--linha); background: var(--sup-2) }
+.janela .barra i { width: 9px; height: 9px; border-radius: 50%; background: var(--linha); display: block }
+.janela .barra span { margin-left: 8px; font: 12px var(--f-dado); color: var(--quieta) }
+.janela img { display: block; width: 100%; height: auto }
+.nota { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; font-size: 15px; color: var(--quieta) }
+.nota b { color: var(--tinta); font-weight: 600 }
+.nota::before { content: ""; flex: none; width: 10px; height: 10px; margin-top: 7px; background: var(--ouro); border-radius: 2px }
 
-/* Seções */
 section { padding-block: 72px; border-top: 1px solid var(--linha) }
-.cabeca { display: grid; gap: 12px; margin-bottom: 36px }
-.cabeca p { color: var(--quieta) }
+.qa { display: grid; grid-template-columns: 5fr 7fr; gap: 56px; align-items: start }
+.qa > * { min-width: 0 }
+.qa h2 { font-size: clamp(30px, 4vw, 44px); line-height: 1.06; font-weight: 800 }
+.qa .pergunta .rot { display: block; margin-bottom: 14px }
+.resposta { display: grid; gap: 18px }
+.resposta > p { font-size: 18px; max-width: 60ch }
+.resposta p.quieto { color: var(--quieta); font-size: 16px }
 
-.ciclo { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: passo }
-.ciclo li { background: var(--sup); border: 1px solid var(--linha); border-radius: 10px; padding: 18px; display: grid; gap: 8px; align-content: start; min-width: 0 }
-.ciclo li::before { counter-increment: passo; content: counter(passo); font: 700 13px var(--f-dado); color: var(--ouro-tx) }
-.ciclo .quem { font: 12px var(--f-dado); color: var(--quieta) }
-.ciclo p { font-size: 15px; color: var(--quieta) }
+.sistemas { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px }
+.sis { background: var(--sup); border: 1px solid var(--linha); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px }
+.sis b { font-weight: 600 }
+.sis small { font: 12px var(--f-dado); color: var(--quieta) }
+.sis small.medido { color: var(--ok) } .sis small.validar { color: var(--aviso) }
 
-.duas { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start }
-.duas > * { min-width: 0 }
-.grill { background: var(--sup); border: 1px solid var(--linha); border-radius: 10px; overflow: hidden }
-.grill div { padding: 14px 18px; border-bottom: 1px solid var(--linha); display: grid; gap: 6px }
-.grill div:last-child { border-bottom: 0 }
-.grill span { font-size: 15px }
-.grill code { font: 13px var(--f-dado); background: var(--sup-2); padding: 3px 8px; border-radius: 5px; justify-self: start; color: var(--tinta) }
-.grill small { font: 11.5px var(--f-dado); color: var(--quieta) }
-.lista { display: grid; gap: 18px; margin-top: 24px }
-.lista div { display: grid; gap: 4px; padding-left: 16px; border-left: 2px solid var(--linha) }
-.lista p { font-size: 15.5px; color: var(--quieta) }
+.piloto { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: p }
+.piloto li { counter-increment: p; border-top: 3px solid var(--linha); padding-top: 16px; display: grid; gap: 8px; align-content: start }
+.piloto li:last-child { border-color: var(--ouro) }
+.piloto li::before { content: counter(p); font: 600 14px var(--f-dado); color: var(--ouro-tx) }
+.piloto p { color: var(--quieta); font-size: 15.5px }
 
-.camadas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px }
-.camada { background: var(--sup); border: 1px solid var(--linha); border-radius: 10px; padding: 22px; display: grid; gap: 12px; align-content: start; min-width: 0 }
-.camada ul { margin: 0; padding-left: 18px; color: var(--quieta); font-size: 15px; display: grid; gap: 4px }
-
-.trilhas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px }
-.trilha { border-top: 3px solid var(--prata); padding-top: 16px; display: grid; gap: 8px; align-content: start; min-width: 0 }
-.trilha:first-child { border-color: var(--ouro) }
-.trilha p { font-size: 15px; color: var(--quieta) }
-.trilha .rot { color: var(--ouro-tx) }
-
-.planos { width: 100%; border-collapse: collapse; font-size: 15px }
-.tab { overflow-x: auto; background: var(--sup); border: 1px solid var(--linha); border-radius: 10px }
-.planos th, .planos td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--linha); vertical-align: top }
-.planos tr:last-child td { border-bottom: 0 }
-.planos thead th { font: 700 17px var(--f-disp) }
-.planos tbody th { font: 500 12px var(--f-dado); text-transform: uppercase; letter-spacing: .07em; color: var(--quieta); white-space: nowrap }
-.planos td { color: var(--quieta); min-width: 180px }
-
-.contato { display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; align-items: center }
+.contato { display: grid; grid-template-columns: 1.2fr .8fr; gap: 48px; align-items: center }
 .contato > * { min-width: 0 }
 .cartao { background: var(--sup); border: 1px solid var(--linha); border-radius: 12px; padding: 22px; display: grid; gap: 14px }
-.cartao .end { font: 15px var(--f-dado); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; overflow-wrap: anywhere }
+.end { font: 15px var(--f-dado); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; overflow-wrap: anywhere }
 .copiar { font: 12px var(--f-dado); background: var(--sup-2); border: 1px solid var(--linha); color: var(--tinta); border-radius: 6px; padding: 4px 9px; cursor: pointer }
-footer { padding-block: 32px 48px; border-top: 1px solid var(--linha); color: var(--quieta); font-size: 14px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap }
+footer { padding-block: 28px 48px; border-top: 1px solid var(--linha); color: var(--quieta); font-size: 14px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap }
 
 @media (max-width: 900px) {
-  .hero, .duas, .contato { grid-template-columns: 1fr; gap: 32px }
-  .ciclo { grid-template-columns: 1fr 1fr }
-  .trilhas { grid-template-columns: 1fr }
+  .abre, .qa, .contato { grid-template-columns: 1fr; gap: 28px }
+  .piloto { grid-template-columns: 1fr 1fr }
 }
 @media (max-width: 560px) {
-  .ciclo, .camadas { grid-template-columns: 1fr }
-  nav a:not(.cta) { display: none }
-  .linha-v { grid-template-columns: 92px 1fr auto }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .trilho i { animation: enche .9s cubic-bezier(.2, .7, .2, 1) both }
-  .trilho i.d1 { animation-delay: .08s } .trilho i.d2 { animation-delay: .16s } .trilho i.d3 { animation-delay: .24s } .trilho i.d4 { animation-delay: .32s }
-  @keyframes enche { from { transform: scaleX(.15) } to { transform: scaleX(1) } }
+  .topo nav a:not(.cta) { display: none }
+  .piloto { grid-template-columns: 1fr }
 }
 </style>
 
 <div class="casca">
   <header class="topo">
-    <a class="logo" href="#inicio" aria-label="Lastro, início"><span class="barras" aria-hidden="true"><i></i><i></i><i></i></span>lastro</a>
+    <a class="logo" href="#inicio" aria-label="Lastro, início">
+      <svg width="26" height="26" viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="8" y="8" width="32" height="32" rx="3" stroke="var(--tinta)" stroke-width="6"/><rect x="24" y="24" width="32" height="32" rx="3" stroke="var(--prata)" stroke-width="6"/><rect x="27" y="27" width="10" height="10" fill="var(--ouro)"/></svg>
+      lastro
+    </a>
     <nav aria-label="Seções">
-      <a href="#ciclo">como funciona</a>
-      <a href="#auditoria">auditoria</a>
-      <a href="#trilhas">trilhas</a>
-      <a href="#planos">planos</a>
-      <a class="cta" href="#contato">pedir piloto</a>
+      <a href="#certo">o número está certo?</a>
+      <a href="#sistemas">meus sistemas</a>
+      <a href="#piloto">como começar</a>
+      <a class="cta" href="#contato">falar com a gente</a>
     </nav>
   </header>
 
   <main id="inicio">
-    <div class="hero">
+    <div class="abre">
       <div>
-        <p class="rot">agentes de análise de dados</p>
-        <h1 class="tese">Toda resposta com <em>lastro.</em></h1>
-        <p class="lead">Você pergunta como perguntaria a um analista. Os agentes do Lastro perguntam de volta o que não devem adivinhar, leem seus dados sem poder alterá-los e só entregam depois de duas auditorias: uma técnica e uma de quem entende do negócio.</p>
-        <div class="acoes"><a class="cta ouro" href="#contato">pedir piloto</a><a class="cta sec" href="#ciclo">ver o ciclo de uma demanda</a></div>
+        <p class="rot">para quem decide com números</p>
+        <h1>O relatório chegou. Dá para confiar nele?</h1>
+        <p class="lead">O Lastro monta as análises da sua empresa direto dos sistemas que você já usa: ERP, CRM ou planilha. O número só chega até você depois de duas conferências: uma feita pelos agentes, outra por alguém que conhece o seu negócio.</p>
+        <div class="acoes"><a class="cta ouro" href="#contato">testar com os meus dados</a><a class="cta leve" href="#certo">ver como a conferência funciona</a></div>
       </div>
-
-      <figure class="rel" aria-label="Exemplo de demanda auditada">
-        <div class="rel-cab"><span class="rot">demanda 1</span><span class="selo">aprovada nas duas camadas</span></div>
-        <q>Quanto cada vendedor vendeu, em valor vendido, nos contratos fechados?</q>
-        <div class="linha-v"><span>Eva Martins</span><span class="trilho"><i style="width:100%"></i></span><span>2.567.582,13</span></div>
-        <div class="linha-v"><span>Ana Souza</span><span class="trilho"><i class="d1" style="width:86.6%"></i></span><span>2.224.684,98</span></div>
-        <div class="linha-v"><span>Bruno Lima</span><span class="trilho"><i class="d2" style="width:80.8%"></i></span><span>2.075.749,45</span></div>
-        <div class="linha-v"><span>Gabi Torres</span><span class="trilho"><i class="d3" style="width:80.4%"></i></span><span>2.063.901,53</span></div>
-        <div class="linha-v"><span>Diego Rocha</span><span class="trilho"><i class="d4" style="width:47.8%"></i></span><span>1.226.288,45</span></div>
-        <div class="chk">
-          <span><b class="av">aviso</b> 12 contratos repetidos na fonte, removidos na silver</span>
-          <span><b>ok</b> soma silver = fato = resposta: 14.030.477,92</span>
-          <span><b>ok</b> 5 dimensões sem órfãos</span>
-          <span><b class="av">aviso</b> 1 orçamento com data no futuro</span>
+      <figure style="margin:0">
+        <div class="janela">
+          <div class="barra" aria-hidden="true"><i></i><i></i><i></i><span>demanda 1 · aguardando revisor</span></div>
+          <img src="img/resposta.jpg" alt="Tela do Lastro com o total vendido por vendedor nos contratos fechados: Eva Martins lidera com R$ 2.567.582,13; total de R$ 14.030.477,92." width="1574" height="560">
         </div>
-        <figcaption class="nota-demo">Dados fictícios da demo. Sem a deduplicação, o total sairia 181.820,60 maior.</figcaption>
+        <figcaption class="nota"><span>Antes de somar, o Lastro achou <b>12 contratos lançados duas vezes</b>. Sem essa limpeza, o total sairia <b>R$ 181.820,60 maior</b>. Dados fictícios da demonstração.</span></figcaption>
       </figure>
     </div>
 
-    <section id="ciclo">
-      <div class="cabeca">
-        <p class="rot">o ciclo de uma demanda</p>
-        <h2>Ninguém calcula antes de entender</h2>
-        <p>Cada pergunta passa pelos mesmos quatro estágios. O rastro de cada agente fica gravado e visível para a sua empresa.</p>
+    <section id="certo">
+      <div class="qa">
+        <div class="pergunta"><span class="rot">a primeira pergunta de toda segunda-feira</span><h2>“Esse número está certo?”</h2></div>
+        <div class="resposta">
+          <p>Antes de qualquer número sair, um auditor automático refaz a conta do zero: procura registros repetidos, valores vazios, datas impossíveis e confere se o total bate em cada etapa.</p>
+          <p>Depois, alguém do seu time abre a mesma conta numa planilha de conferência no Google Colab e aprova. Só então a análise é entregue.</p>
+          <div class="janela"><div class="barra" aria-hidden="true"><i></i><i></i><i></i><span>auditoria técnica</span></div><img src="img/auditoria.jpg" alt="Lista de checagens da auditoria: linhas entre etapas, chaves repetidas, integridade, soma conferida, datas no futuro." width="1574" height="900" loading="lazy"></div>
+        </div>
       </div>
-      <ol class="ciclo">
-        <li><h3>Grill</h3><span class="quem">orquestrador + explorador</span><p>Os dados são perfilados e o Lastro pergunta a medida, a data, a chave e o recorte. Cada pergunta já vem com uma sugestão.</p></li>
-        <li><h3>Construção</h3><span class="quem">arquiteto + engenheiro</span><p>Modelo dimensional e pipeline Bronze, Silver e Gold num ambiente isolado. Você recebe o pipeline.py para rodar sozinho.</p></li>
-        <li><h3>Resposta</h3><span class="quem">analista</span><p>Consultas só de leitura sobre o modelo, com o SQL exposto no relatório.</p></li>
-        <li><h3>Auditoria</h3><span class="quem">auditor + revisor de negócio</span><p>Checagem técnica automática e revisão humana com um notebook do Google Colab. Sem as duas, nada é entregue.</p></li>
+    </section>
+
+    <section>
+      <div class="qa">
+        <div class="pergunta"><span class="rot">a preocupação com a operação</span><h2>“Vão mexer no meu sistema?”</h2></div>
+        <div class="resposta">
+          <p>Não. A conexão usa um acesso que só lê. Isso fica na própria credencial, não depende de alguém lembrar de tomar cuidado.</p>
+          <p>Mesmo que um agente tente gravar algo, o Lastro recusa e registra a tentativa. Cada empresa enxerga apenas os próprios dados, com login próprio.</p>
+          <p class="quieto">Tudo que os agentes consultam, decidem e entregam fica registrado com data e autor. Daqui a seis meses dá para saber de onde veio cada número.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="sistemas">
+      <div class="qa">
+        <div class="pergunta"><span class="rot">sem trocar de sistema</span><h2>“Funciona com o que eu já uso?”</h2></div>
+        <div class="resposta">
+          <p>Estes sistemas já estão mapeados: sabemos como cada um entrega os dados, quanto aguenta de consulta e onde costuma esconder erro. Planilhas Excel e CSV entram direto.</p>
+          <div class="sistemas">
+            <div class="sis"><b>Omie</b><small class="medido">testado em operação real</small></div>
+            <div class="sis"><b>IApp</b><small class="medido">testado em operação real</small></div>
+            <div class="sis"><b>IMUV</b><small class="medido">testado em operação real</small></div>
+            <div class="sis"><b>Sienge</b><small>pela documentação oficial</small></div>
+            <div class="sis"><b>CV CRM · CVDW</b><small>pela documentação oficial</small></div>
+            <div class="sis"><b>Pipedrive</b><small>pela documentação oficial</small></div>
+            <div class="sis"><b>HubSpot</b><small>pela documentação oficial</small></div>
+            <div class="sis"><b>Agendor</b><small>pela documentação oficial</small></div>
+            <div class="sis"><b>Kommo</b><small>pela documentação oficial</small></div>
+            <div class="sis"><b>RD Station CRM</b><small class="validar">a confirmar no piloto</small></div>
+            <div class="sis"><b>Conta Azul</b><small class="validar">a confirmar no piloto</small></div>
+          </div>
+          <p class="quieto">Antes de tocar no seu sistema, testamos a conexão num ambiente simulado que se comporta como o real, com os mesmos limites e os mesmos erros.</p>
+          <div class="janela"><div class="barra" aria-hidden="true"><i></i><i></i><i></i><span>teste de conexão · Sienge · ambiente simulado</span></div><img src="img/conector.jpg" alt="Laudo do teste de conexão com o Sienge: 180 registros, total conferido, 1 requisição." width="1574" height="700" loading="lazy"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="qa">
+        <div class="pergunta"><span class="rot">o tempo do seu time</span><h2>“Vou ter que explicar tudo de novo toda vez?”</h2></div>
+        <div class="resposta">
+          <p>Na primeira vez, o Lastro pergunta o que não pode adivinhar: qual valor somar, qual data vale, o que conta como registro repetido. Cada pergunta já vem com uma sugestão.</p>
+          <p>O que vale para sempre fica guardado. Na demonstração, a segunda análise sobre os mesmos dados precisou de 2 respostas, não de 5.</p>
+          <div class="janela"><div class="barra" aria-hidden="true"><i></i><i></i><i></i><span>perguntas antes de calcular</span></div><img src="img/grill.jpg" alt="Formulário com as perguntas do Lastro antes de calcular: medida, data, chave de registro, recorte e revisor." width="1574" height="1100" loading="lazy"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="qa">
+        <div class="pergunta"><span class="rot">a equipe</span><h2>“Preciso contratar um analista?”</h2></div>
+        <div class="resposta">
+          <p>O trabalho pesado de analista e de engenheiro de dados fica com os agentes: buscar, limpar, modelar, calcular e conferir.</p>
+          <p>A decisão continua com gente: quem aprova cada entrega é alguém do seu negócio, que sabe quando um número não faz sentido.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="qa">
+        <div class="pergunta"><span class="rot">o investimento</span><h2>“Quanto custa para começar?”</h2></div>
+        <div class="resposta">
+          <p>O Lastro roda em ferramentas gratuitas e no que já é seu: a sua nuvem, o seu Power BI, as suas planilhas. Você não paga licença nova para começar.</p>
+          <p>O piloto é combinado com você antes de qualquer trabalho, com escopo e valor por escrito.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="piloto">
+      <div class="qa" style="margin-bottom:36px">
+        <div class="pergunta"><span class="rot">o piloto</span><h2>Como começar</h2></div>
+        <div class="resposta"><p>Uma pergunta real da sua empresa, de ponta a ponta, com as duas conferências.</p></div>
+      </div>
+      <ol class="piloto">
+        <li><h3>A pergunta</h3><p>Conversamos sobre o número que mais pesa nas suas decisões hoje.</p></li>
+        <li><h3>A conexão</h3><p>Ligamos uma fonte em modo só leitura, ou você nos manda uma planilha.</p></li>
+        <li><h3>As respostas</h3><p>Você responde as perguntas que o Lastro não deve adivinhar.</p></li>
+        <li><h3>A entrega conferida</h3><p>Você recebe a análise, a conferência técnica e a planilha para o seu time aprovar.</p></li>
       </ol>
     </section>
 
     <section>
-      <div class="duas">
-        <div>
-          <p class="rot">o grill</p>
-          <h2 style="margin:12px 0 16px">As perguntas que um bom analista faria</h2>
-          <p style="color:var(--quieta)">Regra de negócio não se adivinha. O que vale para a fonte fica gravado: na próxima demanda sobre os mesmos dados, a pergunta não volta. O que muda a cada análise é perguntado a cada vez.</p>
-          <div class="lista">
-            <div><h3>Fica gravado</h3><p>Coluna de data, chave única, quem revisa. A segunda demanda da demo fez só 2 perguntas, não 5.</p></div>
-            <div><h3>Muda a cada demanda</h3><p>A medida que se soma e o recorte (um status, uma empresa).</p></div>
-          </div>
+      <div class="qa">
+        <div class="pergunta"><span class="rot">quem está por trás</span><h2>Feito por quem já errou o número antes</h2></div>
+        <div class="resposta">
+          <p>Construímos data lakes, pipelines e painéis de Power BI desde 2019, para indústria e construção civil. A conferência em duas camadas nasceu num projeto real, em que o painel e a planilha de conferência eram comparados indicador por indicador até baterem.</p>
+          <p class="quieto">Cada armadilha que custou horas em produção, como um sistema que responde “deu certo” escondendo um erro, virou uma checagem automática no Lastro.</p>
         </div>
-        <div class="grill" aria-label="Exemplo de grill">
-          <div><span>Qual coluna é o valor que a análise soma?</span><code>valor_vendido</code><small>vale só para esta demanda</small></div>
-          <div><span>Qual data define o período?</span><code>data_orcamento</code><small>fica gravada</small></div>
-          <div><span>Qual coluna identifica cada registro sem repetir? 'contrato_id' tem 12 valores repetidos na fonte.</span><code>contrato_id</code><small>fica gravada</small></div>
-          <div><span>Existe um recorte obrigatório?</span><code>status = 'Fechado'</code><small>vale só para esta demanda</small></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="auditoria">
-      <div class="cabeca">
-        <p class="rot">auditoria em duas camadas</p>
-        <h2>Dois especialistas, de áreas diferentes, conferem o trabalho um do outro</h2>
-        <p>O método vem de projetos reais de BI em data lake, em que o painel e o notebook de conferência eram comparados indicador por indicador.</p>
-      </div>
-      <div class="camadas">
-        <div class="camada"><p class="rot">camada 1 · técnica · automática</p><h3>Auditor</h3>
-          <ul><li>Linhas entre fonte, silver e fato</li><li>Duplicidade na chave</li><li>Integridade entre fato e dimensões</li><li>Soma da medida em cada camada</li><li>Nulos, negativos e datas impossíveis</li><li>Total da resposta recalculado do zero</li></ul></div>
-        <div class="camada"><p class="rot">camada 2 · negócio · humana</p><h3>Revisor</h3>
-          <ul><li>Recebe um notebook do Colab que lê só o resultado, sem depender da plataforma</li><li>Refaz as contas e compara com o relatório</li><li>Aprova ou reprova com parecer</li><li>Cada reprovação vira aprendizado: os agentes consultam esse histórico nas próximas demandas</li></ul></div>
-      </div>
-    </section>
-
-    <section>
-      <div class="duas">
-        <div>
-          <p class="rot">segurança</p>
-          <h2 style="margin:12px 0 16px">Seus dados só são lidos, nunca alterados</h2>
-          <p style="color:var(--quieta)">A proteção está na credencial, não numa instrução ao agente. Mesmo um agente que erre não consegue escrever na sua base.</p>
-        </div>
-        <div class="lista" style="margin-top:0">
-          <div><h3>Acesso somente leitura</h3><p>Cada conexão usa um usuário ou escopo que só lê. Toda consulta dos agentes ainda passa por uma trava que recusa qualquer escrita.</p></div>
-          <div><h3>Um espaço por empresa</h3><p>Login próprio e isolamento por empresa em todas as tabelas.</p></div>
-          <div><h3>Liberdades sob seu controle</h3><p>O administrador decide o que cada agente pode fazer, inclusive pesquisar fora da base de conhecimento. Tudo começa desligado.</p></div>
-          <div><h3>Rastro completo</h3><p>Cada consulta, cada decisão e cada aprovação fica registrada.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="trilhas">
-      <div class="cabeca">
-        <p class="rot">trilhas</p>
-        <h2>Da planilha ao data lake, na nuvem que você já usa</h2>
-        <p>Os agentes consultam playbooks testados em produção. As contas e os acessos são da sua empresa.</p>
-      </div>
-      <div class="trilhas">
-        <div class="trilha"><p class="rot">pronta</p><h3>AWS</h3><p>S3 em camadas Bronze, Silver e Gold, Glue, Athena e Power BI, com controle de custo do refresh.</p></div>
-        <div class="trilha"><p class="rot">em construção</p><h3>Google</h3><p>De Google Sheets ao BigQuery, com Looker Studio ou Power BI.</p></div>
-        <div class="trilha"><p class="rot">em construção</p><h3>Microsoft</h3><p>De Excel e SharePoint ao Azure SQL ou Fabric, com Power BI nativo.</p></div>
-      </div>
-    </section>
-
-    <section id="planos">
-      <div class="cabeca">
-        <p class="rot">planos</p>
-        <h2>Quanto os agentes podem fazer é decidido no contrato</h2>
-      </div>
-      <div class="tab">
-        <table class="planos">
-          <thead><tr><th scope="col"><span class="rot">plano</span></th><th scope="col">Consulta</th><th scope="col">Pipeline</th><th scope="col">Operação</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">suas fontes</th><td>Leitura</td><td>Leitura</td><td>Leitura</td></tr>
-            <tr><th scope="row">os agentes</th><td>Respondem num ambiente temporário</td><td>Mantêm camadas próprias e geram o pipeline para você publicar</td><td>Operam e monitoram o pipeline aprovado</td></tr>
-            <tr><th scope="row">aprovação humana</th><td>Toda entrega</td><td>Toda entrega e todo deploy</td><td>Toda entrega e toda mudança de schema ou custo</td></tr>
-          </tbody>
-        </table>
       </div>
     </section>
 
     <section id="contato">
       <div class="contato">
         <div>
-          <p class="rot">piloto</p>
-          <h2 style="margin:12px 0 16px">Traga uma pergunta e uma fonte</h2>
-          <p style="color:var(--quieta)">No piloto, rodamos uma demanda real da sua empresa de ponta a ponta, com o grill, as duas auditorias e o notebook para o seu time conferir.</p>
+          <p class="rot">próximo passo</p>
+          <h2 style="font-size:clamp(30px,4vw,44px);line-height:1.06;margin:12px 0 16px">Traga a pergunta que tira o seu sono</h2>
+          <p style="color:var(--quieta);max-width:52ch">Se preferir, mande a pergunta já no primeiro contato.</p>
         </div>
         <div class="cartao">
-          <a class="cta ouro" href="https://wa.me/5561999520802?text=Quero%20um%20piloto%20do%20Lastro" target="_blank" rel="noopener">falar no whatsapp</a>
+          <a class="cta ouro" href="https://wa.me/5561999520802?text=Quero%20testar%20o%20Lastro%20com%20os%20meus%20dados" target="_blank" rel="noopener">falar no WhatsApp</a>
           <div class="end"><span id="email-txt">lixumlabs@gmail.com</span><button class="copiar" id="copiar" type="button">copiar e-mail</button></div>
-          <span class="nota-demo">WhatsApp +55 61 99952-0802</span>
+          <span class="rot" style="text-transform:none;letter-spacing:0">WhatsApp +55 61 99952-0802</span>
         </div>
       </div>
     </section>
   </main>
 
-  <footer><span class="logo" style="font-size:17px"><span class="barras" aria-hidden="true"><i></i><i></i><i></i></span>lastro</span><span>um produto lixum.labs</span></footer>
+  <footer><span>lastro · um produto lixum.labs</span><span>Telas e números desta página vêm da demonstração, com dados fictícios.</span></footer>
 </div>
 
 <script>
