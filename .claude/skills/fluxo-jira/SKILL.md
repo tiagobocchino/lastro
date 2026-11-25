@@ -9,6 +9,10 @@ description: "Regras do fluxo de cards do projeto no Jira (Atlassian): estados, 
 - Seções em `docs/agents/secoes.yaml`. Cada seção é um épico com rótulo `secao-<CHAVE>` (NUC, INT, MKT, CON).
 - Sem acesso ao Jira (projeto ainda não criado, sessão sem o conector): use o espelho `shared-docs/board/<coluna>/LST-n-slug/card.md`, com o mesmo modelo. Ao voltar o acesso, o gerente sobe os cards e anota a chave do Jira no `card.md`.
 
+# Regra que não se esquece: Jira e board andam juntos
+
+Card criado ou movido no Jira só conta quando o espelho em `shared-docs/board/` foi criado ou movido, commitado e enviado ao GitHub no mesmo passo. Antes de relatar qualquer trabalho com cards, rode a JQL `project = LST AND issuetype != Epic ORDER BY key` e `python scripts/conferir_board.py <chaves>`; ele precisa sair 0. Origem: `docs/memory/card-no-jira-e-no-board.md`.
+
 # Estados (nenhum card pula estado)
 
 O projeto tem 3 status (A fazer, Fazendo, Feito; transições 11, 21, 31). Os 5 estados do método são status + rótulo:
