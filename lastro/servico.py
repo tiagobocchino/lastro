@@ -10,6 +10,7 @@ nova -> grill -> pronta -> em_revisao -> aprovada | reprovada
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 from . import relatorio, vetores
@@ -27,6 +28,8 @@ from .politica import Politica, politica_padrao
 
 
 class Plataforma:
+    modo = "produto"
+
     def __init__(self, cfg: Config, repo: Repo, espelho=None):  # noqa: ANN001  (EspelhoStorage, LST-30)
         self.cfg = cfg
         self.repo = repo
@@ -40,6 +43,21 @@ class Plataforma:
             politica_padrao().salvar(arq_politica)
         self.politica = Politica.de_arquivo(arq_politica)
         self.llm = LLM(cfg)
+
+    @classmethod
+    def visitante(cls, cfg: Config, pasta_sessao: Path) -> Plataforma:
+        """Modo visitante do site (ADR 0010, card LST-38). Tudo o que a análise grava fica em `pasta_sessao`:
+        fontes, sandbox, notas do Explorador, decisões do grill, política, gold e relatório. Sem banco
+        (`RepoMemoria`), sem espelho no Storage, sem LLM (nenhum dado sai do servidor) e sem embedder
+        (o cache de vetores fica fora da sessão, em LASTRO_HOME)."""
+        from .memoria import RepoMemoria
+
+        pasta_sessao.mkdir(parents=True, exist_ok=True)
+        cfg_v = replace(cfg, home=pasta_sessao, tenants=pasta_sessao, llm_provedor="nenhum", llm_modelo="", llm_url="",
+                        llm_chave="", embedder="nenhum", banco_url="")
+        plat = cls(cfg_v, RepoMemoria("visitante"), espelho=None)  # type: ignore[arg-type]
+        plat.modo = "demonstracao"
+        return plat
 
     def sincronizar(self) -> int:
         """Envia ao espelho o que mudou na pasta da empresa (no-op sem espelho)."""
@@ -113,11 +131,15 @@ class Plataforma:
         finally:
             self._fechar(ctx)
         resultado = {k: ctx.memoria[k] for k in ("perfis", "modelo", "pipeline", "resposta", "auditoria")}
+        if self.modo == "demonstracao":  # ADR 0010: conferência automática, sem revisão humana
+            resultado["modo"] = "demonstracao"
         self.repo.registrar(autor, "executou", {"aprovado_camada1": resultado["auditoria"]["aprovado_camada1"]}, demanda_id)
         self.repo.atualizar_demanda(demanda_id, status="em_revisao", resultado=resultado)
         return self._salvar_relatorio(demanda_id)
 
     def revisar(self, demanda_id: int, revisor: str, aprovado: bool, parecer: str) -> dict:
+        if self.modo == "demonstracao":
+            raise PermissionError("demonstração não tem revisão humana (ADR 0010): só o produto faz a segunda camada")
         d = self._exigir(demanda_id, {"em_revisao"})
         resultado = d["resultado"]
         resultado["revisao"] = {"revisor": revisor, "aprovado": aprovado, "parecer": parecer}
