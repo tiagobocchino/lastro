@@ -4,7 +4,7 @@
 
 **Lastro** é o que garante o valor de uma moeda. Aqui, é o que garante uma resposta: o rastro, as auditorias e o dado de origem. Frase-tese: **"Toda resposta com lastro."**
 
-O símbolo é o **Cotejo**: duas camadas que se sobrepõem (a auditoria técnica e a revisão de negócio) e, na interseção, a área conferida em ouro. O logotipo é o símbolo + `lastro` em minúsculas (Bricolage Grotesque ExtraBold, -3%). Arquivos em `site/marca/`; conceitos alternativos (Estratos, Esquadro) no Figma "Lastro · Marca". Nome ainda provisório: ver `docs/estudo-de-nomes.md`.
+O símbolo é o **Cotejo**: duas camadas que se sobrepõem (a auditoria técnica e a revisão de negócio) e, na interseção, a área conferida em ouro. O logotipo é o símbolo + `lastro` em minúsculas (Bricolage Grotesque ExtraBold, -3%). Arquivos em `site/marca/`; conceitos alternativos (Estratos, Esquadro) no Figma "Lastro · Marca". Nome e símbolo decididos no ADR 0005.
 
 ## Cores
 
