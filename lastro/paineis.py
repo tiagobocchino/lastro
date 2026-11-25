@@ -23,6 +23,10 @@ from typing import Any
 
 import duckdb
 
+from .agents.construtores import (
+    ident,  # o mesmo nome que o Engenheiro dá às colunas do gold
+)
+
 AGREGACOES = {  # nome no painel → (SQL do DuckDB, DAX, rótulo)
     "soma": ("sum", "SUM", "Soma"),
     "media": ("avg", "AVERAGE", "Média"),
@@ -56,7 +60,13 @@ def catalogo(gold: Path, modelo: dict) -> dict:
     if not fato.exists():
         raise PedidoInvalido("esta demanda ainda não tem gold (rode e aprove a demanda primeiro)")
     tipos = {r[0]: str(r[1]) for r in duckdb.sql(f"DESCRIBE SELECT * FROM read_parquet('{_q(fato)}')").fetchall()}
-    numericas = [c for c, t in tipos.items() if not c.endswith("_id") and any(x in t for x in ("INT", "DOUBLE", "DECIMAL", "FLOAT", "REAL"))]
+    # chave e identificadores (nº do processo, código) identificam a linha: somar não faz sentido
+    fora = {ident(c) for c in [modelo.get("chave"), *modelo.get("identificadores", [])] if c}
+    numericas = [c for c, t in tipos.items() if not c.endswith("_id") and c not in fora
+                 and any(x in t for x in ("INT", "DOUBLE", "DECIMAL", "FLOAT", "REAL"))]
+    if modelo.get("medida") and ident(modelo["medida"]) in numericas:  # a medida do grill vem primeiro
+        numericas.remove(ident(modelo["medida"]))
+        numericas.insert(0, ident(modelo["medida"]))
     dims = [d for d in modelo.get("dimensoes", []) if (gold / f"dim_{_slug(d)}.parquet").exists()]
     tempo = list(TEMPO) if (gold / "dim_data.parquet").exists() and "data" in tipos else []
     return {"medidas": numericas, "dimensoes": [_slug(d) for d in dims], "tempo": tempo, "tipos": tipos}
@@ -72,7 +82,7 @@ def inicial(demanda: dict, gold: Path) -> dict:
     """O que o agente propõe a partir do modelo da demanda: o número principal, a quebra pedida e a evolução."""
     modelo = demanda["resultado"]["modelo"]
     cat = catalogo(gold, modelo)
-    medida = modelo.get("medida") if modelo.get("medida") in cat["medidas"] else (cat["medidas"] or [None])[0]
+    medida = (cat["medidas"] or [None])[0]
     if not medida:
         raise PedidoInvalido("o gold não tem coluna numérica para medir")
     m = {"id": f"{_slug(medida)}_soma", "nome": _nome(medida), "coluna": medida, "agregacao": "soma"}
@@ -102,7 +112,7 @@ def para_visitante(demanda: dict, gold: Path, quebra: str | None, periodo: str |
     fora = {_slug(c) for c in (excluir or set())}  # LST-41: colunas com dado pessoal nunca entram no painel
     cat["medidas"] = [c for c in cat["medidas"] if _slug(c) not in fora]
     cat["dimensoes"] = [d for d in cat["dimensoes"] if d not in fora]
-    medida = modelo.get("medida") if modelo.get("medida") in cat["medidas"] else (cat["medidas"] or [None])[0]
+    medida = (cat["medidas"] or [None])[0]
     if not medida:
         raise PedidoInvalido("a planilha não tem coluna numérica para medir")
     if formato not in FORMATOS:

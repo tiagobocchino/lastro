@@ -40,6 +40,54 @@ def _leitor(caminho: Path) -> str:
     raise ValueError(f"extensão não suportada: {suf}")
 
 
+def nome_seguro(nome: object, posicao: int = 0) -> str:
+    """Nome de coluna que atravessa SQL, grill e painel sem quebrar: sem aspas, sem quebra de linha,
+    espaços colapsados. Cabeçalho vazio (ou o "Unnamed: n" do pandas) vira coluna_<posição>."""
+    texto = " ".join(str(nome if nome is not None else "").replace('"', "").replace("`", "").split())
+    if not texto or texto.lower().startswith("unnamed:"):
+        return f"coluna_{posicao + 1}"
+    return texto
+
+
+def _renomear_colunas(con: duckdb.DuckDBPyConnection, tabela: str) -> None:
+    """Planilha do mundo real (LST-36): aspas, quebra de linha, cabeçalho vazio e nome repetido."""
+    atuais = [r[0] for r in con.execute(f"DESCRIBE {tabela}").fetchall()]
+    usados: set[str] = set()
+    for i, atual in enumerate(atuais):
+        novo = base = nome_seguro(atual, i)
+        n = 2
+        while novo.lower() in usados:
+            novo, n = f"{base}_{n}", n + 1
+        usados.add(novo.lower())
+        if novo != atual:
+            antigo = atual.replace('"', '""')
+            con.execute(f'ALTER TABLE {tabela} RENAME COLUMN "{antigo}" TO "{novo}"')
+
+
+# "R$ 1.234,56", "R$ 526530", "1.234,56": número em formato brasileiro gravado como texto.
+_MOEDA = r"^-?\s*(R\$)?\s*-?\s*([0-9]{1,3}(\.[0-9]{3})+|[0-9]+)(,[0-9]+)?$"
+
+
+def _converter_moeda(con: duckdb.DuckDBPyConnection, tabela: str) -> None:
+    """Coluna de texto em que todo valor preenchido é número brasileiro (com ou sem R$) vira DOUBLE.
+    Basta um valor que não seja número para a coluna ficar como está; sem R$ nem vírgula, também fica
+    (código como "0012" não é valor)."""
+    for col, tipo, *_ in con.execute(f"DESCRIBE {tabela}").fetchall():
+        if tipo != "VARCHAR":
+            continue
+        q = '"' + col.replace('"', '""') + '"'
+        v = f"trim({q})"
+        preenchidos, casam, marcados = con.execute(
+            f"SELECT count({q}) FILTER (WHERE {v} <> ''), count(*) FILTER (WHERE regexp_matches({v}, '{_MOEDA}')), "
+            f"count(*) FILTER (WHERE {v} LIKE '%R$%' OR {v} LIKE '%,%') FROM {tabela}"
+        ).fetchone() or (0, 0, 0)
+        if not preenchidos or casam != preenchidos or not marcados:
+            continue
+        limpo = f"replace(replace(replace(replace({v}, 'R$', ''), ' ', ''), '.', ''), ',', '.')"
+        con.execute(f"ALTER TABLE {tabela} ALTER COLUMN {q} TYPE DOUBLE USING "
+                    f"CASE WHEN {v} = '' THEN NULL ELSE CAST({limpo} AS DOUBLE) END")
+
+
 class Sandbox:
     """DuckDB da demanda. As fontes são copiadas para dentro dele e, depois de `travar`, nenhum
     SQL alcança disco, rede ou outra empresa: só a pasta da própria demanda (onde o pipeline grava o gold).
@@ -88,6 +136,9 @@ class Sandbox:
             src.close()
         else:
             raise ValueError(f"tipo de fonte desconhecido: {fonte.tipo}")
+        if fonte.tipo == "arquivo":
+            _renomear_colunas(self.con, nome)
+            _converter_moeda(self.con, nome)
         self.fontes[nome] = fonte
         return nome
 

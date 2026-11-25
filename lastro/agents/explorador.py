@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from ..caixa import gravar_nota
 from ..pessoal import NOMES as NOMES_PESSOAIS
 from ..pessoal import detectar as detectar_pessoal
@@ -10,6 +12,17 @@ from .base import Agente, Contexto
 NUMERICOS = ("INT", "DECIMAL", "DOUBLE", "FLOAT", "REAL", "NUMERIC", "HUGEINT", "BIGINT")
 DATAS = ("DATE", "TIMESTAMP")
 MAX_CATEGORIAS = 30
+
+
+# "Nº", "N º E", "No.", "Num", "Número", "ID", "Cód", "Código": número que identifica, não valor que soma.
+_NOME_ID = re.compile(r"^(n\s*[º°]|no\.|num\.?|n[uú]mero|id|c[oó]d\.?|c[oó]digo)(?=$|[\s_.\-º°:])", re.IGNORECASE)
+
+
+def _eh_identificador(col: str, tipo: str, distintos: int, total: int) -> bool:
+    nome = col.strip()
+    pelo_nome = bool(_NOME_ID.match(nome)) or nome.lower().rstrip("_").endswith(("id", "codigo", "numero"))
+    inteiro = tipo.upper().startswith(("INT", "BIGINT", "HUGEINT", "SMALLINT", "TINYINT", "UBIGINT", "UINTEGER"))
+    return pelo_nome and inteiro and total > 0 and distintos >= 0.95 * total
 
 
 def _eh_data_por_nome(col: str) -> bool:
@@ -36,7 +49,7 @@ class Explorador(Agente):
                 papel = "texto"
                 t = tipo.upper()
                 if t.startswith(NUMERICOS):
-                    papel = "numero"
+                    papel = "identificador" if _eh_identificador(nome_col, tipo, distintos, total) else "numero"
                 if t.startswith(DATAS) or (_eh_data_por_nome(nome_col) and t.startswith(("VARCHAR", "DATE", "TIMESTAMP"))):
                     papel = "data"
                 coluna = {"nome": nome_col, "tipo": tipo, "papel": papel, "distintos": distintos, "nulos": nulos, "amostra": [str(a) for a in amostra]}

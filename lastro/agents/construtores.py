@@ -54,6 +54,7 @@ class Arquiteto(Agente):
             "medidas": numeros,
             "data": data,
             "chave": chave,
+            "identificadores": [n for n, c in cols.items() if c["papel"] == "identificador"],
             "filtro": filtro,
             "dimensoes": dims,
             "playbook": f"{playbook[0].caminho} § {playbook[0].secao}" if playbook else None,
@@ -185,7 +186,7 @@ class Analista(Agente):
         if tempo and dims:
             ordem = f"dim_data.{tempo}, {len(grupos) + 1} DESC"
         return (
-            f"SELECT {', '.join(grupos)}, {valor}, count(*) AS registros FROM fato {' '.join(juncoes)}"
+            f"SELECT {', '.join(grupos)}, {valor}{', count(*) AS registros' if medida else ''} FROM fato {' '.join(juncoes)}"
             f" GROUP BY {', '.join(grupos)} ORDER BY {ordem} LIMIT 50"
         )
 
