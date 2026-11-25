@@ -2,7 +2,7 @@
 chave: LST-15
 jira: https://adelecrm.atlassian.net/browse/LST-15
 secao: CON
-status: backlog
+status: em-andamento
 especialista: engenheiro-de-dados
 ---
 
