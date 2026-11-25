@@ -9,3 +9,4 @@ Armadilhas e fatos operacionais. Uma linha por nota.
 - [portal-de-api-com-javascript](portal-de-api-com-javascript.md) — doc "baixada" pode ser só a casca HTML; especificação real via Playwright; Newman --env-var sobrepõe variável de coleção; folga no limitador.
 - [supabase-chave-secreta-no-apikey](supabase-chave-secreta-no-apikey.md) — sb_secret_ só no cabeçalho apikey; conferir o espelho com scripts/conferir_espelho.py.
 - [postgres-on-conflict-where-silencioso](postgres-on-conflict-where-silencioso.md) — upsert com WHERE de tenant não falha no Postgres: use RETURNING; teste isolamento nos dois bancos; pg_cron ausente no Postgres local.
+- [vault-conferir-formato-sem-ler](vault-conferir-formato-sem-ler.md) — conferir segredo do Vault pelo formato, sem ler o valor; exemplo das instruções costuma ir parar no Vault; responder em português.

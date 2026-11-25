@@ -2,7 +2,7 @@
 chave: LST-26
 jira: https://adelecrm.atlassian.net/browse/LST-26
 secao: OPS
-status: em-andamento
+status: feito
 especialista: engenheiro-backend
 ---
 
@@ -52,7 +52,12 @@ especialista: engenheiro-backend
 
 **Achado:** os textos do eixo dentro do SVG escalavam com a largura, grandes no desktop e minúsculos no celular. Passaram para HTML.
 
-## Falta (Tiago)
+## E-mail ligado (25/11)
 
-1. Ligar o Resend: são 5 minutos, passo a passo em `docs/infra/monitoramento.md`. A chave vai direto no Vault, pelo SQL Editor.
-2. Rodar `select interno.enviar_alerta('[Lastro] teste', 'ok')` e confirmar que o e-mail chegou. Com isso o card fecha.
+O Tiago gravou a chave do Resend e o e-mail de destino no Vault. O teste `interno.enviar_alerta` foi aceito pelo Resend (HTTP 200, com id de envio).
+
+As três primeiras tentativas falharam com "API key is invalid": o Vault guardava o texto de exemplo das instruções (`re_…`, `PASTE_THE_FULL_RESEND_KEY`). Dá para conferir o formato sem expor o valor (`like 're\_%'`, `like '%@%'`). Registrado em `docs/memory/vault-conferir-formato-sem-ler.md`.
+
+**Conhecimento durável:**
+- `docs/memory/vault-conferir-formato-sem-ler.md`
+- `docs/infra/monitoramento.md`
