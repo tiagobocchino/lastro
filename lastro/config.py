@@ -29,11 +29,14 @@ class Config:
 
 
 def carregar() -> Config:
+    segredo = os.environ.get("LASTRO_SEGREDO", "")
+    if os.environ.get("LASTRO_AMBIENTE", "local") == "producao" and len(segredo) < 32:
+        raise RuntimeError("produção exige LASTRO_SEGREDO aleatório com pelo menos 32 caracteres")
     home = Path(os.environ.get("LASTRO_HOME", RAIZ / ".lastro")).resolve()
     home.mkdir(parents=True, exist_ok=True)
     return Config(
         home=home,
-        segredo=os.environ.get("LASTRO_SEGREDO", "troque-este-segredo-em-producao"),
+        segredo=segredo or "segredo-de-desenvolvimento-nao-use-em-producao",
         llm_provedor=os.environ.get("LASTRO_LLM", "nenhum"),
         llm_modelo=os.environ.get("LASTRO_LLM_MODELO", ""),
         llm_url=os.environ.get("LASTRO_LLM_URL", ""),

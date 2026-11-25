@@ -11,7 +11,9 @@ Lições da GIMI (IAPP, IMUV, OMIE) viraram regras do motor:
 from __future__ import annotations
 
 import json
+import re
 import time
+from urllib.parse import quote
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -126,6 +128,7 @@ class Leitor:
         self.chamadas = 0
         self.tentativas_429 = 0
         self.relogins = 0
+        self._vars_url = self._validar_variaveis()
         faltando = [k for k in self.c["auth"].get("campos", []) if not self.cred.get(k)]
         if self.c["auth"]["tipo"] in ("bearer_estatico", "oauth2_refresh") and not self.cred.get("token"):
             faltando.append("token")
@@ -135,8 +138,25 @@ class Leitor:
             raise Credencial(f"{saas}: faltam credenciais {sorted(set(faltando))}")
 
     # ---- montagem ------------------------------------------------------------------
+    def _validar_variaveis(self) -> dict[str, str]:
+        """Variável no host só aceita [a-z0-9-]; no caminho, é codificada. Impede desviar a credencial."""
+        hosts = set()
+        for modelo in (self.c["base_url"], self.c["auth"].get("url_login", "")):
+            host = modelo.split("://", 1)[-1].split("/", 1)[0]
+            hosts |= set(re.findall(r"\{(\w+)\}", host))
+        seguras = {}
+        for k, v in self.vars.items():
+            v = str(v)
+            if k in hosts:
+                if not re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", v):
+                    raise ValueError(f"{self.saas}: variável de host '{k}' inválida: use só letras minúsculas, números e hífen")
+                seguras[k] = v
+            else:
+                seguras[k] = quote(v, safe="")
+        return seguras
+
     def _url(self, caminho: str) -> str:
-        return self.c["base_url"].format(**self.vars).rstrip("/") + caminho.format(**self.vars)
+        return self.c["base_url"].format(**self._vars_url).rstrip("/") + caminho.format(**self._vars_url)
 
     def _cabecalhos(self) -> dict[str, str]:
         a = self.c["auth"]
@@ -162,7 +182,7 @@ class Leitor:
     def _login(self) -> None:
         a = self.c["auth"]
         corpo = {k: self.cred[k] for k in a["campos"]}
-        r = self.http.post(a["url_login"].format(**self.vars), json=corpo)
+        r = self.http.post(a["url_login"].format(**self._vars_url), json=corpo)
         self.chamadas += 1
         if r.status_code >= 400:
             raise Credencial(f"{self.saas}: login recusado ({r.status_code})")

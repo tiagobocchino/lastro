@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import time
 from pathlib import Path
@@ -81,9 +82,13 @@ async def enviar_fonte(
     if suf not in EXTENSOES:
         raise HTTPException(400, f"formato não suportado; use {sorted(EXTENSOES)}")
     nome = re.sub(r"[^a-z0-9_]+", "_", (nome or Path(arquivo.filename or "fonte").stem).lower()).strip("_") or "fonte"
+    limite = int(os.environ.get("LASTRO_UPLOAD_MAX_MB", "50")) * 1024 * 1024
+    conteudo = await arquivo.read(limite + 1)
+    if len(conteudo) > limite:
+        raise HTTPException(413, f"arquivo acima de {limite // (1024 * 1024)} MB; conecte o sistema de origem em vez de enviar o arquivo")
     destino = p.pasta / "fontes" / f"{nome}_{int(time.time())}{suf}"
     destino.parent.mkdir(parents=True, exist_ok=True)
-    destino.write_bytes(await arquivo.read())
+    destino.write_bytes(conteudo)
     fid = p.repo.adicionar_fonte(nome, "arquivo", str(destino))
     p.repo.registrar(s.email, "conectou_fonte", {"fonte": nome}, None)
     return {"id": fid, "nome": nome}
