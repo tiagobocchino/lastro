@@ -769,8 +769,26 @@ def _demos():
     return _DEMOS
 
 
+def _erro_demo(e: Exception) -> HTTPException:
+    from .demo import Demorou, LimiteIP, Ocupado
+
+    if isinstance(e, Ocupado):
+        return HTTPException(503, str(e), headers={"Retry-After": "10"})
+    if isinstance(e, LimiteIP):
+        return HTTPException(429, str(e))
+    if isinstance(e, Demorou):
+        return HTTPException(504, str(e))
+    return HTTPException(404 if "sessão" in str(e) else 400, str(e))
+
+
+def _ip(request: Request) -> str:
+    """No Render o endereço do visitante vem no primeiro X-Forwarded-For; localmente, no socket."""
+    encaminhado = request.headers.get("x-forwarded-for", "")
+    return encaminhado.split(",")[0].strip() or (request.client.host if request.client else "desconhecido")
+
+
 @app.post("/api/demo/sessoes")
-async def demo_abrir(arquivo: UploadFile | None = File(None), exemplo: bool = Form(False)) -> dict:  # noqa: B008
+async def demo_abrir(request: Request, arquivo: UploadFile | None = File(None), exemplo: bool = Form(False)) -> dict:  # noqa: B008
     from starlette.concurrency import run_in_threadpool
 
     from .demo import MAX_BYTES, ErroDemo
@@ -781,10 +799,16 @@ async def demo_abrir(arquivo: UploadFile | None = File(None), exemplo: bool = Fo
         conteudo = await arquivo.read(MAX_BYTES + 1)
         nome = arquivo.filename
     try:
-        _, resposta = await run_in_threadpool(demos.abrir, nome, conteudo)
+        _, resposta = await run_in_threadpool(demos.abrir, nome, conteudo, None, _ip(request))
     except ErroDemo as e:
-        raise HTTPException(400, str(e)) from e
+        raise _erro_demo(e) from e
     return resposta
+
+
+@app.get("/api/demo/fila")
+def demo_fila() -> dict:
+    d = _demos()
+    return {"esperando": d.esperando, "sessoes_abertas": d.abertas}
 
 
 class RespostasDemo(BaseModel):
@@ -798,7 +822,7 @@ def demo_painel(sid: str, dados: RespostasDemo) -> dict:
     try:
         return _demos().responder(sid, dados.respostas)
     except ErroDemo as e:
-        raise HTTPException(404 if "sessão" in str(e) else 400, str(e)) from e
+        raise _erro_demo(e) from e
 
 
 @app.delete("/api/demo/sessoes/{sid}")

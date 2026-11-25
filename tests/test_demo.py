@@ -219,3 +219,124 @@ def test_toda_combinacao_de_respostas_gera_painel_valido_contra_o_gold(monkeypat
         else:
             assert len(valores["v2"]) > 0, (quebra, periodo, formato)
     assert demos.apagar(s.id)["conferido"]
+
+
+# ---- LST-42: limites e anti-abuso ------------------------------------------------------------
+
+def test_mais_de_50_mil_linhas_e_recusada_sem_deixar_nada(api):
+    _, c, base = api
+    csv = b"valor\n" + b"1\n" * 50_001
+    assert len(csv) < 5 * 1024 * 1024
+    r = c.post("/api/demo/sessoes", files={"arquivo": ("muitas.csv", csv)})
+    assert r.status_code == 400 and "50.000 linhas" in r.json()["detail"]
+    assert list(base.glob("demo-*")) == []
+
+
+def test_limite_por_ip_e_ip_nao_fica_guardado(api):
+    modulo, c, _ = api
+    cab = {"x-forwarded-for": "203.0.113.7, 10.0.0.1"}
+    for _ in range(5):
+        s = c.post("/api/demo/sessoes", data={"exemplo": "true"}, headers=cab).json()
+        c.delete(f"/api/demo/sessoes/{s['sessao']}")
+    r = c.post("/api/demo/sessoes", data={"exemplo": "true"}, headers=cab)
+    assert r.status_code == 429 and "última hora" in r.json()["detail"]
+    outro = c.post("/api/demo/sessoes", data={"exemplo": "true"}, headers={"x-forwarded-for": "198.51.100.2"})
+    assert outro.status_code == 200
+    guardado = str(modulo._DEMOS.limites._vezes)
+    assert "203.0.113.7" not in guardado and "198.51.100.2" not in guardado  # só hash com sal
+
+
+def test_limite_por_dia_com_relogio():
+    from lastro.demo import LimiteIP, Limites
+
+    lim = Limites()
+    t = 1_000_000.0
+    for h in range(4):  # 5 por hora, 4 horas = 20 no dia
+        for i in range(5):
+            lim.registrar("1.2.3.4", t + h * 3_600 + i)
+    with pytest.raises(LimiteIP, match="hoje"):
+        lim.registrar("1.2.3.4", t + 4 * 3_600)
+    lim.registrar("1.2.3.4", t + 86_400 + 10)  # no dia seguinte volta
+
+
+def test_fila_de_um_por_vez_responde_voce_e_o_proximo(monkeypatch, tmp_path):
+    from lastro.demo import Ocupado
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path / "home"))
+    demos = Demos(carregar(), tmp_path / "demo", espera_fila_s=0.2)
+    demos._fila.acquire()  # alguém analisando agora
+    try:
+        with pytest.raises(Ocupado, match="você é o próximo"):
+            demos.abrir(None, None)
+        assert list((tmp_path / "demo").glob("demo-*")) == []
+    finally:
+        demos._fila.release()
+    s, _ = demos.abrir(None, None)  # vaga liberada: entra
+    assert demos.apagar(s.id)["conferido"]
+
+
+def test_fila_ocupada_vira_503_com_retry_after(api):
+    modulo, c, _ = api
+    d = modulo._demos()
+    d.espera_fila_s = 0.1
+    d._fila.acquire()
+    try:
+        r = c.post("/api/demo/sessoes", data={"exemplo": "true"})
+        assert r.status_code == 503 and r.headers["retry-after"] == "10" and "próximo" in r.json()["detail"]
+    finally:
+        d._fila.release()
+
+
+def test_prazo_estourado_cancela_e_apaga_quando_a_analise_para(monkeypatch, tmp_path):
+    import time as _time
+
+    from lastro.demo import Demorou
+    from lastro.servico import Plataforma
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path / "home"))
+    base = tmp_path / "demo"
+    demos = Demos(carregar(), base, prazo_s=0.3)
+    s, _ = demos.abrir(None, None)
+    original = Plataforma.executar
+
+    def lento(self, *a, **k):
+        _time.sleep(1.0)
+        return original(self, *a, **k)
+
+    monkeypatch.setattr(Plataforma, "executar", lento)
+    with pytest.raises(Demorou, match="passou de 0 segundos|passou de"):
+        demos.responder(s.id, {})
+    assert demos._fila.acquire(timeout=5)  # a vaga só volta quando a análise termina de verdade
+    demos._fila.release()
+    for _ in range(50):  # a análise terminou e apagou a sessão sozinha
+        if not list(base.glob("demo-*")):
+            break
+        _time.sleep(0.1)
+    assert list(base.glob("demo-*")) == [] and demos.abertas == 0
+
+
+def test_prazo_estourado_na_leitura_apaga_a_sessao_que_nasce_depois(monkeypatch, tmp_path):
+    import time as _time
+
+    from lastro.demo import Demorou
+    from lastro.servico import Plataforma
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path / "home"))
+    base = tmp_path / "demo"
+    demos = Demos(carregar(), base, prazo_s=0.3)
+    original = Plataforma.abrir
+
+    def lento(self, *a, **k):
+        _time.sleep(1.0)
+        return original(self, *a, **k)
+
+    monkeypatch.setattr(Plataforma, "abrir", lento)
+    with pytest.raises(Demorou):
+        demos.abrir(None, None)
+    assert demos._fila.acquire(timeout=5)
+    demos._fila.release()
+    for _ in range(50):
+        if not list(base.glob("demo-*")) and demos.abertas == 0:
+            break
+        _time.sleep(0.1)
+    assert list(base.glob("demo-*")) == [] and demos.abertas == 0  # a sessão que nasceu tarde foi apagada

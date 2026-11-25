@@ -66,6 +66,54 @@ class ErroDemo(ValueError):
     """Problema que o visitante pode entender (arquivo grande, formato, sessão expirada)."""
 
 
+class Ocupado(ErroDemo):
+    """Fila cheia: alguém está analisando agora (Render gratuito, 1 análise por vez)."""
+
+
+class Demorou(ErroDemo):
+    """A análise passou do prazo."""
+
+
+class LimiteIP(ErroDemo):
+    """Passou do limite de análises por hora ou por dia deste endereço."""
+
+
+MAX_LINHAS = 50_000
+PRAZO_S = 60
+ESPERA_FILA_S = 20
+POR_HORA, POR_DIA = 5, 20
+
+
+class Limites:
+    """Contagem de análises por endereço, só em memória. O IP vira hash com sal aleatório do processo:
+    o endereço em si nunca é guardado, e reiniciar o servidor zera tudo."""
+
+    def __init__(self, por_hora: int = POR_HORA, por_dia: int = POR_DIA):
+        self.por_hora, self.por_dia = por_hora, por_dia
+        self._sal = secrets.token_bytes(16)
+        self._vezes: dict[str, list[float]] = {}
+        self._trava = threading.Lock()
+
+    def _chave(self, ip: str) -> str:
+        import hashlib
+
+        return hashlib.sha256(self._sal + ip.encode()).hexdigest()[:24]
+
+    def registrar(self, ip: str, agora: float | None = None) -> None:
+        agora = time.time() if agora is None else agora
+        k = self._chave(ip)
+        with self._trava:
+            vezes = [t for t in self._vezes.get(k, []) if agora - t < 86_400]
+            if sum(1 for t in vezes if agora - t < 3_600) >= self.por_hora:
+                raise LimiteIP(f"você já fez {self.por_hora} análises na última hora: tente de novo mais tarde ou fale com a gente")
+            if len(vezes) >= self.por_dia:
+                raise LimiteIP(f"você já fez {self.por_dia} análises hoje: volte amanhã ou fale com a gente")
+            vezes.append(agora)
+            self._vezes[k] = vezes
+            for chave in [c for c, v in self._vezes.items() if not v or agora - v[-1] >= 86_400]:  # memória não cresce
+                del self._vezes[chave]
+
+
 @dataclass
 class Sessao:
     id: str
@@ -87,8 +135,13 @@ def _tamanho(pasta: Path) -> tuple[int, int, int]:
 
 
 class Demos:
-    def __init__(self, cfg: Config, base: Path | None = None, ttl_s: int = TTL_S):
+    def __init__(self, cfg: Config, base: Path | None = None, ttl_s: int = TTL_S, prazo_s: float = PRAZO_S,
+                 espera_fila_s: float = ESPERA_FILA_S, max_linhas: int = MAX_LINHAS, limites: Limites | None = None):
         self.cfg, self.base, self.ttl_s = cfg, (base or base_padrao()), ttl_s
+        self.prazo_s, self.espera_fila_s, self.max_linhas = prazo_s, espera_fila_s, max_linhas
+        self.limites = limites or Limites()
+        self._fila = threading.BoundedSemaphore(1)
+        self.esperando = 0
         self._sessoes: dict[str, Sessao] = {}
         self._trava = threading.Lock()
         self.base.mkdir(parents=True, exist_ok=True)
@@ -96,7 +149,19 @@ class Demos:
             shutil.rmtree(sobra, ignore_errors=True)
 
     # ---- ciclo da sessão --------------------------------------------------------------
-    def abrir(self, nome_arquivo: str | None, conteudo: bytes | None, agora: float | None = None) -> tuple[Sessao, dict]:
+    def abrir(self, nome_arquivo: str | None, conteudo: bytes | None, agora: float | None = None, ip: str | None = None) -> tuple[Sessao, dict]:
+        """Limite por IP, depois fila e prazo. Se o prazo estoura, a sessão é apagada assim que a análise termina."""
+        if ip:
+            self.limites.registrar(ip, agora)
+
+        def cancelar(res: tuple[Sessao, dict]) -> None:
+            with self._trava:
+                self._sessoes.pop(res[0].id, None)
+            self._apagar(res[0])
+
+        return self._na_fila(lambda: self._abrir(nome_arquivo, conteudo, agora), cancelar)
+
+    def _abrir(self, nome_arquivo: str | None, conteudo: bytes | None, agora: float | None = None) -> tuple[Sessao, dict]:
         """Recebe o arquivo (ou o exemplo), perfila e devolve as perguntas. Falha apaga o que já foi gravado."""
         inicio = time.perf_counter()
         agora = time.time() if agora is None else agora
@@ -122,6 +187,11 @@ class Demos:
             self._log("abrir_falhou", inicio, len(conteudo), None, erro=type(e).__name__)
             raise ErroDemo("não consegui ler a planilha: confira se a primeira linha tem os nomes das colunas") from e
         perfil = next(iter(d["resultado"]["perfis"].values()))
+        if perfil["linhas"] > self.max_linhas:
+            plat.repo.apagar()  # type: ignore[attr-defined]
+            shutil.rmtree(pasta, ignore_errors=True)
+            self._log("recusou_linhas", inicio, len(conteudo), len(perfil["colunas"]))
+            raise ErroDemo(f"a planilha tem mais de {self.max_linhas:,} linhas: para volumes maiores, fale com a gente".replace(",", "."))
         s = Sessao(sid, pasta, agora, plat, d["id"], perguntas_visitante(perfil, d["grill"]))
         with self._trava:
             self._sessoes[sid] = s
@@ -133,6 +203,10 @@ class Demos:
         }
 
     def responder(self, sid: str, respostas: dict[str, str], agora: float | None = None) -> dict:
+        self._pegar(sid, agora)  # sessão inexistente responde na hora, sem entrar na fila
+        return self._na_fila(lambda: self._responder(sid, respostas, agora), None)
+
+    def _responder(self, sid: str, respostas: dict[str, str], agora: float | None = None) -> dict:
         """Roda a análise, monta o painel e apaga tudo. Devolve o painel e o recibo, com sucesso ou não."""
         inicio = time.perf_counter()
         s = self._pegar(sid, agora)
@@ -184,6 +258,42 @@ class Demos:
         return len(self._sessoes)
 
     # ---- internos ---------------------------------------------------------------------
+    def _na_fila(self, tarefa: Any, ao_cancelar: Any) -> Any:
+        """Uma análise por vez, com prazo. A vaga só volta quando a análise termina de verdade (mesmo
+        depois de estourar o prazo), para o servidor nunca rodar duas ao mesmo tempo."""
+        with self._trava:
+            self.esperando += 1
+        try:
+            if not self._fila.acquire(timeout=self.espera_fila_s):
+                raise Ocupado("tem gente analisando agora e você é o próximo: tente de novo em alguns segundos")
+        finally:
+            with self._trava:
+                self.esperando -= 1
+        res: dict[str, Any] = {}
+        fim, cancelado = threading.Event(), threading.Event()
+
+        def rodar() -> None:
+            try:
+                res["v"] = tarefa()
+            except BaseException as e:  # noqa: BLE001
+                res["e"] = e
+            finally:
+                if cancelado.is_set() and "v" in res and ao_cancelar:
+                    ao_cancelar(res["v"])
+                fim.set()
+                self._fila.release()
+
+        threading.Thread(target=rodar, daemon=True, name="demo-analise").start()
+        if not fim.wait(self.prazo_s):
+            cancelado.set()
+            if fim.is_set() and "v" in res and ao_cancelar:  # terminou no limite: apaga já
+                ao_cancelar(res["v"])
+            self._log("prazo_estourado", None, None, None, prazo_s=self.prazo_s)
+            raise Demorou(f"a análise passou de {int(self.prazo_s)} segundos e foi cancelada; seus dados são apagados assim que ela parar")
+        if "e" in res:
+            raise res["e"]
+        return res["v"]
+
     def _pegar(self, sid: str, agora: float | None) -> Sessao:
         self.varrer(agora)
         s = self._sessoes.get(sid)
