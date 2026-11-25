@@ -93,11 +93,15 @@ def inicial(demanda: dict, gold: Path) -> dict:
 FORMATOS = {"ranking": "barras", "tabela": "tabela", "evolucao": "linha", "numero": "kpi"}
 
 
-def para_visitante(demanda: dict, gold: Path, quebra: str | None, periodo: str | None, formato: str) -> dict:
+def para_visitante(demanda: dict, gold: Path, quebra: str | None, periodo: str | None, formato: str,
+                   excluir: set[str] | None = None) -> dict:
     """Grill de "como mostrar" da demonstração (LST-40) direto na especificação do painel: o número principal
     sempre, mais o visual escolhido (ranking ou tabela pela quebra, ou evolução pelo período)."""
     modelo = demanda["resultado"]["modelo"]
     cat = catalogo(gold, modelo)
+    fora = {_slug(c) for c in (excluir or set())}  # LST-41: colunas com dado pessoal nunca entram no painel
+    cat["medidas"] = [c for c in cat["medidas"] if _slug(c) not in fora]
+    cat["dimensoes"] = [d for d in cat["dimensoes"] if d not in fora]
     medida = modelo.get("medida") if modelo.get("medida") in cat["medidas"] else (cat["medidas"] or [None])[0]
     if not medida:
         raise PedidoInvalido("a planilha não tem coluna numérica para medir")

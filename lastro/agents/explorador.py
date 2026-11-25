@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from ..caixa import gravar_nota
+from ..pessoal import NOMES as NOMES_PESSOAIS
+from ..pessoal import detectar as detectar_pessoal
 from .base import Agente, Contexto
 
 NUMERICOS = ("INT", "DECIMAL", "DOUBLE", "FLOAT", "REAL", "NUMERIC", "HUGEINT", "BIGINT")
@@ -38,6 +40,13 @@ class Explorador(Agente):
                 if t.startswith(DATAS) or (_eh_data_por_nome(nome_col) and t.startswith(("VARCHAR", "DATE", "TIMESTAMP"))):
                     papel = "data"
                 coluna = {"nome": nome_col, "tipo": tipo, "papel": papel, "distintos": distintos, "nulos": nulos, "amostra": [str(a) for a in amostra]}
+                if papel != "data":  # LST-41: dado pessoal pelo formato dos valores, não pelo nome
+                    valores = [r[0] for r in ctx.sandbox.consultar(
+                        f"SELECT DISTINCT CAST({q} AS VARCHAR) FROM {view} WHERE {q} IS NOT NULL LIMIT 500")[1]]
+                    pessoal = detectar_pessoal(valores, numerico=t.startswith(NUMERICOS))
+                    if pessoal:
+                        coluna["pessoal"] = pessoal
+                        coluna["amostra"] = [f"(dado pessoal: {NOMES_PESSOAIS[pessoal]})"]  # nunca guardar CPF na nota
                 # Coluna categórica (poucos valores): guarda os valores para o grill achar o recorte citado na pergunta.
                 if papel == "texto" and 0 < distintos <= MAX_CATEGORIAS and distintos < total:
                     coluna["valores"] = [
@@ -62,6 +71,10 @@ class Explorador(Agente):
             self._gravar_nota(ctx, perfil)
         ctx.memoria["perfis"] = perfis
         self.anotar(ctx, "perfilou_fontes", {v: {"linhas": p["linhas"], "colunas": len(p["colunas"])} for v, p in perfis.items()})
+        pessoais = {p["fonte"]: {c["nome"]: NOMES_PESSOAIS[c["pessoal"]] for c in p["colunas"] if c.get("pessoal")} for p in perfis.values()}
+        pessoais = {f: cols for f, cols in pessoais.items() if cols}
+        if pessoais:  # aviso no rastro da demanda: só nomes de coluna e o tipo, nunca valores
+            self.anotar(ctx, "dados_pessoais", pessoais)
         return perfis
 
     def _gravar_nota(self, ctx: Contexto, perfil: dict) -> None:

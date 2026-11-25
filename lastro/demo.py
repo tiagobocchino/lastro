@@ -28,6 +28,7 @@ from zoneinfo import ZoneInfo
 from . import paineis
 from .agents.construtores import dimensoes_candidatas
 from .config import RAIZ, Config
+from .pessoal import aviso as aviso_pessoal
 from .servico import Plataforma
 
 log = logging.getLogger("lastro.demo")
@@ -41,13 +42,17 @@ FORMATOS = {"ranking (barras)": "ranking", "tabela": "tabela", "evolução no te
 PERIODOS = {"por mês": "ano_mes", "por ano": "ano"}
 
 
+def pessoais(perfil: dict) -> dict[str, str]:
+    return {c["nome"]: c["pessoal"] for c in perfil["colunas"] if c.get("pessoal")}
+
+
 def perguntas_visitante(perfil: dict, grill: list[dict]) -> list[dict]:
     """Até 4 perguntas curtas, cada uma com sugestão (LST-40). O resto do grill (chave, data, recorte)
     fica com a sugestão do Orquestrador, sem ocupar o visitante."""
     sug = {q["id"]: q.get("sugestao") for q in grill}
-    cols = perfil["colunas"]
+    cols = [c for c in perfil["colunas"] if not c.get("pessoal")]  # LST-41: dado pessoal fica fora do painel
     numeros = [c["nome"] for c in cols if c["papel"] == "numero" and not c["nome"].lower().endswith("id")]
-    dims = dimensoes_candidatas(perfil, (perfil["chaves_candidatas"] or [None])[0])
+    dims = [d for d in dimensoes_candidatas(perfil, (perfil["chaves_candidatas"] or [None])[0]) if d not in pessoais(perfil)]
     datas = [c["nome"] for c in cols if c["papel"] == "data"]
     out = []
     if numeros:
@@ -198,7 +203,9 @@ class Demos:
         self._log("perfil", inicio, len(conteudo), len(perfil["colunas"]))
         return s, {
             "sessao": sid, "expira_em": datetime.fromtimestamp(agora + self.ttl_s, FUSO).isoformat(timespec="seconds"),
-            "perfil": {"linhas": perfil["linhas"], "colunas": [{"nome": c["nome"], "papel": c["papel"]} for c in perfil["colunas"]]},
+            "perfil": {"linhas": perfil["linhas"], "colunas": [{"nome": c["nome"], "papel": "pessoal" if c.get("pessoal") else c["papel"]}
+                                                          for c in perfil["colunas"]]},
+            "avisos": aviso_pessoal(pessoais(perfil)),
             "perguntas": [{k: q[k] for k in ("id", "pergunta", "sugestao", "opcoes")} for q in s.perguntas],
         }
 
@@ -221,8 +228,9 @@ class Demos:
             r = {k: v for k, v in escolhas.items() if not k.startswith("demo:")} | {"geral:revisor": "demonstração (ADR 0010)"}
             d = plat.executar(plat.responder_grill(s.demanda_id, "visitante", r)["id"], "visitante")  # type: ignore[arg-type]
             gold = plat.pasta_demanda(d["id"]) / "gold"
+            perfil = next(iter(d["resultado"]["perfis"].values()))
             spec = paineis.para_visitante(d, gold, escolhas.get("demo:quebra"), PERIODOS.get(escolhas.get("demo:periodo", "")),
-                                          FORMATOS[escolhas["demo:formato"]])
+                                          FORMATOS[escolhas["demo:formato"]], excluir=set(pessoais(perfil)))
             html = paineis.html_painel(spec, gold, datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"))
             aud = d["resultado"]["auditoria"]
             resultado = {"html": html, "visuais": [v["titulo"] for v in spec["visuais"]],

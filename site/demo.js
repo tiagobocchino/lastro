@@ -7,7 +7,7 @@
   if (!palco) return;
   const inicial = palco.innerHTML;
   const WHATS = "5561999520802";
-  const PAPEL = { numero: "valor", data: "data", texto: "categoria" };
+  const PAPEL = { numero: "valor", data: "data", texto: "categoria", pessoal: "dado pessoal, fora do painel" };
   let sessao = null;
   let ultimo = null;
 
@@ -74,6 +74,7 @@
       <h3>2. O que o Lastro entendeu</h3>
       <p><b>${p.linhas.toLocaleString("pt-BR")} linhas</b> e <b>${p.colunas.length} colunas</b>:</p>
       <div class="chips">${p.colunas.map((c) => `<span class="chip">${esc(c.nome)} · <b>${esc(PAPEL[c.papel] || c.papel)}</b></span>`).join("")}</div>
+      ${(r.avisos || []).map((a) => `<p class="nota"><span><b>Dado pessoal.</b> ${esc(a)}</span></p>`).join("")}
       <form id="t-perguntas" style="display:grid;gap:14px">
         <div class="duas">${r.perguntas.map((q) => `<label class="perg" for="q-${esc(q.id)}">${esc(q.pergunta)}
           <select id="q-${esc(q.id)}" data-q="${esc(q.id)}">${q.opcoes.map((o) => `<option ${o === q.sugestao ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></label>`).join("")}</div>
