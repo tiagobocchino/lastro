@@ -2,7 +2,7 @@
 chave: LST-26
 jira: https://adelecrm.atlassian.net/browse/LST-26
 secao: OPS
-status: backlog
+status: em-andamento
 especialista: engenheiro-backend
 ---
 
@@ -23,4 +23,4 @@ Comandos da seção OPS em `docs/agents/secoes.yaml` + os critérios acima.
 
 ## Situação
 
-Bloqueado por LST-22.
+LST-22 fechou (Render + Supabase no ar). Critérios em revisão para o plano B/C: ver abaixo.
