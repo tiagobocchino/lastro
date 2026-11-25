@@ -2,7 +2,7 @@
 chave: LST-19
 jira: https://adelecrm.atlassian.net/browse/LST-19
 secao: OPS
-status: pronto
+status: bloqueado
 especialista: engenheiro-backend
 ---
 
@@ -31,3 +31,7 @@ Comandos da seção OPS em `docs/agents/secoes.yaml` + os critérios acima.
 - Script para o Cloud Shell: `scripts/gcp/criar_projeto_lastro.sh`. Ele cria o projeto, liga ao faturamento, habilita as 8 APIs e cria o orçamento de R$ 10 com alertas em R$ 1, R$ 10 e previsão. Pode rodar de novo sem refazer o que já existe.
 - O roteiro foi testado com um `gcloud` falso, conferindo a ordem e os comandos. A execução real fica com o Tiago (cartão e termos).
 - Falta: Tiago fazer os passos 1 a 6 e mandar o ID do projeto.
+
+## Bloqueio (25/11)
+
+A ativação do faturamento falhou com `OR_BACR2_59`. O Tiago escolheu o plano B (ADR 0009). O card volta a andar se o Google liberar o faturamento.
