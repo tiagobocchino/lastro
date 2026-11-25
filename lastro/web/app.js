@@ -373,7 +373,7 @@ async function copiar(botao, texto, alvo) {
   catch { const r = document.createRange(); r.selectNodeContents(alvo); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
 }
 
-async function baixar(caminho, botao) {
+async function baixarArquivo(caminho, botao) {
   const antes = botao.textContent; botao.disabled = true; botao.textContent = "gerando…";
   try {
     const r = await api(caminho);
@@ -392,7 +392,7 @@ async function telaExportar(alvo) {
     ${fs.length ? `<div class="tabela"><table><tbody>${fs.map((f) => `<tr><td>${esc(f.nome)}</td><td style="text-align:right"><div class="linha-btn" style="justify-content:flex-end">
       <button class="btn sec" data-exp="${f.id}" data-fmt="csv">csv</button><button class="btn sec" data-exp="${f.id}" data-fmt="parquet">parquet</button></div></td></tr>`).join("")}</tbody></table></div>`
       : `<p class="quem">Nenhuma fonte de arquivo ainda.</p>`}</div>`;
-  alvo.querySelectorAll("[data-exp]").forEach((b) => (b.onclick = () => baixar(`/api/fontes/${b.dataset.exp}/exportar?formato=${b.dataset.fmt}`, b)));
+  alvo.querySelectorAll("[data-exp]").forEach((b) => (b.onclick = () => baixarArquivo(`/api/fontes/${b.dataset.exp}/exportar?formato=${b.dataset.fmt}`, b)));
 }
 
 const quandoBI = (iso) => iso ? new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "ainda não";
