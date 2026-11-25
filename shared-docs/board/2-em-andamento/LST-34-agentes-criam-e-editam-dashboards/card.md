@@ -2,7 +2,7 @@
 chave: LST-34
 jira: https://adelecrm.atlassian.net/browse/LST-34
 secao: NUC
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-de-dados
 ---
 
