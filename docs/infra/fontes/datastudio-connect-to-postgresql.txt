@@ -1,0 +1,147 @@
+Fonte: https://docs.cloud.google.com/looker/docs/studio/connect-to-postgresql
+Baixado em 25/11/2026 (card LST-34). Looker Studio agora se chama Data Studio.
+
+Connect to PostgreSQL 
+ Stay organized with collections
+ Save and categorize content based on your preferences.
+You can connect your PostgreSQL databases to Data Studio to visualize
+and analyze your data. Use the PostgreSQL connector to transform your data into
+interactive dashboards and reports. You can then share your insights with your
+team or stakeholders who don't have direct database access. 
+Supported versions 
+We've tested Data Studio on the following PostgreSQL versions: 
+9.6 
+10 
+11 
+12 
+13 
+14 
+If you experience issues with using a supported version, let us know in the Data Studio Community . You can also add and vote on feature requests on the issue tracker . 
+How to connect to PostgreSQL 
+The PostgreSQL connector uses the PostgreSQL JDBC driver to connect a Data Studio
+data source to a single PostgreSQL database table, or to a custom query that you
+provide. 
+To connect to your PostgreSQL database, follow these steps: 
+ Sign in to Data Studio. 
+On the Data Studio home page, click
+ add Create , and then select
+ Data Source . 
+Select the PostgreSQL connector. 
+If asked, authorize Data Studio to access your data. 
+Configure access to your database by using one of the
+ connection options . 
+Click AUTHENTICATE . You see a list of tables in that database. 
+Select a table from the list or enter a custom query. 
+Click CONNECT . 
+You can now access all the columns in the table as fields in your reports. 
+Connection options 
+Connect by using a hostname or IP address 
+In the connection panel, select BASIC . Enter the connection details: 
+Hostname or IP address 
+Port (Optional) 
+Database 
+Username 
+Password 
+Connect by using a JDBC URL 
+In the connection panel, select JDBC URL . Enter the connection details: 
+JDBC URL
+ Example 
+ jdbc:postgresql:// HOSTNAME [: PORT ]/ DATABASE_NAME 
+ For Cloud SQL (Private IP) 
+ jdbc:google:postgresql://< var>INSTANCE_CONNECTION_NAME / DATABASE_NAME 
+Username 
+Password 
+ Note: For Cloud SQL private IP connections, don't prefix the connection
+string with your organization name or ID, and remove any spaces from the URL.
+For complete requirements, including required permissions, see
+ Public and private connections . Tip: If you use the JDBC hostname option, you can make sure it's accessible with public DNS lookup tools such as Whois . 
+To connect by using an IPv6 literal address, enclose the address in square
+brackets. For example:
+ jdbc: postgresql ://[2001:db8:1:1:1:1:1:1]/your_db 
+Connect by using SSL 
+Data Studio supports secure (encrypted) connections to the server using the TLS (Transport Layer Security) protocol (TLS 1.2). TLS is also referred to as SSL (Secure Sockets Layer). 
+To enable a secure connection, select Enable SSL and then provide your SSL configuration files. 
+Connect by using client authentication 
+When the Enable client authentication box is checked, you can upload a client private key and a client certificate if required to access your database. 
+ Note: Data Studio expects a
+ PKCS-8 client key format . 
+Learn more about
+ PostgreSQL secure connections . 
+Custom query 
+Select the CUSTOM QUERY option to provide a SQL query instead of connecting to a single table. Data Studio uses this custom SQL as an inner select statement for each generated query to the database. 
+Custom SQL queries may only have a single statement. For example, the following will not work because it has multiple SQL statements: 
+DECLARE cost_per_tb_in_dollar FLOAT64 DEFAULT 4.2;
+SELECT total_bytes_billed / (1024 * 1024))* cost_per_tb_in_dollar)/(1024*1024))) FROM billing-table;
+Queries in Data Studio may time out after three to five minutes. If your custom queries time out, try the following approaches to resolve the issue: 
+Simplify the query so that it runs faster. 
+Run the query in your database and store the results in a separate table. Connect the new table in your data source. 
+Supported data types 
+The PostgreSQL connector supports the following data types: 
+Numeric 
+Character 
+Boolean 
+Date/Time (except Intervals) 
+When Data Studio encounters a column of a non-supported type, it won't create a field for that column. 
+Learn more about PostgreSQL data types . 
+Public and private connections 
+Data Studio supports both public and private IP connections to
+PostgreSQL on Cloud SQL. 
+To connect to a Cloud SQL for PostgreSQL instance by using a private IP,
+verify the following requirements: 
+ Identity and Access Management (IAM) permissions: Grant the Cloud SQL Client
+( roles/cloudsql.client ) IAM role on the Google Cloud
+project that contains the Cloud SQL instance. You must grant this role to
+the user account that authenticates the connection in Data Studio,
+or to the data source's credential owner. If the data source uses viewer's
+credentials, grant this role to each report viewer. 
+ Instance settings: Select the
+ Private path for Google Cloud services 
+option in your Cloud SQL instance settings. 
+ JDBC URL: In the connection panel, select the JDBC URL connection
+option and enter the connection string in the following format: 
+jdbc:google:postgresql:// INSTANCE_CONNECTION_NAME / DATABASE_NAME 
+Replace the following: 
+ INSTANCE_CONNECTION_NAME : the
+ instance connection name in the
+format
+ PROJECT_ID : REGION : INSTANCE_ID 
+ DATABASE_NAME : the name of your PostgreSQL
+database 
+For example: 
+ jdbc:google:postgresql://my-project:us-central1:my-instance/my-db 
+Don't add your organization name or organization ID as a prefix to the
+connection string, and remove any spaces from the URL. 
+ Note: Data Studio doesn't validate the JDBC URL field before
+attempting to connect. An invalid JDBC URL or missing IAM
+permissions can cause Data Studio to stop responding while loading
+tables instead of displaying an error message. 
+Firewall and database access 
+To allow Data Studio to connect to and query databases that are behind
+a firewall, you will need to open access to one of the following IP addresses.
+You may also need to configure your database to accept traffic from these
+addresses. Consult the documentation for your specific database for instructions
+on how to do this. 
+IP addresses 
+The following addresses are reserved for Data Studio's global
+infrastructure: 
+ 142.251.74.0/23 
+ 2001:4860:4807::/48 (Optional, for platforms that support IPv6) 
+If you have enabled data residency for your
+Data Studio Pro subscription, use the following addresses instead: 
+ 142.251.56.0/24 
+ 2001:4860:4815::/48 (Optional, for platforms that support IPv6) 
+Limits of the PostgreSQL connector 
+The PostgreSQL connector doesn't use the Cloud SQL proxy when
+connecting to Cloud SQL PostgreSQL instances. If you're connecting to
+a Cloud SQL PostgreSQL instance using a public IP, you'll need to
+add the listed IPs to the authorized networks list. See the
+ Cloud SQL documentation . 
+Connecting to AlloyDB data sources over SSL isn't supported, since AlloyDB
+doesn't support exporting Certificate Authority (CA) certificates. 
+Selecting a table outside of the public schema isn't supported. However,
+you can select the CUSTOM QUERY option to write a query that includes
+tables in any schema. 
+You can query a maximum of 150 K rows per query using this connector. If you exceed this limit, the data will be truncated. 
+Column headers (field names) must use ASCII characters only. Non-ASCII characters aren't supported. 
+Troubleshooting 
+See the Data Studio troubleshooting guide for a list of common error messages and steps to resolve them.

@@ -51,9 +51,32 @@ O Power BI Desktop pode recusar o certificado do Supabase ("a cadeia de certific
 - baixe o certificado em **Supabase → Database → Settings → SSL Configuration → Download certificate** e importe no Windows em **Autoridades de Certificação Raiz Confiáveis**;
 - ou aceite a conexão sem criptografia quando o Power BI perguntar. Prefira a primeira.
 
-## Looker Studio (gratuito)
+## Looker Studio, agora chamado Data Studio (gratuito)
 
-**Adicionar dados → PostgreSQL**. Preencha host, porta 5432, banco, usuário e senha, e marque **Ativar SSL**. Cada tabela vira uma fonte de dados. Para juntar fato e dimensões, use **Combinar dados** ou uma consulta personalizada.
+Passos conferidos na documentação oficial (`docs/infra/fontes/datastudio-connect-to-postgresql.txt`).
+
+1. Em https://lookerstudio.google.com: **Criar → Fonte de dados → PostgreSQL**. Autorize, se ele pedir.
+2. Aba **BÁSICO**: nome do host, porta `5432`, banco `postgres`, usuário e senha do portal.
+3. **SSL:** marque **Ativar SSL**. O Data Studio pede o arquivo do certificado do servidor: baixe em **Supabase → Database → Settings → SSL Configuration → Download certificate** e envie esse arquivo.
+4. **AUTENTICAR**: aparece a lista de tabelas do seu schema. Escolha uma e clique em **CONECTAR**.
+
+Cada fonte de dados do Data Studio é **uma tabela ou uma consulta personalizada**. Para usar o esquema estrela de uma demanda aprovada numa fonte só, escolha **CONSULTA PERSONALIZADA**, por exemplo:
+
+```sql
+SELECT v.vendedor, d.ano_mes, f.valor_vendido, f.valor_orcado
+FROM d1_fato f
+JOIN d1_dim_vendedor v USING (vendedor_id)
+JOIN d1_dim_data d USING (data)
+```
+
+Troque `d1_` pelo número da demanda. O usuário do BI já procura no próprio schema, então não precisa do prefixo `bi_…`.
+
+**Limites que a documentação traz:**
+- Testado oficialmente até o PostgreSQL 14. O Supabase é mais novo; os tipos que usamos (números, texto, booleano e data) são suportados.
+- Consultas acima de 3 a 5 minutos expiram.
+- O Supabase não restringe IP por padrão; se um dia restringir, libere as faixas que o Data Studio publica.
+
+**Link pronto de criação (Linking API): ainda não.** A referência oficial fica em `developers.google.com`, que esta sessão não alcança. Por fonte de terceiros, a Linking API não tem conector PostgreSQL.
 
 ## Metabase OSS (gratuito, testado)
 
