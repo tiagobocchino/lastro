@@ -10,7 +10,7 @@ APP = Path(__file__).parent.parent / "lastro" / "web" / "app.js"
 
 def test_app_js_sem_nomes_repetidos_no_topo():
     texto = APP.read_text(encoding="utf-8")
-    nomes = re.findall(r"^(?:async\s+)?function\s+(\w+)\s*\(", texto, re.M)
-    nomes += re.findall(r"^(?:const|let|var)\s+(\w+)\s*=", texto, re.M)
+    nomes = re.findall(r"^(?:async\s+)?function\s+(\w+)\s*\(", texto, re.MULTILINE)
+    nomes += re.findall(r"^(?:const|let|var)\s+(\w+)\s*=", texto, re.MULTILINE)
     repetidos = [n for n, c in Counter(nomes).items() if c > 1]
     assert not repetidos, f"nomes declarados mais de uma vez no app.js: {repetidos}"
