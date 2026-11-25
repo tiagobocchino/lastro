@@ -1,6 +1,6 @@
 ---
-chave: LST-8
-jira: pendente (subir quando o projeto LST existir)
+chave: LST-12
+jira: https://adelecrm.atlassian.net/browse/LST-12
 secao: MKT
 status: feito
 especialista: redator-de-copy

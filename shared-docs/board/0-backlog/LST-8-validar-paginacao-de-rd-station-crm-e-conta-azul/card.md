@@ -1,6 +1,6 @@
 ---
-chave: LST-4
-jira: pendente (subir quando o projeto LST existir)
+chave: LST-8
+jira: https://adelecrm.atlassian.net/browse/LST-8
 secao: INT
 status: backlog
 especialista: pesquisador-de-apis

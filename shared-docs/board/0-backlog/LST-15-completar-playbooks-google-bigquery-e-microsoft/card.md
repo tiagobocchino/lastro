@@ -1,6 +1,6 @@
 ---
-chave: LST-11
-jira: pendente (subir quando o projeto LST existir)
+chave: LST-15
+jira: https://adelecrm.atlassian.net/browse/LST-15
 secao: CON
 status: backlog
 especialista: engenheiro-de-dados

@@ -1,6 +1,6 @@
 ---
-chave: LST-3
-jira: pendente (subir quando o projeto LST existir)
+chave: LST-7
+jira: https://adelecrm.atlassian.net/browse/LST-7
 secao: NUC
 status: backlog
 especialista: engenheiro-de-dados

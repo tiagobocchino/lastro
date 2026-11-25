@@ -1,6 +1,6 @@
 ---
-chave: LST-7
-jira: pendente (subir quando o projeto LST existir)
+chave: LST-11
+jira: https://adelecrm.atlassian.net/browse/LST-11
 secao: INT
 status: pronto
 especialista: engenheiro-de-dados

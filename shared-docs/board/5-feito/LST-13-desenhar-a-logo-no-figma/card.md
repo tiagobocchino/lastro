@@ -1,6 +1,6 @@
 ---
-chave: LST-9
-jira: pendente (subir quando o projeto LST existir)
+chave: LST-13
+jira: https://adelecrm.atlassian.net/browse/LST-13
 secao: MKT
 status: feito
 especialista: designer-de-marca

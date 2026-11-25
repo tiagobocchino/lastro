@@ -1,6 +1,6 @@
 ---
-chave: LST-12
-jira: pendente (subir quando o projeto LST existir)
+chave: LST-16
+jira: https://adelecrm.atlassian.net/browse/LST-16
 secao: CON
 status: feito
 especialista: pesquisador-de-apis

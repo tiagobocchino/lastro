@@ -1,6 +1,6 @@
 ---
-chave: LST-5
-jira: pendente (subir quando o projeto LST existir)
+chave: LST-9
+jira: https://adelecrm.atlassian.net/browse/LST-9
 secao: INT
 status: backlog
 especialista: engenheiro-backend

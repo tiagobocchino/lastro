@@ -1,6 +1,6 @@
 ---
-chave: LST-1
-jira: pendente (subir quando o projeto LST existir)
+chave: LST-5
+jira: https://adelecrm.atlassian.net/browse/LST-5
 secao: NUC
 status: pronto
 especialista: engenheiro-de-dados

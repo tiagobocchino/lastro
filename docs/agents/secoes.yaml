@@ -2,6 +2,7 @@
 # e um time de especialistas (.claude/agents/). No Jira, cada seção é um épico com o rótulo `secao-<chave>`.
 
 NUC:
+  epico: LST-1
   nome: Núcleo de agentes
   escopo: orquestrador, Caixa de Ferramenta, agentes do produto, auditoria, API e portal
   caminhos: [lastro/agents/, lastro/caixa.py, lastro/servico.py, lastro/api.py, lastro/web/, skills/]
@@ -9,6 +10,7 @@ NUC:
   verificacao: ["uv run pytest -q", "uv run lastro demo", "QA do portal em 375px e 1440px (Playwright)"]
 
 INT:
+  epico: LST-2
   nome: Integrações SaaS
   escopo: catálogo de contratos, motor de leitura, simuladores, sandbox, coleções Postman
   caminhos: [lastro/saas/, docs/fontes-saas/, tests/test_saas.py]
@@ -16,6 +18,7 @@ INT:
   verificacao: ["uv run pytest -q tests/test_saas.py", "newman run da coleção do SaaS contra /sandbox"]
 
 MKT:
+  epico: LST-3
   nome: Marca e site
   escopo: nome, logo (Figma), identidade, site de apresentação, copy
   caminhos: [BRAND.md, site/, lastro/web/marca.css]
@@ -23,6 +26,7 @@ MKT:
   verificacao: ["site sem rolagem horizontal em 375px", "contraste AA nos dois temas", "toda afirmação do site tem prova no produto"]
 
 CON:
+  epico: LST-4
   nome: Conhecimento
   escopo: playbooks, trilhas AWS/Google/Microsoft, notas de fonte, glossário e ADRs
   caminhos: [caixa/global/, CONTEXT.md, docs/adr/, docs/memory/]
