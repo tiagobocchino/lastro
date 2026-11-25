@@ -30,7 +30,7 @@ especialista: tiago
 
 - [x] Demandas de vendas, orçamentos, produtos e RH rodadas pelos agentes, com as duas camadas
 - [x] O resultado dos agentes conferido com o gabarito; cada diferença vira achado
-- [ ] Gold aprovado publicado no BI (LST-33) de uma empresa de teste
+- [x] Gold aprovado publicado no BI (LST-33) de uma empresa de teste
 
 ## Fase 3 · Power BI e Data Studio (Tiago, com os agentes)
 
@@ -68,4 +68,4 @@ Gabarito × agentes sem diferença inexplicada, PBIP aberto no Power BI Desktop 
   - aspas no nome da coluna;
   - valor em texto `R$ …`;
   - painel somando o nº do processo.
-- **Falta na fase 2:** publicar o gold no BI de uma empresa de teste em produção. Depende do Tiago escolher a empresa.
+- **Fase 2, BI (25/11):** empresa `gimi-teste` criada em produção, com um usuário robô admin (senha fora do repositório). Fontes, demandas 7 a 10, aprovação e publicação passaram pela API do produto. São 38 tabelas no BI. Os totais conferidos no Postgres batem com o gabarito. Painel do RH falhou: "o gold não tem coluna numérica para medir" (achado 3). Kit com PBIP, HTML e consultas do Data Studio entregue ao Tiago.
