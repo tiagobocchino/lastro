@@ -418,7 +418,7 @@ async function telaBI(nova = null, teste = null) {
         <div class="linha-btn" style="align-items:center"><code id="bi-senha" style="overflow-wrap:anywhere">${esc(nova.senha)}</code><button class="btn sec" id="bi-copiar-senha" type="button">copiar</button></div></div>` : ""}
       <div class="tabela"><table class="contrato"><tbody>${linhas.map(([k, v], i) => `<tr><th>${k}</th><td><code id="bi-v${i}">${esc(v)}</code></td><td style="text-align:right"><button class="btn sec" data-copia="${i}">copiar</button></td></tr>`).join("")}</tbody></table></div>
       <h2 style="margin:6px 0 0">Tabelas no BI</h2>
-      ${e.tabelas.length ? `<div class="tabela"><table><thead><tr><th>tabela</th><th>de onde vem</th><th>linhas</th></tr></thead><tbody>${e.tabelas.map((t) => `<tr><td><code>${esc(t.tabela)}</code></td><td>${esc(t.origem)}</td><td class="n">${num(t.linhas)}</td></tr>`).join("")}</tbody></table></div>`
+      ${e.tabelas.length ? `<div class="tabela"><table><thead><tr><th>tabela</th><th>de onde vem</th><th>linhas</th></tr></thead><tbody>${e.tabelas.map((t) => `<tr><td><code>${esc(t.tabela)}</code></td><td>${esc(t.origem)}</td><td class="n">${t.mantida ? "mantida (arquivo fora do servidor)" : num(t.linhas)}</td></tr>`).join("")}</tbody></table></div>`
         : `<p class="quem">Nada publicado ainda. Envie uma fonte ou aprove uma demanda e clique em publicar.</p>`}
       <p class="erro-msg" id="bi-msg" role="status"></p>
       <div class="linha-btn"><button class="btn" id="bi-publicar">publicar agora</button><button class="btn sec" id="bi-trocar">trocar a senha</button><button class="btn sec" id="bi-desligar">desligar</button></div>

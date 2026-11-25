@@ -157,6 +157,19 @@ def tabelas_da_empresa(repo: Any, pasta: Path) -> list[Tabela]:
     return out
 
 
+def sem_arquivo(repo: Any, pasta: Path) -> dict[str, str]:
+    """Prefixo de tabela → origem, para o que está no banco mas cujo arquivo não existe mais neste servidor
+    (disco efêmero: um deploy no Render zera a pasta). A publicação mantém essas tabelas em vez de apagar o BI."""
+    faltam: dict[str, str] = {}
+    for f in repo.fontes():
+        if f["tipo"] in ("arquivo", "sqlite") and not Path(f["caminho"]).exists():
+            faltam[f"fonte_{ident(f['nome'], 'f')}"] = f"fonte {f['nome']}"
+    for d in repo.demandas():
+        if d["status"] == "aprovada" and not (pasta / "demandas" / str(d["id"]) / "gold" / "fato.parquet").exists():
+            faltam[f"d{d['id']}_"] = faltam[f"painel_{d['id']}_"] = f"demanda {d['id']}"
+    return faltam
+
+
 def _colunas(rel: Any) -> list[tuple[str, str]]:
     usados: dict[str, int] = {}
     cols = []
@@ -275,14 +288,25 @@ class AcessoBI:
             with self.banco._dono() as con:
                 existentes = [r["tablename"] for r in con.execute(
                     "SELECT tablename FROM pg_tables WHERE schemaname=%s", (atual["nome"],))]
+                novas = {t.nome for t in tabelas}
+                faltam = sem_arquivo(repo, pasta)
+                mantidas: dict[str, str] = {}
                 for t in existentes:
+                    origem = next((o for pre, o in faltam.items() if t.startswith(pre)), None)
+                    if origem and t not in novas:  # o arquivo sumiu do servidor: manter a versão publicada, nunca apagar o BI
+                        mantidas[t] = origem
+                        continue
                     con.execute(sql.SQL("DROP TABLE {}.{}").format(esquema, sql.Identifier(t)))
+                for origem in sorted(set(mantidas.values())):
+                    avisos.append(f"{origem}: os arquivos não estão neste servidor; a versão já publicada foi mantida. "
+                                  "Rode a demanda (ou envie a fonte) de novo para atualizar.")
                 for t in tabelas:
                     try:
                         with con.transaction():  # savepoint: uma fonte quebrada não derruba as outras
                             resumo.append(self._copiar(con, duck, esquema, t, avisos))
                     except Exception as e:  # noqa: BLE001
                         avisos.append(f"{t.origem}: não foi publicada ({type(e).__name__})")
+                resumo += [{"tabela": t, "origem": o, "linhas": None, "colunas": None, "mantida": True} for t, o in sorted(mantidas.items())]
                 con.execute(sql.SQL("GRANT SELECT ON ALL TABLES IN SCHEMA {} TO {}").format(esquema, esquema))
                 con.execute("UPDATE interno.bi_acessos SET publicado_em = now(), tabelas = %s WHERE tenant_id=%s",
                             (_json(resumo), tenant))

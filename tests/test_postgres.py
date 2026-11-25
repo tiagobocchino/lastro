@@ -583,3 +583,25 @@ def test_funil_da_demo_no_postgres(monitor, banco_pg, url_pg):
         assert leitor.execute("SELECT count(*) FROM painel.demo_funil_dia").fetchone()[0] == 1
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             leitor.execute("SELECT * FROM interno.demo_eventos")
+
+
+def test_bi_publicar_depois_do_disco_zerado_mantem_o_que_ja_estava(banco_pg, url_pg, monkeypatch, tmp_path: Path):
+    """Deploy no Render zera o disco: publicar de novo não pode apagar o BI do cliente."""
+    import shutil
+
+    from lastro.bi import AcessoBI
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path))
+    cfg = carregar()
+    a, repo_a, plat_a, did = _empresa_com_gold(banco_pg, cfg)
+    bi = AcessoBI(banco_pg, url_pg)
+    cred = bi.gerar_credencial(a)
+    antes = {t["tabela"] for t in bi.publicar(a, repo_a, plat_a.pasta)["tabelas"]}
+    shutil.rmtree(plat_a.pasta / "demandas")  # o disco do servidor foi zerado
+    for f in repo_a.fontes():
+        Path(f["caminho"]).unlink()
+    r = bi.publicar(a, repo_a, plat_a.pasta)
+    assert {t["tabela"] for t in r["tabelas"] if t.get("mantida")} == antes
+    assert any(f"demanda {did}" in x for x in r["avisos"]) and any("fonte" in x for x in r["avisos"])
+    with _entrar_como(url_pg, cred) as c:
+        assert c.execute(f"SELECT count(*) FROM d{did}_fato").fetchone()[0] > 0
