@@ -38,3 +38,14 @@ Passos do Tiago: conta no Render, Blueprint com os 4 valores, os 2 segredos no G
 - `https://lastro-api-73zx.onrender.com/saude` = `{"estado":"ok","banco":"ok"}`; portal 200; sem contas demo; `/tarefas/cargas` sem segredo = 401.
 - Empresa `lixum` (plano Operação) e admin criados no banco; demanda de ponta a ponta em produção (ver LST-30).
 - Falta: segredos `LASTRO_URL_API` e `LASTRO_TAREFA_SEGREDO` no GitHub e uma execução manual do workflow `cargas agendadas`.
+
+## Plano C para as cargas (25/11)
+
+- O GitHub Actions recusou o disparo (HTTP 500 na interface e na API) e nunca rodou o agendamento, mesmo com o Actions liberado no repositório.
+- As cargas passaram para o Supabase (`supabase/migrations/0004_agendamento.sql`, adendo na ADR 0009):
+  - `pg_cron` no minuto 12 acorda o Render (`/saude`) e no minuto 17 dispara `/tarefas/cargas`;
+  - o endereço e o segredo vêm do Vault;
+  - as funções ficam no schema `interno`, sem execução para `anon` e `authenticated`;
+  - `pg_net` fica no schema `extensions`.
+- Teste: o banco chamou o Render e recebeu 200 `{"estado":"ok","banco":"ok"}`. Verificador de segurança sem avisos novos.
+- Falta: o Tiago gravar `lastro_tarefa_segredo` no Vault pelo SQL Editor (o valor vem do painel do Render).
