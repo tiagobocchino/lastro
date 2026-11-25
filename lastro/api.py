@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from .banco import PAPEIS_QUE_DEMANDAM, PAPEIS_QUE_REVISAM, Repo, autenticar, conectar, emitir_token, ler_token
+from .banco import PAPEIS_QUE_DEMANDAM, PAPEIS_QUE_REVISAM, abrir_banco, emitir_token, ler_token
 from .config import carregar
 from .conectores import EXTENSOES
 from .politica import PermissaoNegada
@@ -21,7 +21,7 @@ from .servico import Plataforma
 from .somente_leitura import EscritaBloqueada
 
 cfg = carregar()
-con = conectar(cfg.banco)
+banco = abrir_banco(cfg)
 WEB = Path(__file__).parent / "web"
 app = FastAPI(title="Lastro", version="0.1.0")
 
@@ -42,7 +42,7 @@ def sessao(authorization: Annotated[str | None, Header()] = None) -> Sessao:
 
 
 def plataforma(s: Annotated[Sessao, Depends(sessao)]) -> Plataforma:
-    return Plataforma(cfg, Repo(con, s.tenant))
+    return Plataforma(cfg, banco.repo(s.tenant, s.email, s.papel))
 
 
 def _papel(s: Sessao, permitidos: set[str]) -> None:
@@ -54,13 +54,13 @@ def _papel(s: Sessao, permitidos: set[str]) -> None:
 def saude() -> dict:
     """Verificação de saúde do Cloud Run: sem login, sem detalhe interno."""
     try:
-        con.execute("SELECT 1").fetchone()
-        banco = "ok"
+        banco.ping()
+        estado = "ok"
     except Exception:  # noqa: BLE001
-        banco = "erro"
-    if banco != "ok":
+        estado = "erro"
+    if estado != "ok":
         raise HTTPException(503, "banco indisponível")
-    return {"estado": "ok", "versao": app.version, "banco": banco}
+    return {"estado": "ok", "versao": app.version, "banco": estado}
 
 
 class Login(BaseModel):
@@ -70,7 +70,7 @@ class Login(BaseModel):
 
 @app.post("/api/login")
 def login(dados: Login) -> dict:
-    u = autenticar(con, dados.email, dados.senha)
+    u = banco.autenticar(dados.email, dados.senha)
     if not u:
         raise HTTPException(401, "e-mail ou senha inválidos")
     return {"token": emitir_token(cfg.segredo, u["email"], u["tenant_id"], u["papel"]), "nome": u["nome"], "papel": u["papel"], "tenant": u["tenant_id"]}

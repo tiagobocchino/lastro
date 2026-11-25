@@ -18,6 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8"]
 vetores = ["fastembed>=0.4"]
+postgres = ["psycopg[binary]>=3.2", "psycopg-pool>=3.2"]
 
 [project.scripts]
 lastro = "lastro.cli:main"

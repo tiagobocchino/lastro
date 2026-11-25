@@ -20,6 +20,7 @@ class Config:
     llm_chave: str
     embedder: str = "nenhum"
     tenants: Path | None = None
+    banco_url: str = ""
 
     @property
     def banco(self) -> Path:
@@ -44,6 +45,7 @@ def carregar() -> Config:
         llm_url=os.environ.get("LASTRO_LLM_URL", ""),
         llm_chave=os.environ.get("LASTRO_LLM_CHAVE", ""),
         embedder=os.environ.get("LASTRO_EMBEDDER", "nenhum"),
+        banco_url=os.environ.get("LASTRO_BANCO_URL", ""),
         tenants=Path(os.environ["LASTRO_TENANTS"]).resolve() if os.environ.get("LASTRO_TENANTS") else None,
     )
 

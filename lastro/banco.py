@@ -1,4 +1,7 @@
-"""Banco da plataforma (SQLite local; em produção, Supabase com RLS — ver supabase/migrations).
+"""Banco da plataforma: SQLite local ou Postgres do Supabase com RLS (`banco_postgres.py`, ADR 0008).
+
+Os dois ficam atrás da mesma interface: `abrir_banco(cfg)` devolve um banco com `criar_tenant`,
+`criar_usuario`, `autenticar`, `ping` e `repo(tenant, email, papel)`.
 
 Toda leitura e escrita passa por `Repo`, que recebe o tenant na construção e filtra
 por ele em todas as consultas: é o equivalente local da RLS.
@@ -164,3 +167,38 @@ class Repo:
             vals.append(v if isinstance(v, str) else json.dumps(v, ensure_ascii=False, default=str))
         self.con.execute(f"UPDATE demandas SET {', '.join(sets)} WHERE tenant_id=? AND id=?", (*vals, self.tenant, demanda_id))
         self.con.commit()
+
+
+class BancoSqlite:
+    """Banco local (desenvolvimento e testes). Mesma interface do `BancoPostgres`."""
+
+    def __init__(self, caminho: Path):
+        self.con = conectar(caminho)
+
+    def ping(self) -> None:
+        self.con.execute("SELECT 1").fetchone()
+
+    def criar_tenant(self, tenant_id: str, nome: str) -> None:
+        criar_tenant(self.con, tenant_id, nome)
+
+    def criar_usuario(self, tenant_id: str, email: str, nome: str, papel: str, senha: str) -> None:
+        criar_usuario(self.con, tenant_id, email, nome, papel, senha)
+
+    def autenticar(self, email: str, senha: str) -> dict | None:
+        u = autenticar(self.con, email, senha)
+        return dict(u) if u else None
+
+    def repo(self, tenant: str, email: str = "sistema@lastro", papel: str = "admin") -> Repo:  # noqa: ARG002
+        return Repo(self.con, tenant)
+
+    def fechar(self) -> None:
+        self.con.close()
+
+
+def abrir_banco(cfg):  # noqa: ANN001, ANN201  (Config; evita import circular)
+    """Postgres do Supabase quando LASTRO_BANCO_URL existe; senão, SQLite em LASTRO_HOME."""
+    if cfg.banco_url:
+        from .banco_postgres import BancoPostgres  # noqa: PLC0415  (psycopg só com o extra postgres)
+
+        return BancoPostgres(cfg.banco_url)
+    return BancoSqlite(cfg.banco)

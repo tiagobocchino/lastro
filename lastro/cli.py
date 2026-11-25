@@ -7,7 +7,7 @@ import os
 import shutil
 import sys
 
-from .banco import Repo, conectar, criar_tenant, criar_usuario
+from .banco import abrir_banco
 from .caixa import Caixa
 from .config import CAIXA_GLOBAL, RAIZ, carregar
 from .servico import Plataforma
@@ -23,11 +23,11 @@ DEMO_SENHA = "demo1234"
 
 def preparar_demo() -> tuple[Plataforma, int]:
     cfg = carregar()
-    con = conectar(cfg.banco)
-    criar_tenant(con, DEMO_TENANT, "Empresa Demo")
+    banco = abrir_banco(cfg)
+    banco.criar_tenant(DEMO_TENANT, "Empresa Demo")
     for email, nome, papel in DEMO_USUARIOS:
-        criar_usuario(con, DEMO_TENANT, email, nome, papel, DEMO_SENHA)
-    repo = Repo(con, DEMO_TENANT)
+        banco.criar_usuario(DEMO_TENANT, email, nome, papel, DEMO_SENHA)
+    repo = banco.repo(DEMO_TENANT, "admin@demo.lastro", "admin")
     existentes = [f for f in repo.fontes() if f["nome"] == "orcamentos"]
     if existentes:
         return Plataforma(cfg, repo), existentes[0]["id"]

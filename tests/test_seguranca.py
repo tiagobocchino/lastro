@@ -61,11 +61,9 @@ def test_upload_acima_do_limite_volta_413(monkeypatch, tmp_path):
     import lastro.api as api
     from fastapi.testclient import TestClient
 
-    from lastro.banco import criar_tenant, criar_usuario
-
     importlib.reload(api)
-    criar_tenant(api.con, "acme", "Acme")
-    criar_usuario(api.con, "acme", "adm@acme", "Adm", "admin", "senha123")
+    api.banco.criar_tenant("acme", "Acme")
+    api.banco.criar_usuario("acme", "adm@acme", "Adm", "admin", "senha123")
     c = TestClient(api.app)
     tok = c.post("/api/login", json={"email": "adm@acme", "senha": "senha123"}).json()["token"]
     grande = b"a,b\n" + b"1,2\n" * 400_000  # ~1,6 MB

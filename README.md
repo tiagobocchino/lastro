@@ -16,6 +16,8 @@ uv run python exemplos/gerar_orcamentos.py   # dados fictícios com armadilhas
 uv run lastro demo                           # uma demanda de ponta a ponta no terminal
 uv run lastro serve                          # portal em http://localhost:8000
 uv run pytest -q
+# testes do Postgres com RLS (ADR 0008): precisa de um Postgres onde o teste crie bancos
+LASTRO_TESTE_PG=postgresql://postgres@localhost:5432/postgres uv run --extra postgres pytest -q tests/test_postgres.py
 ```
 
 Em container (o mesmo que vai para o Cloud Run):
