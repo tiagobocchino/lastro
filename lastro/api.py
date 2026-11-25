@@ -49,9 +49,9 @@ NAO_MEDIR = ("/saude", "/web/", "/favicon")
 
 
 @app.middleware("http")
-async def medir(request, call_next):  # noqa: ANN001, ANN201
+async def medir(request, call_next):
     """Conta requisições, 4xx, 5xx e latência por hora (LST-26). Falha ao gravar nunca derruba a resposta."""
-    from starlette.concurrency import run_in_threadpool  # noqa: PLC0415
+    from starlette.concurrency import run_in_threadpool
 
     inicio = time.perf_counter()
     status = 500

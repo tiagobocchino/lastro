@@ -101,7 +101,7 @@ def main(argv: list[str] | None = None) -> None:
         for r in executar_devidas(banco, abrir_cofre(cfg, banco), cfg):
             print(f"carga {r['carga']} ({r['tenant']}, {r['saas']}): {r['status']} · {r['chamadas']} requisições {r.get('aviso', '')}")
     elif a.cmd == "painel":
-        from .painel import gerar  # noqa: PLC0415
+        from .painel import gerar
 
         with open(a.saida, "w", encoding="utf-8") as f:
             f.write(gerar(dias=a.dias))
