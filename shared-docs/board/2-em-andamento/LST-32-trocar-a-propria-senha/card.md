@@ -2,7 +2,7 @@
 chave: LST-32
 jira: https://adelecrm.atlassian.net/browse/LST-32
 secao: NUC
-status: backlog
+status: em-andamento
 especialista: engenheiro-backend
 ---
 
