@@ -2,7 +2,7 @@
 chave: LST-6
 jira: https://adelecrm.atlassian.net/browse/LST-6
 secao: NUC
-status: backlog
+status: em-andamento
 especialista: engenheiro-backend
 ---
 
