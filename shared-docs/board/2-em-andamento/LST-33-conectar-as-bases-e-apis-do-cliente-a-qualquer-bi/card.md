@@ -2,7 +2,7 @@
 chave: LST-33
 jira: https://adelecrm.atlassian.net/browse/LST-33
 secao: INT
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-de-dados
 ---
 
@@ -29,3 +29,13 @@ Contas pagas (Power BI Pro/Fabric, Looker pago, Tableau): sem teste até haver c
 ## Origem
 
 Visão do Tiago em 25/11: o Lastro conecta bases e APIs aos BIs self-service; nosso próprio sistema e os exemplos do site usam dashboards em Python (gratuito), e Looker Studio no pior caso.
+
+## Desenho (25/11)
+
+- **Isolamento por schema e papel, não por RLS.** Cada empresa tem um schema e um papel com o mesmo nome opaco, `bi_<10 hex>`. O papel só tem `SELECT` no próprio schema e roda com `default_transaction_read_only`, `statement_timeout` e limite de conexões. Os BIs listam schemas e tabelas, e o schema por empresa mostra só o que é dela. O nome é opaco porque `pg_namespace` e `pg_roles` são legíveis por qualquer papel.
+- **O que vai para o BI:**
+  - cada fonte vira `fonte_<nome>`;
+  - cada demanda aprovada vira `d<id>_fato`, `d<id>_dim_*` e `d<id>_silver`, um esquema estrela do gold.
+  - A troca é atômica, numa transação só.
+- **Quando publica:** pelo botão no portal, depois de cada carga boa (LST-7) e de cada aprovação.
+- **Acesso ao banco:** pelo Session pooler do Supabase (porta 5432), com usuário `bi_xxx.<ref>`.
