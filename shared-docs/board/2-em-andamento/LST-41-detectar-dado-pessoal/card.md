@@ -2,7 +2,7 @@
 chave: LST-41
 jira: https://adelecrm.atlassian.net/browse/LST-41
 secao: NUC
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-de-dados
 ---
 
