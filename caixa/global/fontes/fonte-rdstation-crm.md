@@ -11,17 +11,17 @@ tags:
 
 # Contrato
 
-Origem: documentação oficial (developers.rdstation.com) · limites confirmados; paginação a validar no piloto.
+Origem: documentação oficial da API v2 (developers.rdstation.com/reference/crm-v2-*) · tamanho máximo de página a validar no piloto.
 
-URL base: `https://crm.rdstation.com/api/v1`.
+URL base: `https://api.rd.services/crm/v2`.
 
 # Autenticação
 
-Tipo `oauth2_refresh`.
+Tipo `oauth2_refresh`. OAuth2: autorização em `https://accounts.rdstation.com/oauth/authorize`, token em `https://api.rd.services/oauth2/token`, validade de 7200 s; refresh_token rotativo (guardar o novo a cada renovação). Tokens só no cofre (LST-9).
 
 # Paginação
 
-Tipo `pagina`, teto de 200 por página. Total informado pela API: o motor confere truncamento.
+Tipo `pagina`, teto de 25 por página. A API não informa total.
 
 # Limites
 
@@ -38,4 +38,6 @@ Não tem: carga completa a cada execução.
 
 # Armadilhas
 
-Nenhuma registrada ainda.
+- A API v1 (crm.rdstation.com/api/v1) usa um token fixo por usuário e só mostra o que a visibilidade dele permite; o Lastro usa a v2, com OAuth2.
+- Token de acesso vale 2 horas; o refresh_token muda a cada renovação e expira se ficar 14 dias sem uso: carga parada por duas semanas exige nova autorização.
+- Paginação por page[number] e page[size] (padrão 25); o fim é a página com menos registros que o tamanho.

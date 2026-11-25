@@ -1,6 +1,7 @@
 // Portal do Lastro: login, demandas, grill, execução, auditoria e revisão.
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 const num = (v) => typeof v === "number" ? v.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : esc(v);
 const NOMES = { nova: "nova", grill: "grill", pronta: "pronta para rodar", em_revisao: "aguardando revisor", aprovada: "aprovada", reprovada: "reprovada" };
 
@@ -55,6 +56,13 @@ async function telaPrincipal() {
   $("#aba-con").onclick = () => telaConectores();
   $("#nova").onclick = () => { atual = null; telaNova(); marcarLista(); };
   await carregarLista();
+  const autorizado = new URLSearchParams(location.search).get("autorizado");
+  if (autorizado) {  // volta da autorização OAuth2 no sistema do cliente
+    history.replaceState(null, "", "/");
+    await telaConectores(autorizado);
+    if ($("#laudo")) $("#laudo").innerHTML = `<div class="bloco"><p class="ok"><b>Acesso autorizado.</b> O Lastro guardou a autorização no cofre e renova sozinho. Teste agora na "API real do cliente".</p></div>`;
+    return;
+  }
   if (atual) abrirDemanda(atual); else telaNova();
 }
 
@@ -187,7 +195,7 @@ async function telaConectores(escolhido) {
   $("#painel").innerHTML = `<p class="rot">conector</p><h1>${esc(c.nome)}</h1>
     <ol class="passos">${PASSOS.map((p, i) => `<li${i < 4 ? ' class="feito"' : ""}>${esc(p)}</li>`).join("")}</ol>
     <h2>Contrato da API</h2>
-    <div class="bloco tabela"><table><tbody>
+    <div class="bloco tabela"><table class="contrato"><tbody>
       <tr><th>origem do contrato</th><td>${esc(c.confianca)}</td></tr>
       <tr><th>autenticação</th><td><code>${esc(c.auth)}</code></td></tr>
       <tr><th>paginação</th><td><code>${esc(c.paginacao)}</code>, até ${c.maximo_pagina} por página</td></tr>
@@ -201,6 +209,9 @@ async function telaConectores(escolhido) {
       <div class="duas-col">${[...c.variaveis_url, ...c.campos].map((k) => `<label for="cv-${k}">${esc(k)}<input type="text" id="cv-${k}" data-campo="${k}" data-var="${c.variaveis_url.includes(k) ? 1 : ""}" value="demo"></label>`).join("")}</div>
       <div class="duas-col"><label for="ent">Entidade<select id="ent">${c.entidades.map((e) => `<option>${esc(e)}</option>`).join("")}</select></label>
       ${c.incremental ? `<label for="desde">Só o que mudou desde <small>opcional</small><input type="date" id="desde"></label>` : ""}</div>
+      ${c.auth === "oauth2_refresh" ? `<div class="aviso-oauth"><p><b>Este sistema usa autorização (OAuth2).</b> Ninguém digita senha ou token aqui: o admin do cliente entra no ${esc(c.nome)}, autoriza o Lastro só para leitura, e o acesso fica guardado no cofre, renovado sozinho antes de vencer.</p>
+        <div class="linha-btn"><button class="btn sec" type="button" id="b-autorizar">autorizar no ${esc(c.nome)}</button></div><p class="erro-msg" id="msg-aut"></p>
+        <p class="quem">No sandbox, o teste faz a autorização e uma renovação de token simuladas.</p></div>` : ""}
       <fieldset class="modo"><legend class="rot">onde testar</legend>
         <label><input type="radio" name="modo" value="sandbox" checked> sandbox do Lastro <small>simula a API com as armadilhas reais; nenhum dado sai daqui</small></label>
         <label><input type="radio" name="modo" value="real"> API real do cliente <small>use credencial somente leitura; a rede do servidor precisa alcançar o sistema</small></label></fieldset>
@@ -208,6 +219,10 @@ async function telaConectores(escolhido) {
       <p class="quem">No Postman: importe a coleção e rode na ordem. Ela já aponta para o sandbox deste servidor e testa as armadilhas do contrato.</p>
     </form><div id="laudo"></div>` : `<p class="quem">Só o admin da empresa conecta sistemas.</p>`}`;
   if (!admin) return;
+  if ($("#b-autorizar")) $("#b-autorizar").onclick = async () => {
+    try { location.href = (await (await api(`/api/saas/${c.id}/oauth/iniciar`)).json()).url; }
+    catch (err) { $("#msg-aut").textContent = err.message; }
+  };
   $("#b-postman").onclick = async () => {
     const r = await api(`/api/saas/${c.id}/postman`);
     const url = URL.createObjectURL(await r.blob());
@@ -230,7 +245,7 @@ function laudoHtml(l) {
   const cols = l.colunas.slice(0, 8);
   return `<div class="bloco"><p><span class="status aprovada">conexão ok · ${esc(l.modo)}</span></p>
     <div class="numeros"><div><span class="rot">registros</span><b>${num(l.registros)}</b></div><div><span class="rot">total da API</span><b>${l.total_informado ?? "—"}</b></div><div><span class="rot">requisições</span><b>${l.chamadas}</b></div><div><span class="rot">429 absorvidos</span><b>${l.tentativas_429}</b></div><div><span class="rot">tempo real estimado</span><b>${l.tempo_real_estimado_s != null ? l.tempo_real_estimado_s + "s" : "—"}</b></div></div>
-    <p class="quem">truncamento ${esc(l.truncamento)} · ${l.relogins} renovações de token · ${l.tentativas_escrita_bloqueadas ?? 0} tentativas de escrita bloqueadas${l.avisos.length ? " · " + esc(l.avisos.join("; ")) : ""}</p>
+    <p class="quem">truncamento ${esc(l.truncamento)} · ${plural((l.renovacoes_token || 0) + l.relogins, "renovação", "renovações")} de token · ${l.tentativas_escrita_bloqueadas ?? 0} tentativas de escrita bloqueadas${l.avisos.length ? " · " + esc(l.avisos.join("; ")) : ""}</p>
     ${l.fonte_id ? `<p class="ok"><b>Importado como fonte.</b> Já aparece em "nova demanda".</p>` : ""}
     <div class="tabela"><table><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${l.amostra.map((r) => `<tr>${cols.map((c) => `<td>${esc(typeof r[c] === "object" ? JSON.stringify(r[c]) : r[c])}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
 }

@@ -112,6 +112,7 @@ class Leitor:
         relogio: Relogio | None = None,
         catalogo: dict | None = None,
         max_tentativas: int = 5,
+        oauth: Any = None,
     ):
         cat = catalogo or carregar_catalogo()
         if saas not in cat:
@@ -124,13 +125,14 @@ class Leitor:
         self.relogio = relogio or RelogioReal()
         self.limitador = Limitador(self.c.get("limite", {}), self.relogio)
         self.max_tentativas = max_tentativas
+        self.oauth = oauth  # GerenteToken (lastro/saas/oauth.py): token renovado e guardado no cofre
         self.token: str | None = None
         self.chamadas = 0
         self.tentativas_429 = 0
         self.relogins = 0
         self._vars_url = self._validar_variaveis()
         faltando = [k for k in self.c["auth"].get("campos", []) if not self.cred.get(k)]
-        if self.c["auth"]["tipo"] in ("bearer_estatico", "oauth2_refresh") and not self.cred.get("token"):
+        if self.c["auth"]["tipo"] in ("bearer_estatico", "oauth2_refresh") and not self.cred.get("token") and not self.oauth:
             faltando.append("token")
         if self.c["auth"]["tipo"] == "api_key_header":
             faltando += [k for k in self.c["auth"]["cabecalhos"] if not self.cred.get(k)]
@@ -169,6 +171,8 @@ class Leitor:
         if t == "api_key_header":
             pref = a.get("prefixo", "")
             return {cab: pref + self.cred[k] for k, cab in a["cabecalhos"].items()}
+        if t == "oauth2_refresh" and self.oauth:
+            return {"Authorization": f"Bearer {self.oauth.token()}"}
         if t in ("bearer_estatico", "oauth2_refresh"):
             return {"Authorization": f"Bearer {self.cred['token']}"}
         if t == "email_token_header":
@@ -208,6 +212,11 @@ class Leitor:
             self.chamadas += 1
             if r.status_code == 401 and self.c["auth"]["tipo"] == "login_bearer" and not relogou:
                 self.token, relogou = None, True
+                self.relogins += 1
+                continue
+            if r.status_code == 401 and self.oauth and not relogou:  # token revogado ou vencido antes da hora
+                self.oauth.forcar_renovacao()
+                relogou = True
                 self.relogins += 1
                 continue
             if r.status_code == 429 or r.status_code >= 500:

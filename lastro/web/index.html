@@ -63,6 +63,7 @@ select { width: 100%; padding: 10px 12px; border: 1px solid var(--linha); border
 .modo { border: 1px solid var(--linha); border-radius: 8px; padding: 10px 14px; display: grid; gap: 8px } .modo label { display: block; font-weight: 500 } .modo small { display: block; color: var(--quieta); font-weight: 400; margin-left: 22px }
 .numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px } .numeros div { display: grid; gap: 2px } .numeros b { font: 700 22px var(--f-disp); font-variant-numeric: tabular-nums }
 th { white-space: nowrap }
+.contrato td { white-space: normal; overflow-wrap: anywhere }
 @media (max-width: 760px) { .grade { grid-template-columns: 1fr } aside { border-right: 0; border-bottom: 1px solid var(--linha) } }
 @media (prefers-reduced-motion: no-preference) { .bloco { animation: sobe .25s ease-out } @keyframes sobe { from { transform: translateY(4px) } to { transform: none } } }
 </style>

@@ -2,26 +2,31 @@
 
 from __future__ import annotations
 
+import html
 import os
 import re
 import time
 from pathlib import Path
 from typing import Annotated
 
+import httpx
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .banco import PAPEIS_QUE_DEMANDAM, PAPEIS_QUE_REVISAM, abrir_banco, emitir_token, ler_token
+from .cofre import abrir_cofre
 from .config import carregar
 from .conectores import EXTENSOES
 from .politica import PermissaoNegada
 from .servico import Plataforma
 from .somente_leitura import EscritaBloqueada
+from .saas import oauth
 
 cfg = carregar()
 banco = abrir_banco(cfg)
+cofre = abrir_cofre(cfg, banco)
 WEB = Path(__file__).parent / "web"
 app = FastAPI(title="Lastro", version="0.1.0")
 
@@ -236,13 +241,72 @@ def catalogo_saas(s: Annotated[Sessao, Depends(sessao)]) -> list[dict]:
     return saas_servico.resumo_catalogo()
 
 
+# ---- OAuth2 (LST-9): o admin do cliente autoriza uma vez; o token vive só no cofre ----------
+
+def _cliente_oauth() -> httpx.Client:  # trocado nos testes pelo transporte do simulador
+    return httpx.Client(timeout=30)
+
+
+def _url_publica(request: Request) -> str:
+    return os.environ.get("LASTRO_URL_PUBLICA") or str(request.base_url).rstrip("/")
+
+
+def _contrato_oauth(saas: str) -> dict:
+    c = saas_servico.CAT.get(saas)
+    if not c or c["auth"]["tipo"] != "oauth2_refresh":
+        raise HTTPException(404, "sistema sem OAuth2 no catálogo")
+    return c
+
+
+@app.get("/api/saas/{saas}/oauth/iniciar")
+def oauth_iniciar(saas: str, request: Request, s: Annotated[Sessao, Depends(sessao)]) -> dict:
+    _papel(s, {"admin"})
+    contrato = _contrato_oauth(saas)
+    try:
+        app_oauth = oauth.app_do_ambiente(saas, _url_publica(request))
+    except oauth.Credencial as e:
+        raise HTTPException(409, str(e)) from e
+    state = oauth.emitir_state(cfg.segredo, s.tenant, saas, s.email)
+    return {"url": oauth.url_autorizacao(contrato, app_oauth, state)}
+
+
+@app.get("/oauth/retorno", include_in_schema=False)
+def oauth_retorno(request: Request, state: str = "", code: str = "", error: str = "") -> Response:
+    """O sistema do cliente volta aqui. O `state` assinado diz de qual empresa e de qual admin é a autorização."""
+    try:
+        carga = oauth.ler_state(cfg.segredo, state)
+        if error or not code:
+            raise oauth.Credencial(f"autorização não concedida ({error or 'sem código'})")
+        saas = carga["s"]
+        contrato = _contrato_oauth(saas)
+        with _cliente_oauth() as http:
+            tokens = oauth.trocar_codigo(contrato, oauth.app_do_ambiente(saas, _url_publica(request)), code, http)
+        cofre.guardar(oauth.nome_no_cofre(carga["t"], saas), tokens.para_cofre())
+    except (oauth.Credencial, HTTPException) as e:
+        motivo = e.detail if isinstance(e, HTTPException) else str(e)
+        return HTMLResponse(f"<p>Não foi possível concluir a autorização: {html.escape(str(motivo))}</p><p><a href='/'>voltar ao Lastro</a></p>", 400)
+    banco.repo(carga["t"], carga["e"], "admin").registrar(carga["e"], "autorizou_conector", {"saas": saas})  # sem token
+    return RedirectResponse("/?autorizado=" + saas, status_code=303)
+
+
 @app.post("/api/saas/{saas}/testar")
 def testar_saas(saas: str, dados: TesteConexao, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
     _papel(s, {"admin"})
     # Modo real: só admin, credencial do cliente (somente leitura), nada é guardado além do laudo.
+    gerente = None
     try:
         desde = _date.fromisoformat(dados.desde) if dados.desde else None
-        laudo = saas_servico.testar(saas, dados.entidade, dados.credenciais, dados.variaveis, desde, dados.modo)
+        c = saas_servico.CAT.get(saas)
+        if dados.modo == "real" and c and c["auth"]["tipo"] == "oauth2_refresh":
+            try:
+                http = _cliente_oauth()
+                gerente = oauth.GerenteToken(c, oauth.app_do_ambiente(saas, ""), cofre, s.tenant, saas, http)
+            except oauth.Credencial as e:
+                raise HTTPException(409, str(e)) from e
+        laudo = saas_servico.testar(
+            saas, dados.entidade, dados.credenciais, dados.variaveis, desde, dados.modo, oauth=gerente,
+            cliente=gerente.http if gerente else None,
+        )
     except (LookupError, ValueError) as e:
         raise HTTPException(400, str(e)) from e
     p.repo.registrar(s.email, "testou_conector", {k: v for k, v in laudo.items() if k not in ("_extracao", "amostra")}, None)

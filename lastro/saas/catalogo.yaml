@@ -160,21 +160,40 @@ kommo:
 
 rdstation_crm:
   nome: RD Station CRM
-  confianca: documentação oficial (developers.rdstation.com) · limites confirmados; paginação a validar no piloto
-  base_url: "https://crm.rdstation.com/api/v1"
-  auth: {tipo: oauth2_refresh}
-  paginacao: {tipo: pagina, param_pagina: page, param_limite: limit, maximo: 200, primeira: 1}
-  envelope: {registros: deals, total: total}
+  confianca: documentação oficial da API v2 (developers.rdstation.com/reference/crm-v2-*) · tamanho máximo de página a validar no piloto
+  base_url: "https://api.rd.services/crm/v2"
+  auth:
+    tipo: oauth2_refresh
+    url_autorizar: "https://accounts.rdstation.com/oauth/authorize"
+    url_token: "https://api.rd.services/oauth2/token"
+    cliente_no: corpo           # client_id e client_secret no corpo (form)
+    validade_s: 7200
+    refresh_rotativo: true      # cada renovação devolve um refresh_token novo; o antigo morre
+    refresh_ocioso_dias: 14
+  paginacao: {tipo: pagina, param_pagina: "page[number]", param_limite: "page[size]", maximo: 25, primeira: 1}
+  envelope: {registros: data}
   limite: {por_minuto: 120}
   entidades:
-    negocios: {caminho: /deals, registros: deals}
-    contatos: {caminho: /contacts, registros: contacts}
+    negocios: {caminho: /deals, registros: data}
+    contatos: {caminho: /contacts, registros: data}
+  armadilhas:
+    - "A API v1 (crm.rdstation.com/api/v1) usa um token fixo por usuário e só mostra o que a visibilidade dele permite; o Lastro usa a v2, com OAuth2."
+    - "Token de acesso vale 2 horas; o refresh_token muda a cada renovação e expira se ficar 14 dias sem uso: carga parada por duas semanas exige nova autorização."
+    - "Paginação por page[number] e page[size] (padrão 25); o fim é a página com menos registros que o tamanho."
 
 contaazul:
   nome: Conta Azul (ERP financeiro)
   confianca: documentação oficial (developers.contaazul.com) · paginação a validar no piloto
   base_url: "https://api-v2.contaazul.com/v1"
-  auth: {tipo: oauth2_refresh}
+  auth:
+    tipo: oauth2_refresh
+    url_autorizar: "https://login.contaazul.com/#/oauth/authorize"
+    url_token: "https://api-v2.contaazul.com/oauth/token"
+    cliente_no: basic           # Authorization: Basic base64(client_id:client_secret)
+    escopo: "openid profile aws.cognito.signin.user.admin"
+    exige_state: true
+    validade_s: 3600
+    refresh_rotativo: true
   paginacao: {tipo: pagina, param_pagina: pagina, param_limite: tamanho_pagina, maximo: 100, primeira: 1}
   envelope: {registros: itens, total: itens_totais}
   limite: {por_minuto: 60}
@@ -182,13 +201,23 @@ contaazul:
     vendas: {caminho: /venda/busca}
     contas_receber: {caminho: /financeiro/eventos-financeiros/contas-a-receber/buscar}
   armadilhas:
-    - "OAuth2 com refresh_token: o cliente autoriza uma vez; o token de acesso precisa ser renovado."
+    - "OAuth2 com refresh_token: o cliente autoriza uma vez; o token de acesso vale 1 hora e o refresh_token muda a cada renovação (guardar sempre o novo)."
+    - "Renovação recusada volta 400 invalid_grant com error_subtype: access_revoked exige nova autorização."
 
 google_sheets:
   nome: Google Sheets (planilhas)
   confianca: referência pública da Sheets API v4 · a validar no piloto (docs não baixadas nesta sessão)
   base_url: "https://sheets.googleapis.com/v4/spreadsheets/{planilha_id}"
-  auth: {tipo: oauth2_refresh, escopos: ["https://www.googleapis.com/auth/spreadsheets.readonly"]}
+  auth:
+    tipo: oauth2_refresh
+    escopos: ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+    escopo: "https://www.googleapis.com/auth/spreadsheets.readonly"
+    url_autorizar: "https://accounts.google.com/o/oauth2/v2/auth"
+    url_token: "https://oauth2.googleapis.com/token"
+    cliente_no: corpo
+    params_autorizar: {access_type: offline, prompt: consent}   # sem isso o Google não devolve refresh_token
+    validade_s: 3600
+    refresh_rotativo: false     # o Google mantém o mesmo refresh_token
   paginacao: {tipo: nenhuma, maximo: 0}
   envelope: {registros: values}
   limite: {por_minuto: 60}
@@ -207,7 +236,16 @@ google_drive:
   nome: Google Drive (lista de planilhas)
   confianca: referência pública da Drive API v3 · a validar no piloto (docs não baixadas nesta sessão)
   base_url: "https://www.googleapis.com/drive/v3"
-  auth: {tipo: oauth2_refresh, escopos: ["https://www.googleapis.com/auth/drive.readonly"]}
+  auth:
+    tipo: oauth2_refresh
+    escopos: ["https://www.googleapis.com/auth/drive.readonly"]
+    escopo: "https://www.googleapis.com/auth/drive.readonly"
+    url_autorizar: "https://accounts.google.com/o/oauth2/v2/auth"
+    url_token: "https://oauth2.googleapis.com/token"
+    cliente_no: corpo
+    params_autorizar: {access_type: offline, prompt: consent}   # sem isso o Google não devolve refresh_token
+    validade_s: 3600
+    refresh_rotativo: false     # o Google mantém o mesmo refresh_token
   paginacao: {tipo: cursor, param_cursor: pageToken, param_limite: pageSize, maximo: 100, cursor_resposta: nextPageToken}
   envelope: {registros: files}
   limite: {por_minuto: 600}

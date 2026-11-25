@@ -58,6 +58,7 @@ class Simulador:
     relogio: Any = None
     rajada_429: int = 0           # quantas respostas 429 seguidas soltar no começo
     expirar_token_apos: int = 0   # login_bearer: token vence depois de N chamadas (0 = nunca)
+    validade_token_s: float = 0   # oauth2_refresh: validade do token emitido (0 = a do catálogo)
     catalogo: dict | None = None
     chamadas: list[dict] = field(default_factory=list)
     tentativas_escrita: int = 0
@@ -67,6 +68,9 @@ class Simulador:
         self.relogio = self.relogio or RelogioVirtual()
         self._429_restantes = self.rajada_429
         self._tokens: dict[str, int] = {}
+        self._oauth_acesso: dict[str, float] = {}   # token de acesso -> vence em
+        self._oauth_refresh: set[str] = set()
+        self.oauth_emitidos = 0
         self._janela: list[float] = []
         rnd = random.Random(self.semente)
         base = datetime(2026, 1, 1, tzinfo=timezone.utc)
@@ -93,7 +97,14 @@ class Simulador:
     # ---- transporte para httpx --------------------------------------------------------
     def transporte(self) -> httpx.MockTransport:
         def handler(req: httpx.Request) -> httpx.Response:
-            corpo = json.loads(req.content) if req.content else None
+            corpo: Any = None
+            if req.content:
+                if "x-www-form-urlencoded" in req.headers.get("content-type", ""):
+                    from urllib.parse import parse_qsl  # noqa: PLC0415
+
+                    corpo = dict(parse_qsl(req.content.decode()))
+                else:
+                    corpo = json.loads(req.content)
             st, cab, resp = self.responder(req.method, req.url.path, dict(req.url.params), dict(req.headers), corpo)
             return httpx.Response(st, headers=cab, content=b"" if resp is None else json.dumps(resp).encode())
 
@@ -113,6 +124,8 @@ class Simulador:
             tok = base64.urlsafe_b64encode(f"{self.saas}-{len(self._tokens)}".encode()).decode()
             self._tokens[tok] = 0
             return 200, {}, {a.get("campo_token", "access_token"): tok, "token_type": "Bearer", "expires_in": 21600}
+        if a["tipo"] == "oauth2_refresh" and a.get("url_token") and metodo == "POST" and caminho == urlparse(a["url_token"]).path:
+            return self._servidor_de_token(cab, corpo or {})
         if metodo in VERBOS_DE_ESCRITA or (metodo == "POST" and not self.c.get("rpc")):
             self.tentativas_escrita += 1
             return 405, {}, {"erro": "o sandbox do Lastro só aceita leitura"}
@@ -167,6 +180,11 @@ class Simulador:
             v = cab.get("authorization", "")
             if not v.startswith("Bearer ") or "invalida" in v:
                 return nega
+            tok = v[7:]
+            if tok.startswith("sim-at-"):  # emitido pelo servidor de token simulado: confere validade
+                vence = self._oauth_acesso.get(tok)
+                if vence is None or vence <= self.relogio.agora():
+                    return 401, {}, {"erro": "token expirado"}
         elif t == "login_bearer":
             tok = cab.get("authorization", "").removeprefix("Bearer ")
             if tok not in self._tokens:
@@ -179,6 +197,41 @@ class Simulador:
             if not corpo or any(not corpo.get(k) or corpo.get(k) == "invalida" for k in a["campos"]):
                 return 200, {}, {"faultstring": "ERROR: credenciais inválidas", "faultcode": "SOAP-ENV:Client-5113"}
         return None
+
+    CODIGO_SANDBOX = "codigo-sandbox"
+
+    def _servidor_de_token(self, cab: dict, corpo: dict) -> tuple[int, dict, Any]:
+        """Imita o /oauth/token: troca de código, renovação, validade e refresh_token rotativo."""
+        a = self.c["auth"]
+        invalido = lambda sub: (400, {}, {"error": "invalid_grant", "error_subtype": sub})  # noqa: E731
+        if a.get("cliente_no", "corpo") == "basic":
+            ok_cliente = cab.get("authorization", "").startswith("Basic ")
+        else:
+            ok_cliente = bool(corpo.get("client_id") and corpo.get("client_secret"))
+        if not ok_cliente:
+            return 401, {}, {"error": "invalid_client"}
+        tipo = corpo.get("grant_type")
+        if tipo == "authorization_code":
+            if corpo.get("code") != self.CODIGO_SANDBOX:
+                return invalido("invalid_code")
+        elif tipo == "refresh_token":
+            rt = corpo.get("refresh_token", "")
+            if rt not in self._oauth_refresh:
+                return invalido("invalid_refresh_token")
+            if a.get("refresh_rotativo", True):
+                self._oauth_refresh.discard(rt)
+        else:
+            return 400, {}, {"error": "unsupported_grant_type"}
+        self.oauth_emitidos += 1
+        validade = self.validade_token_s or a.get("validade_s", 3600)
+        acesso = f"sim-at-{self.oauth_emitidos}"
+        self._oauth_acesso[acesso] = self.relogio.agora() + validade
+        resposta = {"access_token": acesso, "token_type": "Bearer", "expires_in": validade}
+        if tipo == "authorization_code" or a.get("refresh_rotativo", True):
+            novo = f"sim-rt-{self.oauth_emitidos}"
+            self._oauth_refresh.add(novo)
+            resposta["refresh_token"] = novo
+        return 200, {}, resposta
 
     def _empresa_inexistente(self, cab: dict, corpo: Any) -> bool:
         textos = list(cab.values()) + list((corpo or {}).values() if isinstance(corpo, dict) else [])

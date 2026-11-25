@@ -15,3 +15,5 @@
   --chao: #0D1116; --sup: #151B22; --sup-2: #1B222B; --tinta: #E7ECF1; --quieta: #98A3AE; --linha: #26303A;
   --ouro: #E1B24F; --ouro-tx: #E8C06A; --ouro-f: #2E2716; --bronze: #C98552; --prata: #AEB7C0;
   --ok: #7CC4A0; --erro: #F08A7C; --aviso: #E7C06B; color-scheme: dark; }
+
+.aviso-oauth { border-left: 3px solid var(--ouro); padding-left: 14px; display: grid; gap: 8px }

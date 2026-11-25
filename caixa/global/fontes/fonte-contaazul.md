@@ -18,7 +18,7 @@ URL base: `https://api-v2.contaazul.com/v1`.
 
 # Autenticação
 
-Tipo `oauth2_refresh`.
+Tipo `oauth2_refresh`. OAuth2: autorização em `https://login.contaazul.com/#/oauth/authorize`, token em `https://api-v2.contaazul.com/oauth/token`, validade de 3600 s; refresh_token rotativo (guardar o novo a cada renovação). Tokens só no cofre (LST-9).
 
 # Paginação
 
@@ -39,4 +39,5 @@ Não tem: carga completa a cada execução.
 
 # Armadilhas
 
-- OAuth2 com refresh_token: o cliente autoriza uma vez; o token de acesso precisa ser renovado.
+- OAuth2 com refresh_token: o cliente autoriza uma vez; o token de acesso vale 1 hora e o refresh_token muda a cada renovação (guardar sempre o novo).
+- Renovação recusada volta 400 invalid_grant com error_subtype: access_revoked exige nova autorização.

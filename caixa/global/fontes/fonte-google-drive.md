@@ -18,7 +18,7 @@ URL base: `https://www.googleapis.com/drive/v3`.
 
 # Autenticação
 
-Tipo `oauth2_refresh`.
+Tipo `oauth2_refresh`. OAuth2: autorização em `https://accounts.google.com/o/oauth2/v2/auth`, token em `https://oauth2.googleapis.com/token`, validade de 3600 s; refresh_token fixo. Tokens só no cofre (LST-9).
 
 # Paginação
 

@@ -214,3 +214,20 @@ def test_ciclo_completo_no_postgres(banco_pg, monkeypatch, tmp_path: Path):
     assert d["status"] == "aprovada"
     acoes = [e["acao"] for e in banco_pg.repo(t, f"ana@{t}", "leitor").eventos(d["id"])]
     assert acoes[0] == "abriu_demanda" and acoes[-1] == "revisou"
+
+
+# --- LST-9: cofre no Vault --------------------------------------------------------------
+
+def test_cofre_supabase_guarda_atualiza_e_authenticated_nao_le(banco_pg):
+    import psycopg
+
+    from lastro.cofre import CofreSupabase
+
+    cofre = CofreSupabase(banco_pg)
+    nome = f"lastro:t{uuid.uuid4().hex[:6]}:oauth:contaazul"
+    cofre.guardar(nome, '{"refresh_token": "rt-1"}')
+    cofre.guardar(nome, '{"refresh_token": "rt-2"}')  # rotação: atualiza, não duplica
+    assert cofre.ler(nome) == '{"refresh_token": "rt-2"}' and cofre.ler("nao-existe") is None
+    with banco_pg.repo("acme", "adm@acme", "admin")._con() as con:  # noqa: SLF001
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            con.execute("SELECT * FROM vault.decrypted_secrets")

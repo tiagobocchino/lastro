@@ -44,12 +44,33 @@ def _variaveis(saas: str) -> list[str]:
 def campos_credencial(saas: str) -> list[str]:
     a = CAT[saas]["auth"]
     campos = list(a.get("campos", [])) + list(a.get("cabecalhos", {}))
-    if a["tipo"] in ("bearer_estatico", "oauth2_refresh"):
+    if a["tipo"] == "bearer_estatico":  # OAuth2 não pede token no formulário: o admin autoriza no sistema
         campos.append("token")
     return campos
 
 
-def testar(saas: str, entidade: str, credenciais: dict, variaveis: dict, desde: date | None = None, modo: str = "sandbox") -> dict[str, Any]:
+def _oauth_no_sandbox(saas: str, sim: Simulador, cliente: httpx.Client) -> Any:
+    """Sandbox de sistema OAuth2: roda o fluxo inteiro no simulador, sem nada sair da plataforma.
+    Troca o código por tokens, adianta o relógio para perto do vencimento e deixa o Leitor renovar."""
+    from .oauth import AppOAuth, GerenteToken, nome_no_cofre, trocar_codigo  # noqa: PLC0415
+
+    class CofreDaMemoria(dict):
+        def ler(self, nome: str) -> str | None:
+            return self.get(nome)
+
+        def guardar(self, nome: str, segredo: str) -> None:
+            self[nome] = segredo
+
+    app = AppOAuth("app-sandbox", "segredo-sandbox", "http://sandbox/oauth/retorno")
+    cofre = CofreDaMemoria()
+    tokens = trocar_codigo(CAT[saas], app, Simulador.CODIGO_SANDBOX, cliente, sim.relogio.agora())
+    cofre.guardar(nome_no_cofre("sandbox", saas), tokens.para_cofre())
+    sim.relogio.t = tokens.expira_em - 60  # falta 1 minuto: a primeira chamada já precisa renovar
+    return GerenteToken(CAT[saas], app, cofre, "sandbox", saas, cliente, sim.relogio)
+
+
+def testar(saas: str, entidade: str, credenciais: dict, variaveis: dict, desde: date | None = None, modo: str = "sandbox",
+           oauth: Any = None, cliente: httpx.Client | None = None) -> dict[str, Any]:
     """Roda uma extração e devolve um laudo legível. Sandbox usa o simulador (nada sai da plataforma)."""
     if saas not in CAT or entidade not in CAT[saas]["entidades"]:
         raise LookupError("SaaS ou entidade fora do catálogo")
@@ -60,18 +81,21 @@ def testar(saas: str, entidade: str, credenciais: dict, variaveis: dict, desde: 
         cliente = httpx.Client(transport=sim.transporte())
         relogio = sim.relogio
     elif modo == "real":
-        cliente, relogio = httpx.Client(timeout=30), None
+        cliente, relogio = cliente or httpx.Client(timeout=30), None
     else:
         raise ValueError("modo deve ser sandbox ou real")
     laudo: dict[str, Any] = {"saas": saas, "entidade": entidade, "modo": modo, "ok": False}
     try:
-        lei = Leitor(saas, credenciais, variaveis, cliente=cliente, relogio=relogio)
+        if sim is not None and CAT[saas]["auth"]["tipo"] == "oauth2_refresh" and not credenciais.get("token"):
+            oauth = _oauth_no_sandbox(saas, sim, cliente)
+        lei = Leitor(saas, credenciais, variaveis, cliente=cliente, relogio=relogio, oauth=oauth)
         ext = lei.extrair(entidade, desde=desde)
         laudo |= {
             "ok": True, "registros": len(ext.registros), "total_informado": ext.total_informado, "chamadas": ext.chamadas,
             "tentativas_429": ext.tentativas_429, "relogins": ext.relogins, "avisos": ext.avisos,
             "truncamento": "conferido" if ext.total_informado is not None else "a API não informa total",
             "amostra": ext.registros[:3], "colunas": sorted({k for r in ext.registros[:50] for k in r}),
+            "renovacoes_token": getattr(oauth, "renovacoes", 0),
             "_extracao": ext,
         }
         if isinstance(relogio, RelogioVirtual):
