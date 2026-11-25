@@ -2,7 +2,7 @@
 chave: LST-7
 jira: https://adelecrm.atlassian.net/browse/LST-7
 secao: NUC
-status: backlog
+status: em-andamento
 especialista: engenheiro-de-dados
 ---
 
