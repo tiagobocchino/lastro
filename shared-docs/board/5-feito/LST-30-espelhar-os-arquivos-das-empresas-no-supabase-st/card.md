@@ -2,7 +2,7 @@
 chave: LST-30
 jira: https://adelecrm.atlassian.net/browse/LST-30
 secao: OPS
-status: em-qa
+status: feito
 especialista: engenheiro-de-dados
 ---
 
@@ -12,11 +12,11 @@ especialista: engenheiro-de-dados
 
 ## Critérios de aceite
 
-- [ ] Cada gravação na pasta da empresa vai para o bucket privado `tenants/<empresa>/...` do Supabase Storage
-- [ ] Pasta ausente no disco é restaurada inteira do bucket antes do uso
-- [ ] Teste: apagar o disco local e o ciclo da demanda continua com os mesmos dados
-- [ ] Sem `LASTRO_STORAGE_URL`, nada muda (modo local e bucket montado da ADR 0007)
-- [ ] Chave do Storage só em variável de ambiente; nunca no repositório, no rastro ou no laudo
+- [x] Cada gravação na pasta da empresa vai para o bucket privado `tenants/<empresa>/...` do Supabase Storage
+- [x] Pasta ausente no disco é restaurada inteira do bucket antes do uso
+- [x] Teste: apagar o disco local e o ciclo da demanda continua com os mesmos dados
+- [x] Sem `LASTRO_STORAGE_URL`, nada muda (modo local e bucket montado da ADR 0007)
+- [x] Chave do Storage só em variável de ambiente; nunca no repositório, no rastro ou no laudo
 
 ## Verificação
 
@@ -47,3 +47,12 @@ especialista: engenheiro-de-dados
 **Suíte:** 201 passed com Postgres.
 
 **Falta:** `python scripts/conferir_espelho.py` com a chave secreta real, no shell do Render (LST-22).
+
+## QA em produção (25/11)
+
+Render (`lastro-api-73zx`) + Supabase `lastro-teste`, com a chave secreta real no painel do Render:
+- login do admin, envio de fonte e demanda completa pela API;
+- **22 arquivos** da empresa `lixum` no bucket privado `tenants`: fonte, política, decisões do grill, gold e relatório;
+- demanda em revisão, total 14.030.477,92, auditoria da camada 1 aprovada, 12 eventos no rastro.
+
+A restauração depois de o Render dormir está coberta por `test_disco_apagado_a_demanda_continua` e vai acontecer naturalmente no primeiro acesso após 15 minutos parado.

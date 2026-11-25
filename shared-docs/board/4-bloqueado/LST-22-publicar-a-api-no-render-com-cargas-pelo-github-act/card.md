@@ -12,10 +12,10 @@ especialista: engenheiro-backend
 
 ## Critérios de aceite
 
-- [ ] Serviço web gratuito no Render a partir do Dockerfile (LST-20); `/saude` = 200
-- [ ] Variáveis só no painel do Render: LASTRO_AMBIENTE=producao, LASTRO_SEGREDO, LASTRO_BANCO_URL, LASTRO_TAREFA_SEGREDO, LASTRO_URL_PUBLICA e as do Storage (LST-30)
+- [x] Serviço web gratuito no Render a partir do Dockerfile (LST-20); `/saude` = 200
+- [x] Variáveis só no painel do Render: LASTRO_AMBIENTE=producao, LASTRO_SEGREDO, LASTRO_BANCO_URL, LASTRO_TAREFA_SEGREDO, LASTRO_URL_PUBLICA e as do Storage (LST-30)
 - [ ] GitHub Actions agendado no minuto 17 de cada hora chamando POST /tarefas/cargas; o mesmo job mantém o Supabase acordado
-- [ ] Migrações 0001 a 0003 no projeto Supabase de produção
+- [x] Migrações 0001 a 0003 no projeto Supabase de produção
 
 ## Verificação
 
@@ -32,3 +32,9 @@ Passos manuais do Tiago: criar a conta no Render, ligar o repositório e colar a
 ## Bloqueio
 
 Passos do Tiago: conta no Render, Blueprint com os 4 valores, os 2 segredos no GitHub e mandar o endereço do serviço.
+
+## No ar (25/11)
+
+- `https://lastro-api-73zx.onrender.com/saude` = `{"estado":"ok","banco":"ok"}`; portal 200; sem contas demo; `/tarefas/cargas` sem segredo = 401.
+- Empresa `lixum` (plano Operação) e admin criados no banco; demanda de ponta a ponta em produção (ver LST-30).
+- Falta: segredos `LASTRO_URL_API` e `LASTRO_TAREFA_SEGREDO` no GitHub e uma execução manual do workflow `cargas agendadas`.

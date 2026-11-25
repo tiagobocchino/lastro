@@ -2,7 +2,7 @@
 chave: LST-31
 jira: https://adelecrm.atlassian.net/browse/LST-31
 secao: OPS
-status: em-qa
+status: feito
 especialista: engenheiro-backend
 ---
 
@@ -16,7 +16,7 @@ especialista: engenheiro-backend
 - [x] Subagentes de engenharia com as ferramentas de leitura; nenhum com deploy, variáveis ou criação de recursos
 - [x] Na sessão principal, ações do Render pedem aprovação (`ask` em `.claude/settings.json`)
 - [x] Regras e setup em `docs/agents/mcp.md`
-- [ ] Conectado na máquina do Tiago (chave do Render e login do Supabase) e conferido com uma listagem em cada um
+- [x] Conectado na máquina do Tiago (chave do Render e login do Supabase) e conferido com uma listagem em cada um
 
 ## Entrega (25/11)
 
@@ -24,3 +24,7 @@ especialista: engenheiro-backend
 - `.mcp.json`: a chave do Render vem de `${RENDER_API_KEY}`; o Supabase usa login no navegador.
 - Subagentes: backend e dados leem Supabase e Render; frontend lê Render; o pesquisador só busca na documentação do Supabase; designer e redator não têm acesso.
 - Falta: o Tiago ligar na máquina dele (passos em `docs/agents/mcp.md`).
+
+## QA (25/11)
+
+Na máquina do Tiago: `/mcp` conectou o `supabase-lastro` ("Authentication successful"), e "liste meus serviços no Render" respondeu com o serviço `lastro-api`. No caminho, foi limpa uma configuração antiga do Claude Code que apontava para um intermediário do OpenRouter na porta 3456 (`apiKeyHelper`, `*_BASE_URL`, `ANTHROPIC_MODEL`), com backups `settings.json.bak*`.

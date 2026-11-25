@@ -1,5 +1,5 @@
 # Dispara as cargas agendadas do Lastro (LST-7) de hora em hora e mantém o Supabase acordado (plano B, ADR 0009).
-# Segredos do repositório: LASTRO_URL_API (ex.: https://lastro-api.onrender.com) e LASTRO_TAREFA_SEGREDO
+# Segredos do repositório: LASTRO_URL_API (ex.: https://lastro-api-73zx.onrender.com) e LASTRO_TAREFA_SEGREDO
 # (o mesmo valor que o Render gerou). Minuto 17: fora do pico do começo da hora, quando o GitHub atrasa agendamentos.
 name: cargas agendadas
 on:
