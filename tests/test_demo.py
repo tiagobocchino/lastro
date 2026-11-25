@@ -361,3 +361,73 @@ def test_sair_da_pagina_apaga_a_sessao(api):
     assert c.post(f"/api/demo/sessoes/{s['sessao']}/apagar").json()["recibo"]["conferido"]
     assert list(base.glob("demo-*")) == []
     assert c.post(f"/api/demo/sessoes/{s['sessao']}/apagar").json() == {"recibo": None}  # repetido não dá erro
+
+
+# ---- LST-44: funil anônimo ------------------------------------------------------------------------
+
+def test_funil_registra_as_etapas_sem_nada_do_visitante(api):
+    modulo, c, _ = api
+    s = c.post("/api/demo/sessoes", data={"exemplo": "true"}).json()
+    c.post(f"/api/demo/sessoes/{s['sessao']}/painel", json={"respostas": {"demo:formato": "ranking (barras)"}})
+    assert c.post("/api/demo/contato", json={"visual": "ranking"}).json() == {"ok": True}
+    secreto = pd.DataFrame({"coluna_super_secreta": ["VALOR_SIGILOSO_1", "VALOR_SIGILOSO_2", "x", "y"], "faturamento_oculto": [1, 2, 3, 4]})
+    s2 = c.post("/api/demo/sessoes", files={"arquivo": ("segredo.csv", secreto.to_csv(index=False).encode())}).json()
+    c.delete(f"/api/demo/sessoes/{s2['sessao']}")
+    c.post("/api/demo/sessoes", files={"arquivo": ("x.txt", b"a\n1\n")})
+    ev = modulo.banco.eventos_demo()
+    assert [e["etapa"] for e in ev] == ["subiu", "painel", "clicou_contato", "subiu", "desistiu", "recusou"]
+    assert ev[0]["faixa_tamanho"] == "até 100 KB" and ev[0]["n_colunas"] == 9 and ev[0]["duracao_ms"] >= 0
+    assert ev[1]["visual"] == "ranking" and ev[2]["visual"] == "ranking" and ev[5]["motivo"] == "formato"
+    tudo = str(ev)
+    for segredo in ("coluna_super_secreta", "VALOR_SIGILOSO", "faturamento_oculto", "segredo.csv", "testclient", "127.0.0.1"):
+        assert segredo not in tudo, f"o funil guardou '{segredo}'"
+
+
+def test_clique_forjado_nao_injeta_texto(api):
+    modulo, c, _ = api
+    c.post("/api/demo/contato", json={"visual": "<script>alert(1)</script> dados do cliente"})
+    assert modulo.banco.eventos_demo()[-1]["visual"] is None
+
+
+def test_limite_de_ip_vira_recusa_no_funil(api):
+    modulo, c, _ = api
+    cab = {"x-forwarded-for": "203.0.113.9"}
+    for _ in range(6):
+        r = c.post("/api/demo/sessoes", data={"exemplo": "true"}, headers=cab)
+        if r.status_code == 200:
+            c.delete(f"/api/demo/sessoes/{r.json()['sessao']}")
+    assert modulo.banco.eventos_demo()[-1] == {**modulo.banco.eventos_demo()[-1], "etapa": "recusou", "motivo": "limite_ip"}
+
+
+def test_falha_ao_gravar_o_funil_nao_derruba_a_demonstracao(api, monkeypatch):
+    modulo, c, _ = api
+
+    def quebrado(*a, **k):
+        raise OSError("banco fora")
+
+    monkeypatch.setattr(modulo._demos(), "ao_evento", quebrado)
+    s = c.post("/api/demo/sessoes", data={"exemplo": "true"})
+    assert s.status_code == 200
+    assert c.post(f"/api/demo/sessoes/{s.json()['sessao']}/painel", json={}).json()["recibo"]["conferido"]
+
+
+def test_evento_so_aceita_lista_fechada():
+    from lastro.banco import evento_demo
+
+    with pytest.raises(ValueError):
+        evento_demo("qualquer_coisa")
+    e = evento_demo("recusou", motivo="CPF 123", faixa_tamanho="enorme", visual="pizza", n_colunas=-1)
+    assert e == {"etapa": "recusou", "duracao_ms": None, "faixa_tamanho": None, "n_colunas": None, "visual": None, "motivo": None}
+
+
+def test_funil_no_painel_de_operacao():
+    from datetime import date, datetime
+    from zoneinfo import ZoneInfo
+
+    from lastro.painel import renderizar
+
+    vazio = {k: [] for k in ("requisicoes", "disponibilidade", "demandas", "uso", "cargas", "alertas")}
+    dados = vazio | {"demo": [{"dia": date(2026, 11, 25), "subiram": 40, "paineis": 30, "clicaram": 6, "recusas": 5, "desistencias": 4}]}
+    h = renderizar(dados, datetime(2026, 11, 25, 18, tzinfo=ZoneInfo("America/Sao_Paulo")))
+    assert "Funil da demonstração do site" in h and "75,0% da etapa anterior" in h and "20,0% da etapa anterior" in h
+    assert "Funil da demonstração" in renderizar(vazio, datetime(2026, 11, 25, 18, tzinfo=ZoneInfo("America/Sao_Paulo")))  # sem dados ainda, não quebra

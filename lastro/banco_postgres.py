@@ -21,6 +21,7 @@ from .banco import (
     CAMPOS_CARGA_ATUALIZAVEIS,
     SQL_METRICA,
     confere_senha,
+    evento_demo,
     gerar_senha_provisoria,
     hash_senha,
     hora_cheia,
@@ -62,6 +63,17 @@ class BancoPostgres:
         sql = SQL_METRICA.format(t="interno.metricas_api", h="to_timestamp(%s)", p="%s")
         with self._dono() as con:
             con.execute(sql, (hora_cheia(agora), int(400 <= status < 500), int(status >= 500), ms))
+
+    def registrar_demo(self, etapa: str, **campos: object) -> None:
+        e = evento_demo(etapa, **campos)  # type: ignore[arg-type]
+        with self._dono() as con:
+            con.execute("INSERT INTO interno.demo_eventos (etapa, duracao_ms, faixa_tamanho, n_colunas, visual, motivo) "
+                        "VALUES (%s,%s,%s,%s,%s,%s)", tuple(e.values()))
+
+    def eventos_demo(self) -> list[dict]:
+        with self._dono() as con:
+            return [dict(r) for r in con.execute(
+                "SELECT etapa, duracao_ms, faixa_tamanho, n_colunas, visual, motivo FROM interno.demo_eventos ORDER BY id")]
 
     def metricas(self) -> list[dict]:
         with self._dono() as con:

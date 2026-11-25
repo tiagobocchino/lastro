@@ -10,6 +10,7 @@
   const PAPEL = { numero: "valor", data: "data", texto: "categoria", pessoal: "dado pessoal, fora do painel" };
   let sessao = null;
   let ultimo = null;
+  let formatoChave = null;
 
   async function chamar(caminho, opcoes = {}) {
     const r = await fetch(caminho, opcoes);
@@ -86,6 +87,7 @@
       ev.preventDefault();
       const respostas = Object.fromEntries([...document.querySelectorAll("[data-q]")].map((s) => [s.dataset.q, s.value]));
       ultimo = respostas["demo:formato"] || "painel";
+      formatoChave = { "ranking (barras)": "ranking", "tabela": "tabela", "evolução no tempo": "evolucao", "só o número": "numero" }[ultimo] || null;
       const botao = $("#t-montar");
       botao.disabled = true; botao.textContent = "montando e conferindo…";
       try {
@@ -139,6 +141,9 @@
       };
     }
     $("#t-outra").onclick = recomecar;
+    // Funil anônimo (LST-44): só o formato do painel, nunca os dados
+    const whats = palco.querySelector('a[href^="https://wa.me/"]');
+    if (whats) whats.addEventListener("click", () => { try { navigator.sendBeacon?.("/api/demo/contato", new Blob([JSON.stringify({ visual: formatoChave })], { type: "application/json" })); } catch { /* o clique segue */ } });
     palco.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 

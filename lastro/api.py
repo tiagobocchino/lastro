@@ -761,7 +761,7 @@ def _demos():
 
         from .demo import Demos
 
-        _DEMOS = Demos(cfg)
+        _DEMOS = Demos(cfg, ao_evento=banco.registrar_demo)
 
         def varrer_sempre() -> None:
             while True:
@@ -835,10 +835,13 @@ def demo_painel(sid: str, dados: RespostasDemo) -> dict:
 def demo_apagar(sid: str) -> dict:
     from .demo import ErroDemo
 
+    d = _demos()
     try:
-        return {"recibo": _demos().apagar(sid)}
+        recibo = d.apagar(sid)
     except ErroDemo as e:
         raise HTTPException(404, str(e)) from e
+    d.evento("desistiu")
+    return {"recibo": recibo}
 
 
 @app.post("/api/demo/sessoes/{sid}/apagar", include_in_schema=False)
@@ -846,7 +849,21 @@ def demo_apagar_ao_sair(sid: str) -> dict:
     """O navegador avisa (sendBeacon, só POST) quando o visitante sai da página no meio da análise."""
     from .demo import ErroDemo
 
+    d = _demos()
     try:
-        return {"recibo": _demos().apagar(sid)}
+        recibo = d.apagar(sid)
     except ErroDemo:
         return {"recibo": None}
+    d.evento("desistiu")
+    return {"recibo": recibo}
+
+
+class CliqueDemo(BaseModel):
+    visual: str | None = None
+
+
+@app.post("/api/demo/contato", include_in_schema=False)
+def demo_clicou_contato(dados: CliqueDemo) -> dict:
+    """O visitante clicou para conversar depois do painel. Só o formato do painel, de lista fechada."""
+    _demos().evento("clicou_contato", visual=dados.visual)
+    return {"ok": True}

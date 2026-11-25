@@ -42,6 +42,9 @@ CREATE TABLE IF NOT EXISTS cargas (
 CREATE TABLE IF NOT EXISTS eventos (
   id INTEGER PRIMARY KEY, tenant_id TEXT NOT NULL, demanda_id INTEGER, ator TEXT NOT NULL,
   acao TEXT NOT NULL, detalhe TEXT NOT NULL, em REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS demo_eventos (
+  id INTEGER PRIMARY KEY, em REAL NOT NULL, etapa TEXT NOT NULL, duracao_ms INTEGER, faixa_tamanho TEXT,
+  n_colunas INTEGER, visual TEXT, motivo TEXT);
 CREATE TABLE IF NOT EXISTS metricas_api (
   hora REAL PRIMARY KEY, requisicoes INTEGER NOT NULL DEFAULT 0, erros_4xx INTEGER NOT NULL DEFAULT 0,
   erros_5xx INTEGER NOT NULL DEFAULT 0, latencia_ms INTEGER NOT NULL DEFAULT 0);
@@ -52,6 +55,23 @@ SQL_METRICA = (  # uma linha por hora (LST-26); o mesmo SQL serve ao SQLite e ao
     "ON CONFLICT (hora) DO UPDATE SET requisicoes = {t}.requisicoes + 1, erros_4xx = {t}.erros_4xx + excluded.erros_4xx, "
     "erros_5xx = {t}.erros_5xx + excluded.erros_5xx, latencia_ms = {t}.latencia_ms + excluded.latencia_ms"
 )
+
+
+DEMO_ETAPAS = {"subiu", "recusou", "painel", "painel_falhou", "desistiu", "clicou_contato"}
+DEMO_FAIXAS = {"até 100 KB", "100 KB a 1 MB", "1 a 5 MB"}
+DEMO_VISUAIS = {"ranking", "tabela", "evolucao", "numero"}
+DEMO_MOTIVOS = {"formato", "tamanho", "linhas", "leitura", "limite_ip", "fila", "prazo"}
+
+
+def evento_demo(etapa: str, duracao_ms: int | None = None, faixa_tamanho: str | None = None, n_colunas: int | None = None,
+                visual: str | None = None, motivo: str | None = None) -> dict:
+    """Evento do funil da demonstração (LST-44) só com valores de lista fechada: nada do visitante entra."""
+    if etapa not in DEMO_ETAPAS:
+        raise ValueError(f"etapa desconhecida: {etapa}")
+    return {"etapa": etapa, "duracao_ms": int(duracao_ms) if duracao_ms is not None else None,
+            "faixa_tamanho": faixa_tamanho if faixa_tamanho in DEMO_FAIXAS else None,
+            "n_colunas": int(n_colunas) if isinstance(n_colunas, int) and 0 <= n_colunas <= 10_000 else None,
+            "visual": visual if visual in DEMO_VISUAIS else None, "motivo": motivo if motivo in DEMO_MOTIVOS else None}
 
 
 def hora_cheia(agora: float) -> float:
@@ -275,6 +295,15 @@ class BancoSqlite:
 
     def metricas(self) -> list[dict]:
         return [dict(r) for r in self.con.execute("SELECT * FROM metricas_api ORDER BY hora")]
+
+    def registrar_demo(self, etapa: str, **campos: object) -> None:
+        e = evento_demo(etapa, **campos)  # type: ignore[arg-type]
+        self.con.execute("INSERT INTO demo_eventos (em, etapa, duracao_ms, faixa_tamanho, n_colunas, visual, motivo) VALUES (?,?,?,?,?,?,?)",
+                         (time.time(), *e.values()))
+        self.con.commit()
+
+    def eventos_demo(self) -> list[dict]:
+        return [dict(r) for r in self.con.execute("SELECT * FROM demo_eventos ORDER BY id")]
 
     def criar_tenant(self, tenant_id: str, nome: str) -> None:
         criar_tenant(self.con, tenant_id, nome)

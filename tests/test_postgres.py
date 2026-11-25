@@ -560,3 +560,23 @@ def test_bi_pelo_portal_no_postgres(url_pg, monkeypatch, tmp_path: Path):
         assert con.execute("SELECT count(*) FROM fonte_orcamentos").fetchone()[0] > 0
     assert c.delete("/api/bi/credencial", headers=adm).json() == {"ligado": False}
     modulo.banco.fechar()
+
+
+def test_funil_da_demo_no_postgres(monitor, banco_pg, url_pg):
+    import psycopg
+
+    con = monitor
+    con.execute("TRUNCATE interno.demo_eventos")
+    for etapa, campos in (("subiu", {"faixa_tamanho": "até 100 KB", "n_colunas": 9}), ("subiu", {}), ("painel", {"visual": "ranking", "duracao_ms": 800}),
+                          ("clicou_contato", {"visual": "ranking"}), ("recusou", {"motivo": "limite_ip"})):
+        banco_pg.registrar_demo(etapa, **campos)
+    assert [e["etapa"] for e in banco_pg.eventos_demo()] == ["subiu", "subiu", "painel", "clicou_contato", "recusou"]
+    linha = con.execute("SELECT subiram, paineis, clicaram, recusas, ms_medio_painel FROM painel.demo_funil_dia").fetchone()
+    assert linha == (2, 1, 1, 1, 800)
+    with pytest.raises(psycopg.errors.CheckViolation):  # texto livre não entra nem por SQL direto
+        con.execute("INSERT INTO interno.demo_eventos (etapa, motivo) VALUES ('recusou', 'cpf do cliente 123')")
+    with psycopg.connect(url_pg) as leitor:
+        leitor.execute("SET ROLE painel_leitor")
+        assert leitor.execute("SELECT count(*) FROM painel.demo_funil_dia").fetchone()[0] == 1
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            leitor.execute("SELECT * FROM interno.demo_eventos")

@@ -30,6 +30,7 @@ def coletar(url: str, dias: int = DIAS) -> dict[str, list[dict]]:
         "uso": ("SELECT * FROM painel.uso_gratuito ORDER BY recurso", ()),
         "cargas": ("SELECT * FROM painel.cargas ORDER BY empresa, saas, entidade", ()),
         "alertas": ("SELECT * FROM painel.alertas ORDER BY aberto_em DESC LIMIT 20", ()),
+        "demo": ("SELECT * FROM painel.demo_funil_dia WHERE dia >= %s ORDER BY dia", (desde,)),
     }
     with psycopg.connect(url, row_factory=dict_row, prepare_threshold=None) as con:
         return {k: [dict(r) for r in con.execute(sql, args)] for k, (sql, args) in consultas.items()}
@@ -92,6 +93,24 @@ def _quando(v: Any) -> str:
     if not isinstance(v, datetime):
         return "—"
     return _e((v.astimezone(FUSO) if v.tzinfo else v).strftime("%d/%m %H:%M"))
+
+
+def _funil(linhas: list[dict]) -> str:
+    """Funil da demonstração do site (LST-44): subiu → painel → clicou para conversar, sem nada do visitante."""
+    t = {k: sum(int(r[k] or 0) for r in linhas) for k in ("subiram", "paineis", "clicaram", "recusas", "desistencias")}
+    pct = lambda a, b: f"{_n(100 * a / b, 1)}%" if b else "—"
+    etapas = [("subiram uma planilha", t["subiram"], ""), ("receberam o painel", t["paineis"], pct(t["paineis"], t["subiram"])),
+              ("clicaram para conversar", t["clicaram"], pct(t["clicaram"], t["paineis"]))]
+    maior = max(t["subiram"], 1)
+    barras = "".join(
+        f'<div class="medidor"><div class="lin"><span>{_e(n)}</span><b>{_n(v)}{f" · {_e(x)} da etapa anterior" if x else ""}</b></div>'
+        f'<div class="trilho"><i style="width:{100 * v / maior:.1f}%;background:var(--ouro)"></i></div></div>' for n, v, x in etapas)
+    dias = [[_e(f"{r['dia']:%d/%m}"), _n(r["subiram"]), _n(r["paineis"]), _n(r["clicaram"]), _n(r["recusas"]), _n(r["desistencias"])]
+            for r in sorted(linhas, key=lambda r: r["dia"], reverse=True)[:7]]
+    return (f'<section class="bloco"><h2>Funil da demonstração do site</h2>'
+            f'<p class="quieta">Últimos 30 dias, anônimo: sem IP e sem nada das planilhas. {_n(t["recusas"])} recusas (formato, tamanho, limite) e '
+            f'{_n(t["desistencias"])} desistências.</p>{barras}'
+            f'{_tabela(["dia", "subiram", "painéis", "clicaram", "recusas", "desistiram"], dias, "Nenhuma demonstração ainda.")}</section>')
 
 
 def renderizar(dados: dict[str, list[dict]], gerado_em: datetime, dias: int = DIAS) -> str:
@@ -163,6 +182,7 @@ td:last-child {{ white-space:normal }}
 </div>
 <section class="bloco"><h2>Demandas por dia</h2>{_barras(serie_dem, "demandas", "")}</section>
 <section class="bloco"><h2>Cargas agendadas</h2>{_tabela(["empresa", "sistema", "situação", "última carga boa", "aviso"], cargas, "Nenhuma carga agendada.")}</section>
+{_funil(dados.get("demo", []))}
 <section class="bloco"><h2>Alertas</h2>{_tabela(["tipo", "detalhe", "aberto em", "fechado em"], alertas, "Nenhum alerta até agora.")}</section>
 </main></body></html>
 """

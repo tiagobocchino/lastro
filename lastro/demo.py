@@ -129,6 +129,21 @@ class Sessao:
     perguntas: list[dict] = field(default_factory=list)
 
 
+def faixa(n_bytes: int) -> str:
+    return "até 100 KB" if n_bytes <= 100 * 1024 else ("100 KB a 1 MB" if n_bytes <= 1024 * 1024 else "1 a 5 MB")
+
+
+def _motivo(e: Exception) -> str:
+    if isinstance(e, LimiteIP):
+        return "limite_ip"
+    if isinstance(e, Ocupado):
+        return "fila"
+    if isinstance(e, Demorou):
+        return "prazo"
+    t = str(e)
+    return "formato" if "CSV ou Excel" in t else "tamanho" if "5 MB" in t else "linhas" if "linhas" in t else "leitura"
+
+
 def base_padrao() -> Path:
     return Path(os.environ.get("LASTRO_DEMO_DIR") or Path(tempfile.gettempdir()) / "lastro-demo")
 
@@ -141,10 +156,12 @@ def _tamanho(pasta: Path) -> tuple[int, int, int]:
 
 class Demos:
     def __init__(self, cfg: Config, base: Path | None = None, ttl_s: int = TTL_S, prazo_s: float = PRAZO_S,
-                 espera_fila_s: float = ESPERA_FILA_S, max_linhas: int = MAX_LINHAS, limites: Limites | None = None):
+                 espera_fila_s: float = ESPERA_FILA_S, max_linhas: int = MAX_LINHAS, limites: Limites | None = None,
+                 ao_evento: Any = None):
         self.cfg, self.base, self.ttl_s = cfg, (base or base_padrao()), ttl_s
         self.prazo_s, self.espera_fila_s, self.max_linhas = prazo_s, espera_fila_s, max_linhas
         self.limites = limites or Limites()
+        self.ao_evento = ao_evento  # funil anônimo (LST-44): banco.registrar_demo
         self._fila = threading.BoundedSemaphore(1)
         self.esperando = 0
         self._sessoes: dict[str, Sessao] = {}
@@ -156,15 +173,18 @@ class Demos:
     # ---- ciclo da sessão --------------------------------------------------------------
     def abrir(self, nome_arquivo: str | None, conteudo: bytes | None, agora: float | None = None, ip: str | None = None) -> tuple[Sessao, dict]:
         """Limite por IP, depois fila e prazo. Se o prazo estoura, a sessão é apagada assim que a análise termina."""
-        if ip:
-            self.limites.registrar(ip, agora)
-
         def cancelar(res: tuple[Sessao, dict]) -> None:
             with self._trava:
                 self._sessoes.pop(res[0].id, None)
             self._apagar(res[0])
 
-        return self._na_fila(lambda: self._abrir(nome_arquivo, conteudo, agora), cancelar)
+        try:
+            if ip:
+                self.limites.registrar(ip, agora)
+            return self._na_fila(lambda: self._abrir(nome_arquivo, conteudo, agora), cancelar)
+        except ErroDemo as e:
+            self.evento("recusou", motivo=_motivo(e))
+            raise
 
     def _abrir(self, nome_arquivo: str | None, conteudo: bytes | None, agora: float | None = None) -> tuple[Sessao, dict]:
         """Recebe o arquivo (ou o exemplo), perfila e devolve as perguntas. Falha apaga o que já foi gravado."""
@@ -192,6 +212,9 @@ class Demos:
             self._log("abrir_falhou", inicio, len(conteudo), None, erro=type(e).__name__)
             raise ErroDemo("não consegui ler a planilha: confira se a primeira linha tem os nomes das colunas") from e
         perfil = next(iter(d["resultado"]["perfis"].values()))
+        if perfil["linhas"] <= self.max_linhas:
+            self.evento("subiu", duracao_ms=int((time.perf_counter() - inicio) * 1000), faixa_tamanho=faixa(len(conteudo)),
+                        n_colunas=len(perfil["colunas"]))
         if perfil["linhas"] > self.max_linhas:
             plat.repo.apagar()  # type: ignore[attr-defined]
             shutil.rmtree(pasta, ignore_errors=True)
@@ -211,7 +234,11 @@ class Demos:
 
     def responder(self, sid: str, respostas: dict[str, str], agora: float | None = None) -> dict:
         self._pegar(sid, agora)  # sessão inexistente responde na hora, sem entrar na fila
-        return self._na_fila(lambda: self._responder(sid, respostas, agora), None)
+        try:
+            return self._na_fila(lambda: self._responder(sid, respostas, agora), None)
+        except (Ocupado, Demorou) as e:
+            self.evento("painel_falhou", motivo=_motivo(e))
+            raise
 
     def _responder(self, sid: str, respostas: dict[str, str], agora: float | None = None) -> dict:
         """Roda a análise, monta o painel e apaga tudo. Devolve o painel e o recibo, com sucesso ou não."""
@@ -237,9 +264,11 @@ class Demos:
                          "auditoria": {"aprovada": bool(aud["aprovado_camada1"]), "checagens": len(aud.get("checagens", []))},
                          "modo": "demonstracao"}
             self._log("painel", inicio, None, len(spec["visuais"]))
+            self.evento("painel", duracao_ms=int((time.perf_counter() - inicio) * 1000), visual=FORMATOS[escolhas["demo:formato"]])
         except Exception as e:  # noqa: BLE001  (o visitante recebe o recibo mesmo quando a análise falha)
             resultado = {"erro": "não consegui montar o painel com esses dados: tente outra coluna de valor ou outro recorte"}
             self._log("painel_falhou", inicio, None, None, erro=type(e).__name__)
+            self.evento("painel_falhou")
         resultado["recibo"] = self.apagar(sid)
         return resultado
 
@@ -264,6 +293,15 @@ class Demos:
     @property
     def abertas(self) -> int:
         return len(self._sessoes)
+
+    def evento(self, etapa: str, **campos: Any) -> None:
+        """Registra no funil sem nunca derrubar a demonstração."""
+        if not self.ao_evento:
+            return
+        try:
+            self.ao_evento(etapa, **campos)
+        except Exception as e:  # noqa: BLE001
+            log.warning("demo: evento do funil não gravado: %s", type(e).__name__)
 
     # ---- internos ---------------------------------------------------------------------
     def _na_fila(self, tarefa: Any, ao_cancelar: Any) -> Any:
