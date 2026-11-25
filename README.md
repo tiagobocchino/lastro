@@ -18,6 +18,15 @@ uv run lastro serve                          # portal em http://localhost:8000
 uv run pytest -q
 ```
 
+Em container (o mesmo que vai para o Cloud Run):
+
+```bash
+docker build -t lastro .
+docker run -p 8080:8080 lastro                  # portal em http://localhost:8080, saúde em /saude
+```
+
+Com `LASTRO_AMBIENTE=producao`, o container exige `LASTRO_SEGREDO` (32+ caracteres) e não cria contas de demonstração.
+
 Contas de teste do tenant `demo` (senha `demo1234`): `ana@demo.lastro` (demandante), `rui@demo.lastro` (revisor de negócio), `admin@demo.lastro` (admin, conecta fontes).
 
 ## Ciclo de uma demanda

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import sys
 
@@ -66,7 +67,7 @@ def main(argv: list[str] | None = None) -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("demo", help="cria o tenant demo e roda uma demanda de ponta a ponta")
     s = sub.add_parser("serve", help="sobe a API e o portal")
-    s.add_argument("--porta", type=int, default=8000)
+    s.add_argument("--porta", type=int, default=int(os.environ.get("PORT", "8000")))
     b = sub.add_parser("buscar", help="busca na Caixa de Ferramenta global")
     b.add_argument("pergunta")
     a = p.parse_args(argv)
@@ -75,7 +76,8 @@ def main(argv: list[str] | None = None) -> None:
     elif a.cmd == "serve":
         import uvicorn  # noqa: PLC0415
 
-        preparar_demo()
+        if os.environ.get("LASTRO_AMBIENTE", "local") != "producao":
+            preparar_demo()  # contas de demonstração só fora de produção
         uvicorn.run("lastro.api:app", host="0.0.0.0", port=a.porta)
     elif a.cmd == "buscar":
         caixa = Caixa({"global": CAIXA_GLOBAL})

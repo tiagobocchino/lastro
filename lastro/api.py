@@ -50,6 +50,19 @@ def _papel(s: Sessao, permitidos: set[str]) -> None:
         raise HTTPException(403, f"papel '{s.papel}' não pode fazer isso")
 
 
+@app.get("/saude")
+def saude() -> dict:
+    """Verificação de saúde do Cloud Run: sem login, sem detalhe interno."""
+    try:
+        con.execute("SELECT 1").fetchone()
+        banco = "ok"
+    except Exception:  # noqa: BLE001
+        banco = "erro"
+    if banco != "ok":
+        raise HTTPException(503, "banco indisponível")
+    return {"estado": "ok", "versao": app.version, "banco": banco}
+
+
 class Login(BaseModel):
     email: str
     senha: str
