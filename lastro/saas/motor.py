@@ -50,6 +50,13 @@ def carregar_catalogo(caminho: Path = CATALOGO) -> dict[str, dict]:
     return yaml.safe_load(caminho.read_text(encoding="utf-8"))
 
 
+def incremental_da(contrato: dict, entidade: str) -> dict | None:
+    """Filtro incremental da entidade: a entidade pode ter o seu (ou `null` para não ter), senão vale o do sistema.
+    Ex.: no Bling, pedidos aceitam dataAlteracaoInicial e contas a receber não."""
+    e = contrato["entidades"][entidade]
+    return e["incremental"] if "incremental" in e else contrato.get("incremental")
+
+
 def pegar(obj: Any, caminho: str | None) -> Any:
     """Lê `a.b.c` de um dicionário aninhado."""
     if not caminho:
@@ -81,6 +88,7 @@ class Limitador:
         por_s = limite.get("por_segundo")
         por_min = limite.get("por_minuto")
         intervalo = 1.0 / por_s if por_s else (60.0 / por_min if por_min else 0.0)
+        intervalo *= 1.01  # folga: 3/s espaçado em 1/3 s soma 0,9999 s e a 4ª chamada cai na mesma janela de 1 s
         self.intervalo = max(intervalo, float(limite.get("pausa_s", 0.0)))
         self.relogio = relogio
         self.ultima: float | None = None
@@ -263,10 +271,10 @@ class Leitor:
         maximo = int(e.get("maximo", pag["maximo"]))
         caminho_reg = e.get("registros") or pegar(self.c, "envelope.registros")
         params = dict(e.get("params_fixos") or {}) | dict(filtros or {})
-        inc = self.c.get("incremental")
+        inc = incremental_da(self.c, entidade)
         if desde is not None:
             if not inc:
-                raise ValueError(f"{self.saas} não tem filtro incremental no contrato")
+                raise ValueError(f"{self.saas}.{entidade} não tem filtro incremental no contrato")
             momento = desde if isinstance(desde, datetime) else datetime.combine(desde, datetime.min.time(), timezone.utc)
             params[inc["param"]] = int(momento.timestamp()) if inc["formato"] == "epoch" else momento.strftime(inc["formato"])
         registros: list[dict] = []

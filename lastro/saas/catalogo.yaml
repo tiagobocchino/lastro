@@ -256,3 +256,53 @@ google_drive:
   armadilhas:
     - "Sem o parâmetro fields a resposta vem enxuta e sem modifiedTime."
     - "Arquivos na lixeira aparecem se o filtro trashed=false for esquecido."
+
+bling:
+  nome: Bling (ERP)
+  confianca: especificação OpenAPI oficial da API v3 (developer.bling.com.br, baixada em 25/11/2026) e guias de autenticação e limites · tamanho máximo de página e rotação do refresh_token a validar no piloto
+  base_url: "https://api.bling.com.br/Api/v3"
+  auth:
+    tipo: oauth2_refresh
+    url_autorizar: "https://bling.com.br/Api/v3/oauth/authorize"
+    url_token: "https://bling.com.br/Api/v3/oauth/token"
+    cliente_no: basic           # o guia proíbe client_id/secret no corpo
+    exige_state: true
+    validade_s: 21600           # 6 horas; refresh_token vale 30 dias
+    refresh_rotativo: true      # o guia não diz; o Lastro sempre grava o que vier
+  paginacao: {tipo: pagina, param_pagina: pagina, param_limite: limite, maximo: 100, primeira: 1}
+  envelope: {registros: data}
+  limite: {por_segundo: 3, por_dia: 120000}
+  entidades:
+    pedidos_venda: {caminho: /pedidos/vendas, incremental: {param: dataAlteracaoInicial, formato: "%Y-%m-%d %H:%M:%S"}}
+    contatos: {caminho: /contatos, incremental: {param: dataAlteracaoInicial, formato: "%Y-%m-%d %H:%M:%S"}}
+    produtos: {caminho: /produtos, incremental: {param: dataAlteracaoInicial, formato: "%Y-%m-%d %H:%M:%S"}}
+    contas_receber: {caminho: /contas/receber, incremental: null}
+    contas_pagar: {caminho: /contas/pagar, incremental: null}
+  armadilhas:
+    - "Filtro por data de alteração só existe em algumas rotas (pedidos, contatos, produtos): contas a receber e a pagar voltam inteiras a cada carga."
+    - "Filtro por período maior que um ano responde HTTP 400: uma carga parada há mais de um ano precisa recomeçar do zero."
+    - "Limite de 3 requisições por segundo e 120 mil por dia para a conta inteira, somando todos os aplicativos."
+    - "O código de autorização expira em 30 segundos: a troca por token precisa ser imediata."
+    - "O token opaco foi descontinuado; a autenticação atual é JWT (o uso no cabeçalho Bearer é o mesmo)."
+    - "A resposta não informa total: o fim é a página vazia, e o truncamento não pode ser conferido."
+
+ploomes:
+  nome: Ploomes (CRM)
+  confianca: especificação oficial (developers.ploomes.com/json/openapi.json, baixada em 25/11/2026) · o envelope OData `value` não aparece na especificação, a confirmar no piloto
+  base_url: "https://public-api2.ploomes.com"
+  auth: {tipo: api_key_header, cabecalhos: {user_key: User-Key}}
+  paginacao: {tipo: offset, param_offset: "$skip", param_limite: "$top", maximo: 300}
+  envelope: {registros: value}
+  limite: {por_minuto: 120}
+  entidades:
+    negocios: {caminho: /Deals}
+    contatos: {caminho: /Contacts}
+    pedidos: {caminho: /Orders}
+    propostas: {caminho: /Quotes}
+    tarefas: {caminho: /Tasks}
+  armadilhas:
+    - "Limite de 120 requisições por minuto somando todos os usuários de integração da conta."
+    - "No máximo 300 itens por requisição em Contacts, Deals, Cities, Tasks, Orders e Quotes."
+    - "Só administradores criam a User-Key (Administração > Integrações > Usuários de Integração): peça um usuário de integração só de leitura."
+    - "A especificação não documenta campo de data de alteração: a carga é completa até o piloto confirmar um filtro OData por data."
+

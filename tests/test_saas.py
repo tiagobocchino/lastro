@@ -215,3 +215,37 @@ def test_planilha_ficticia_vira_fonte_com_perfil_do_explorador(tmp_path, monkeyp
     papeis = {c["nome"]: c["papel"] for c in perfil["colunas"]}
     assert papeis["valor"] == "numero" and papeis["status"] == "texto"
     assert "id" in perfil["chaves_candidatas"]
+
+
+# --- LST-10: Bling e Ploomes ----------------------------------------------------------------
+
+def test_bling_incremental_so_nas_rotas_que_aceitam():
+    import httpx
+
+    from lastro.cargas import cota_do_contrato
+    from lastro.saas.motor import incremental_da
+
+    assert incremental_da(CAT["bling"], "pedidos_venda")["param"] == "dataAlteracaoInicial"
+    assert incremental_da(CAT["bling"], "contas_receber") is None
+    sim = Simulador("bling", n=250)
+    lei = Leitor("bling", {"token": "t"}, cliente=httpx.Client(transport=sim.transporte()), relogio=sim.relogio)
+    ext = lei.extrair("pedidos_venda", desde=date(2026, 9, 1))
+    primeira = sim.chamadas[0]["query"]
+    assert primeira["dataAlteracaoInicial"] == "2026-09-01 00:00:00" and primeira["limite"] == "100" and primeira["pagina"] == "1"
+    assert ext.registros and all(r["atualizado_em"] >= "2026-09-01" for r in ext.registros)
+    with pytest.raises(ValueError, match="contas_receber"):
+        lei.extrair("contas_receber", desde=date(2026, 9, 1))
+    assert cota_do_contrato("bling", None) == 120000  # cota fixa da conta, sem pacote
+
+
+def test_ploomes_odata_skip_top_e_user_key():
+    import httpx
+
+    sim = Simulador("ploomes", n=650)
+    lei = Leitor("ploomes", {"user_key": "chave-de-integracao"}, cliente=httpx.Client(transport=sim.transporte()), relogio=sim.relogio)
+    ext = lei.extrair("negocios")
+    assert len(ext.registros) == 650
+    assert [c["query"]["$skip"] for c in sim.chamadas] == ["0", "300", "600"] and sim.chamadas[0]["query"]["$top"] == "300"
+    sem_chave = Leitor("ploomes", {"user_key": "invalida"}, cliente=httpx.Client(transport=Simulador("ploomes", n=5).transporte()))
+    with pytest.raises(Credencial):
+        sem_chave.extrair("negocios")

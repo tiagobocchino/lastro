@@ -1,0 +1,86 @@
+Fonte: https://developer.bling.com.br/limites
+Baixado em 2026-11-25
+
+Home
+Referência da API
+Guia
+Limites
+Webhooks
+Ajuda
+Publicando um aplicativo
+Changelogs de API
+Changelogs de Webhooks
+Soluções de IA
+Migração para autenticação JWT
+Ctrl + K
+Auto
+Suporte
+Área do integrador
+Índice da seção
+Limites
+Filtros
+Requisições
+Limites
+Filtros
+
+Requests GET com filtros por período com intervalo superior a um ano retornarão o status code 400.
+
+Filtros por período possuem os sufixos "Inicial" ou "Final", ex: dataInicial, dataFinal, dataAlteracaoInicial e dataAlteracaoFinal.
+
+Requisições
+
+A API do Bling possui uma política de segurança para evitar prejudicar o usuário e assegurar a disponibilidade dos nossos recursos.
+
+Existem limites sobre as requisições de cada conta Bling, não específicas por endpoints, mas sim para todas. Isso significa que em quaisquer módulos que estejam sendo operados, o limite é aplicado para toda a conta.
+
+Caso um limite seja atingido, os próximos requests não serão processados.
+
+Os limites por requisições são determinados pelas regras abaixo:
+
+3 requisições por segundo
+120.000 requisições por dia
+
+Exemplos de retornos quando um limite é atingido:
+
+HTTP Status code: 429 Too Many Requests
+
+JSON
+{
+	"error": {
+		"type": "TOO_MANY_REQUESTS",
+		"message": "Limite de requisições atingido.",
+		"description": "O limite de requisições por segundo foi atingido, tente novamente mais tarde.",
+		"limit": 3,
+		"period": "second"
+	}
+}
+
+
+HTTP Status code: 429 Too Many Requests
+
+JSON
+{
+	"error": {
+		"type": "TOO_MANY_REQUESTS",
+		"message": "Limite de requisições atingido.",
+		"description": "O limite de requisições por dia foi atingido, tente novamente amanhã.",
+		"limit": 120000,
+		"period": "day"
+	}
+}
+
+
+Também existem cenários aos quais o IP de origem da requisição pode ser bloqueado.
+
+As regras de bloqueios por IP são especificadas abaixo:
+
+300 erros em 10 segundos, com duração de 10 minutos.
+600 requests em 10 segundos, com duração de 10 minutos.
+20 requests (/oauth/token) em 60 segundos, com duração de 60 minutos.
+
+Com o objetivo de manter a integridade do sistema, se uma aplicação continuar ultrapassando os limites definidos, o IP poderá ser bloqueado por tempo indeterminado.
+
+© 2026 Bling - 
+Política de privacidade
+ - 
+Termos de serviço

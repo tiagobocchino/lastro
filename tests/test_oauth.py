@@ -20,7 +20,7 @@ VARS = {"google_sheets": {"planilha_id": "abc", "aba": "Vendas"}}
 
 
 def test_quatro_sistemas_tem_contrato_oauth_completo():
-    assert set(OAUTH) == {"rdstation_crm", "contaazul", "google_sheets", "google_drive"}
+    assert set(OAUTH) == {"rdstation_crm", "contaazul", "google_sheets", "google_drive", "bling"}
     for k in OAUTH:
         a = CAT[k]["auth"]
         assert a["url_autorizar"].startswith("https://") and a["url_token"].startswith("https://"), k

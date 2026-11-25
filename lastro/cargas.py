@@ -26,7 +26,7 @@ import httpx
 import pandas as pd
 
 from .saas import oauth
-from .saas.motor import CotaEsgotada, Credencial, ErroSaaS, EscritaNaFonte, Leitor, Truncamento, carregar_catalogo, gravar_bronze
+from .saas.motor import incremental_da, CotaEsgotada, Credencial, ErroSaaS, EscritaNaFonte, Leitor, Truncamento, carregar_catalogo, gravar_bronze
 from .saas.simulador import Simulador
 
 FUSO = ZoneInfo("America/Sao_Paulo")
@@ -40,10 +40,11 @@ def nome_credencial(tenant: str, saas: str) -> str:
 
 def cota_do_contrato(saas: str, pacote: str | None) -> int | None:
     """Cota diária pelo pacote do cliente (ex.: Sienge Free = 100), quando o catálogo conhece."""
-    por_pacote = CAT[saas].get("limite", {}).get("por_dia_por_pacote") or {}
+    limite = CAT[saas].get("limite", {})
+    por_pacote = limite.get("por_dia_por_pacote") or {}
     if pacote and pacote not in por_pacote:
         raise ValueError(f"{saas}: pacote '{pacote}' desconhecido; use {sorted(por_pacote)}")
-    return por_pacote.get(pacote) if pacote else None
+    return por_pacote.get(pacote) if pacote else limite.get("por_dia")  # cota fixa do sistema (ex.: Bling 120 mil/dia)
 
 
 def _frase(e: Exception) -> str:
@@ -132,7 +133,7 @@ def executar(banco: Any, cofre: Any, cfg: Any, carga: dict, agora: float | None 
             raise ErroSaaS("a fonte desta carga não existe mais")
         leitor, _ = _leitor(carga, cofre, cliente, orcamento)
         desde = None
-        if carga["marca_dagua"] and CAT[carga["saas"]].get("incremental"):
+        if carga["marca_dagua"] and incremental_da(CAT[carga["saas"]], carga["entidade"]):
             desde = datetime.fromtimestamp(carga["marca_dagua"] - SOBREPOSICAO_S, timezone.utc)
         ext = leitor.extrair(carga["entidade"], desde=desde)
         gravar_bronze(cfg.pasta_tenant(carga["tenant_id"]) / "bronze", carga["tenant_id"], ext)

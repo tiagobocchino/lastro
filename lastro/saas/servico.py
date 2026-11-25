@@ -12,7 +12,7 @@ from typing import Any
 import httpx
 import pandas as pd
 
-from .motor import Credencial, ErroSaaS, EscritaNaFonte, Leitor, Truncamento, carregar_catalogo, gravar_bronze, pegar
+from .motor import incremental_da, Credencial, ErroSaaS, EscritaNaFonte, Leitor, Truncamento, carregar_catalogo, gravar_bronze, pegar
 from .simulador import RelogioVirtual, Simulador
 
 CAT = carregar_catalogo()
@@ -27,7 +27,7 @@ def resumo_catalogo() -> list[dict]:
             "escopos": c["auth"].get("escopos", []),
             "id": k, "nome": c["nome"], "confianca": c["confianca"], "auth": c["auth"]["tipo"],
             "campos": campos_credencial(k), "paginacao": c["paginacao"]["tipo"], "maximo_pagina": c["paginacao"]["maximo"],
-            "limite": limite, "incremental": (c.get("incremental") or {}).get("param"), "erro_200": bool(c.get("erro_200")),
+            "limite": limite, "incremental": (c.get("incremental") or next((e["incremental"] for e in c["entidades"].values() if e.get("incremental")), None) or {}).get("param"), "erro_200": bool(c.get("erro_200")),
             "entidades": list(c["entidades"]), "armadilhas": c.get("armadilhas", []), "variaveis_url": _variaveis(k),
             "pacotes": list((lim.get("por_dia_por_pacote") or {}).keys()),
         })
@@ -148,6 +148,8 @@ def colecao_postman(saas: str, base_sandbox: str) -> dict:
                         "url": "{{url_login}}"},
         })
     regra = c.get("erro_200")
+    lim = c.get("limite", {})
+    espera_ms = int(1100 / lim["por_segundo"]) if lim.get("por_segundo") else (int(61000 / lim["por_minuto"]) if lim.get("por_minuto") else 0)
     for i, (nome, e) in enumerate(c["entidades"].items(), start=1):
         testes = ["pm.test('HTTP 200', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"]
         if regra:
@@ -169,8 +171,9 @@ def colecao_postman(saas: str, base_sandbox: str) -> dict:
         else:
             q = [{"key": pag["param_pagina"], "value": str(pag.get("primeira", 1))}, {"key": pag["param_limite"], "value": str(maximo)}]
         q += [{"key": k, "value": str(v)} for k, v in (e.get("params_fixos") or {}).items()]
-        if c.get("incremental"):
-            q.append({"key": c["incremental"]["param"], "value": "2026-09-01" if c["incremental"]["formato"] != "epoch" else "1788220800", "disabled": True})
+        inc = incremental_da(c, nome)
+        if inc:
+            q.append({"key": inc["param"], "value": "2026-09-01" if inc["formato"] != "epoch" else "1788220800", "disabled": True})
         if c.get("rpc"):
             corpo = {"call": e["call"], "param": [{q[0]["key"]: int(q[0]["value"]), q[1]["key"]: int(q[1]["value"])}]} | {k: "{{" + k + "}}" for k in a["campos"]}
             req = {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": json.dumps(corpo, ensure_ascii=False)}, "url": "{{base_url}}" + caminho}
@@ -178,7 +181,10 @@ def colecao_postman(saas: str, base_sandbox: str) -> dict:
             req = {"method": "GET", "header": cab, "url": {"raw": "{{base_url}}" + caminho, "host": ["{{base_url}}"], "path": [p for p in caminho.split("/") if p], "query": q}}
         if auth:
             req["auth"] = auth
-        itens.append({"name": f"{i} · {nome}", "event": [{"listen": "test", "script": {"exec": testes}}], "request": req})
+        eventos = [{"listen": "test", "script": {"exec": testes}}]
+        if espera_ms:  # respeita o limite do contrato também no Postman/Newman (ex.: Bling, 3 por segundo)
+            eventos.insert(0, {"listen": "prerequest", "script": {"exec": [f"setTimeout(() => {{}}, {espera_ms});"]}})
+        itens.append({"name": f"{i} · {nome}", "event": eventos, "request": req})
     variaveis = [{"key": "base_url", "value": f"{base_sandbox}/sandbox/{saas}"}]
     if a.get("url_login"):
         variaveis.append({"key": "url_login", "value": f"{base_sandbox}/sandbox/{saas}/auth/" + a["url_login"].rstrip("/").split("/")[-1]})

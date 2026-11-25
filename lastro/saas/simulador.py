@@ -23,7 +23,7 @@ from urllib.parse import parse_qs, urlparse
 
 import httpx
 
-from .motor import carregar_catalogo, pegar
+from .motor import incremental_da, carregar_catalogo, pegar
 
 VERBOS_DE_ESCRITA = {"PUT", "PATCH", "DELETE"}
 
@@ -148,7 +148,7 @@ class Simulador:
             erro_corpo = {regra["campo"]: regra.get("valor_erro", "ERRO: empresa não encontrada"), "code": "ESTABELECIMENTO_NOT_FOUND", "message": "empresa não encontrada"}
             return 200, {}, erro_corpo
         params = (corpo or {}).get("param", [{}])[0] if self.c.get("rpc") else query
-        regs = self._filtrar(self.dados[ent], params)
+        regs = self._filtrar(self.dados[ent], params, ent)
         return self._paginar(regs, e, params)
 
     def _dentro_do_limite(self) -> bool:
@@ -246,8 +246,8 @@ class Simulador:
                 return nome, e
         return None, {}
 
-    def _filtrar(self, regs: list[dict], params: dict) -> list[dict]:
-        inc = self.c.get("incremental")
+    def _filtrar(self, regs: list[dict], params: dict, ent: str) -> list[dict]:
+        inc = incremental_da(self.c, ent)
         if not inc or inc["param"] not in params:
             return regs
         v = params[inc["param"]]

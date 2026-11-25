@@ -6,3 +6,4 @@ Armadilhas e fatos operacionais. Uma linha por nota.
 - [yaml-dois-pontos-na-descricao](yaml-dois-pontos-na-descricao.md) — descrição de nota com dois-pontos quebra o YAML: use aspas.
 - [docker-build-atras-de-proxy](docker-build-atras-de-proxy.md) — build atrás de proxy com CA própria; como medir o tamanho real da imagem
 - [oauth-refresh-rotativo-e-relogio-zero](oauth-refresh-rotativo-e-relogio-zero.md) — refresh_token rotativo exige gravar no cofre na hora; `agora or time.time()` falha com relógio em 0.0; RD CRM v1 × v2.
+- [portal-de-api-com-javascript](portal-de-api-com-javascript.md) — doc "baixada" pode ser só a casca HTML; especificação real via Playwright; Newman --env-var sobrepõe variável de coleção; folga no limitador.
