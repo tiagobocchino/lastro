@@ -2,7 +2,7 @@
 chave: LST-35
 jira: https://adelecrm.atlassian.net/browse/LST-35
 secao: NUC
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-backend
 ---
 
