@@ -2,7 +2,7 @@
 chave: LST-44
 jira: https://adelecrm.atlassian.net/browse/LST-44
 secao: OPS
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-backend
 ---
 
