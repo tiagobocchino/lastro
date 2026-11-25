@@ -36,6 +36,11 @@ Não tem: carga completa a cada execução.
 
 - `contratos` em `/contracts`
 - `clientes` em `/clients`
+- `tarefas` em `/tasks`
+- `funcionarios` em `/employees`
+- `usuarios` em `/users`
+- `vendedores` em `/sellers`
+- `grupos` em `/groups`
 
 # Armadilhas
 

@@ -80,6 +80,12 @@ iapp:
   entidades:
     contratos: {caminho: /contracts}
     clientes: {caminho: /clients}
+    # LST-36: as demais entidades do bruto da GIMI (o formato; a base de teste é sintética)
+    tarefas: {caminho: /tasks}
+    funcionarios: {caminho: /employees}
+    usuarios: {caminho: /users}
+    vendedores: {caminho: /sellers}
+    grupos: {caminho: /groups}
   armadilhas:
     - "success:false com HTTP 200 (ESTABELECIMENTO_NOT_FOUND) vira carga vazia silenciosa se não for checado."
     - "Credencial por empresa: uma carga por empresa, partição company=."

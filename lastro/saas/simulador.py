@@ -62,6 +62,7 @@ class Simulador:
     catalogo: dict | None = None
     chamadas: list[dict] = field(default_factory=list)
     tentativas_escrita: int = 0
+    dados_base: dict | None = None  # base pronta por entidade (ex.: GIMI simulada, LST-36) no lugar da genérica
 
     def __post_init__(self) -> None:
         self.c = (self.catalogo or carregar_catalogo())[self.saas]
@@ -75,6 +76,9 @@ class Simulador:
         rnd = random.Random(self.semente)
         base = datetime(2026, 1, 1, tzinfo=timezone.utc)
         self.dados: dict[str, list[dict]] = {}
+        if self.dados_base is not None:
+            self.dados = {ent: list(self.dados_base.get(ent, [])) for ent in self.c["entidades"]}
+            return
         for ent in self.c["entidades"]:
             regs = []
             for i in range(1, self.n + 1):

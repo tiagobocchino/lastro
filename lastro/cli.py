@@ -80,6 +80,10 @@ def main(argv: list[str] | None = None) -> None:
     pn = sub.add_parser("painel", help="gera o painel de operação (HTML) a partir do schema painel do Supabase")
     pn.add_argument("--saida", default="painel-operacao.html")
     pn.add_argument("--dias", type=int, default=30)
+    sg = sub.add_parser("simular-gimi", help="gera a base sintética no padrão bruto da GIMI e o gabarito (LST-36)")
+    sg.add_argument("--saida", default="gimi-simulada")
+    sg.add_argument("--semente", type=int, default=36)
+    sg.add_argument("--contratos", type=int, default=3000, help="contratos por empresa")
     b = sub.add_parser("buscar", help="busca na Caixa de Ferramenta global")
     b.add_argument("pergunta")
     a = p.parse_args(argv)
@@ -106,6 +110,12 @@ def main(argv: list[str] | None = None) -> None:
         with open(a.saida, "w", encoding="utf-8") as f:
             f.write(gerar(dias=a.dias))
         print(f"painel gravado em {a.saida}")
+    elif a.cmd == "simular-gimi":
+        from .simulados import gimi
+
+        cont = gimi.exportar(gimi.gerar(a.semente, a.contratos), a.saida)
+        print(f"base gravada em {a.saida}: {sum(cont.values())} registros brutos em {len(cont)} arquivos, mais contratos.csv, "
+              "itens.csv, funcionarios.csv e gabarito.json")
     elif a.cmd == "buscar":
         caixa = Caixa({"global": CAIXA_GLOBAL})
         for t in caixa.buscar(a.pergunta):
