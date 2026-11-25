@@ -88,8 +88,9 @@ class Engenheiro(Agente):
         juncoes, chaves_fato = [], []
         for d in m["dimensoes"]:
             i = ident(d)
-            etapas.append((f"dim_{i}", f"CREATE OR REPLACE TABLE dim_{i} AS SELECT row_number() OVER (ORDER BY {i}) AS {i}_id, {i} FROM (SELECT DISTINCT {i} FROM silver)"))
-            juncoes.append(f"LEFT JOIN dim_{i} USING ({i})")
+            # SQL portável (sem USING e com apelido na subconsulta) para a tradução por trilha (LST-15)
+            etapas.append((f"dim_{i}", f"CREATE OR REPLACE TABLE dim_{i} AS SELECT row_number() OVER (ORDER BY {i}) AS {i}_id, {i} FROM (SELECT DISTINCT {i} FROM silver) AS d"))
+            juncoes.append(f"LEFT JOIN dim_{i} ON dim_{i}.{i} = silver.{i}")
             chaves_fato.append(f"dim_{i}.{i}_id")
         if m["data"]:
             dt = ident(m["data"])
@@ -111,7 +112,15 @@ class Engenheiro(Agente):
             ctx.sandbox.executar_pipeline(f"COPY {t} TO '{(gold / f'{t}.parquet').as_posix()}' (FORMAT parquet)")
         script = self._script(etapas, m)
         (ctx.pasta_demanda / "pipeline.py").write_text(script, encoding="utf-8")
-        resultado = {"etapas": [n for n, _ in etapas], "gold": [f"gold/{t}.parquet" for t in tabelas], "script": "pipeline.py"}
+        from ..trilhas import TRILHAS, gerar  # noqa: PLC0415
+
+        pasta_trilhas = ctx.pasta_demanda / "trilhas"
+        pasta_trilhas.mkdir(exist_ok=True)
+        for chave, texto in gerar(etapas, m).items():
+            (pasta_trilhas / TRILHAS[chave].arquivo).write_text(texto, encoding="utf-8")
+        ctx.memoria["etapas_sql"] = etapas
+        resultado = {"etapas": [n for n, _ in etapas], "gold": [f"gold/{t}.parquet" for t in tabelas], "script": "pipeline.py",
+                     "trilhas": [f"trilhas/{t.arquivo}" for t in TRILHAS.values()]}
         ctx.memoria["pipeline"] = resultado
         self.anotar(ctx, "construiu_pipeline", resultado)
         return resultado

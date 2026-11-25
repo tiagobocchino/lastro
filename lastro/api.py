@@ -190,7 +190,8 @@ def revisar(did: int, dados: Revisao, s: Annotated[Sessao, Depends(sessao)], p: 
         raise _erro(e) from e
 
 
-ARQUIVOS = {"relatorio": "relatorio.html", "notebook": "auditoria_colab.ipynb", "pipeline": "pipeline.py"}
+ARQUIVOS = {"relatorio": "relatorio.html", "notebook": "auditoria_colab.ipynb", "pipeline": "pipeline.py",
+            "bigquery": "trilhas/pipeline_bigquery.sql", "azure": "trilhas/pipeline_azure_sql.sql", "athena": "trilhas/pipeline_athena.sql"}
 
 
 @app.get("/api/demandas/{did}/arquivo/{tipo}")
@@ -200,7 +201,7 @@ def arquivo(did: int, tipo: str, p: Annotated[Plataforma, Depends(plataforma)]) 
     caminho = p.pasta_demanda(did) / ARQUIVOS[tipo]
     if not caminho.exists():
         raise HTTPException(404, "arquivo ainda não gerado")
-    return FileResponse(caminho, filename=f"demanda{did}_{ARQUIVOS[tipo]}")
+    return FileResponse(caminho, filename=f"demanda{did}_{Path(ARQUIVOS[tipo]).name}")
 
 
 @app.get("/api/caixa")

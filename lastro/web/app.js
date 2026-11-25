@@ -1,6 +1,8 @@
 // Portal do Lastro: login, demandas, grill, execução, auditoria e revisão.
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const NOMES_ARQUIVO = { notebook: "auditoria_colab.ipynb", pipeline: "pipeline.py", relatorio: "relatorio.html",
+  bigquery: "pipeline_bigquery.sql", azure: "pipeline_azure_sql.sql", athena: "pipeline_athena.sql" };
 const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 const num = (v) => typeof v === "number" ? v.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : esc(v);
 const NOMES = { nova: "nova", grill: "grill", pronta: "pronta para rodar", em_revisao: "aguardando revisor", aprovada: "aprovada", reprovada: "reprovada" };
@@ -160,6 +162,8 @@ function resultadoHtml(d) {
     <h2>Camada 2 · revisor de negócio</h2>
     <div class="bloco"><p>Abra o notebook no Google Colab, refaça as contas e compare com a tabela acima.</p>
       <div class="linha-btn"><button class="btn sec" data-baixar="notebook">baixar notebook do Colab</button><button class="btn sec" data-baixar="relatorio">baixar relatório</button><button class="btn sec" data-baixar="pipeline">baixar pipeline.py</button></div>
+      <p class="quem" style="margin:12px 0 6px">Levar para a nuvem da empresa (o mesmo pipeline, no SQL de cada uma):</p>
+      <div class="linha-btn"><button class="btn sec" data-baixar="bigquery">Google BigQuery</button><button class="btn sec" data-baixar="azure">Azure SQL / Fabric</button><button class="btn sec" data-baixar="athena">AWS Athena</button></div>
       ${d.revisao ? `<p><b>${esc(d.revisao.revisor)}</b> ${d.revisao.aprovado ? "aprovou" : "reprovou"}: ${esc(d.revisao.parecer || "(sem parecer)")}</p>` : ""}
       ${podeRevisar ? `<form id="f-rev" style="display:grid;gap:10px"><label for="parecer">Parecer<textarea id="parecer" placeholder="Ex.: números conferem com o notebook; regra de status correta."></textarea></label>
         <div class="linha-btn"><button class="btn ouro" type="submit" value="1">aprovar entrega</button><button class="btn sec" type="submit" value="0">reprovar</button></div><p class="erro-msg" id="msg-r"></p></form>`
@@ -177,7 +181,7 @@ async function revisar(e, id) {
 async function baixar(id, tipo) {
   const r = await api(`/api/demandas/${id}/arquivo/${tipo}`);
   const url = URL.createObjectURL(await r.blob());
-  const a = document.createElement("a"); a.href = url; a.download = `demanda${id}_${tipo === "notebook" ? "auditoria_colab.ipynb" : tipo === "pipeline" ? "pipeline.py" : "relatorio.html"}`;
+  const a = document.createElement("a"); a.href = url; a.download = `demanda${id}_${NOMES_ARQUIVO[tipo]}`;
   document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 

@@ -1,0 +1,119 @@
+Fonte: https://docs.cloud.google.com/scheduler/pricing
+Baixado em 2026-11-25
+
+Cloud Scheduler pricing
+
+This document explains Cloud Scheduler pricing details.
+
+Pricing overview
+
+Cloud Scheduler pricing is based exclusively on the job. A Cloud Scheduler job defines a single activity scheduled to run at a frequency provided in the definition.
+
+Note: A paused job is counted as a job.
+
+The actual running of a job is called an execution. A job is not billed for individual executions. A job is billed $0.10/job/31 days, which is $0.003 per day for each billable job. The billed usage of a job is calculated per day. For instance, if a single job is defined and deleted 10 days later, then that job is billed as $0.1/31 times 10 which is $0.03.
+
+Free usage
+
+Each Google billing account gets 3 jobs per month free. Note that the free tier is measured at the account level not the project level. For example, if your account has 5 projects with 2 jobs each, you will have 3 free jobs and 7 paid jobs.
+
+Pricing table
+
+Item
+
+	
+
+Price (USD)
+
+
+
+
+Jobs
+
+	
+0 count to 93 count
+$0.00 (Free) / 31 count, per 1 month / account
+93 count and above
+$0.10 / 31 count, per 1 month / account
+What's next
+Read the Cloud Scheduler documentation.
+Get started with Cloud Scheduler.
+Try the Pricing calculator.
+Learn about Cloud Scheduler solutions and use cases.
+Request a custom quote
+With Google Cloud's pay-as-you-go pricing, you only pay for the services you use. Connect with our sales team to get a custom quote for your organization.
+Contact sales
+Overview
+Solutions
+Products
+Pricing
+Resources
+Docs
+Support
+Sign in
+Why Google
+Choosing Google Cloud
+Trust and security
+Modern Infrastructure Cloud
+Multicloud
+Global infrastructure
+Locations
+Customers and case studies
+Analyst reports
+Whitepapers
+Blog
+Products and pricing
+Google Cloud pricing
+Google Workspace pricing
+See all products
+Solutions
+Infrastructure modernization
+Databases
+Application modernization
+Smart analytics
+Artificial Intelligence
+Security
+Productivity & work transformation
+Industry solutions
+DevOps solutions
+Small business solutions
+See all solutions
+Resources
+Google Cloud Affiliate Program
+Google Cloud documentation
+Google Cloud quickstarts
+Google Cloud Marketplace
+Learn about cloud computing
+Support
+Code samples
+Cloud Architecture Center
+Training
+Builders Hub
+Certifications
+Google for Developers
+Google Cloud for Startups
+System status
+Release Notes
+Engage
+Contact sales
+Find a Partner
+Become a Partner
+Events
+Podcasts
+Developer Center
+Press Corner
+Google Cloud on YouTube
+Google Cloud Tech on YouTube
+Follow on X
+Join User Research
+We're hiring. Join Google Cloud!
+Community forums
+About Google
+Privacy
+Site terms
+Google Cloud terms
+Our third decade of climate action: join us
+Sign up for the Google Cloud newsletter
+Subscribe
+language
+‪English‬

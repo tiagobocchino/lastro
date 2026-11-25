@@ -14,4 +14,4 @@ tags: [microsoft, excel, sharepoint, azure, azure sql, fabric, data factory, pow
 
 # Situação
 
-Playbook a completar no primeiro cliente da trilha. Base: ETL Fichas de Ação (Excel para star schema).
+Playbook pronto: `global:playbooks/microsoft-azure-sql-power-bi.md`. O Engenheiro gera o pipeline desta trilha em cada demanda (`trilhas/` da pasta da demanda), conferido por ida e volta contra o sandbox. Falta a primeira execução numa conta real do cliente.

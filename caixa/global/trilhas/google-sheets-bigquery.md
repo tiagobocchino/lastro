@@ -14,4 +14,4 @@ tags: [google, sheets, bigquery, looker studio, colab, warehouse]
 
 # Situação
 
-Playbook a completar no primeiro cliente da trilha. Base: extrator CVCRM para Google Sheets.
+Playbook pronto: `global:playbooks/google-bigquery-looker.md`. O Engenheiro gera o pipeline desta trilha em cada demanda (`trilhas/` da pasta da demanda), conferido por ida e volta contra o sandbox. Falta a primeira execução numa conta real do cliente.
