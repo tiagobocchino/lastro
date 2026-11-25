@@ -17,19 +17,19 @@ especialista: tiago
 
 ## Fase 1 · Base simulada (Claude)
 
-- [ ] Gerador reprodutível (com semente) no formato bruto da API IApp, com as mesmas entidades do bruto da GIMI: contratos (com produtos aninhados), tarefas, funcionários, usuários, clientes, vendedores e grupos
-- [ ] 4 empresas (gimi, gbl, gpb, filial), pelo menos 2 anos de histórico, com sazonalidade e volume parecido com o real
-- [ ] Sujeiras que as regras tratam: registros de teste, contrato com valor 0, datas antes do corte 2024-01-01, vendedor com sufixo " - (id)" e "_", classe entre parênteses no grupo, duplicados, nulos e campos aninhados
-- [ ] Gabarito de vendas e carteira: tipo de venda GIMI × representante, vendedor limpo e classe
-- [ ] Gabarito de orçamentos: funil orçado → aprovado ou perdido, e orçado × vendido
-- [ ] Gabarito de produtos: classificação por prefixo de SKU
-- [ ] Gabarito de RH: quadro, admissões, desligamentos e vendedor ativo
-- [ ] A base disponível como API simulada no catálogo de conectores (iapp, com paginação real) e como arquivos brutos
+- [x] Gerador reprodutível (com semente) no formato bruto da API IApp, com as mesmas entidades do bruto da GIMI: contratos (com produtos aninhados), tarefas, funcionários, usuários, clientes, vendedores e grupos
+- [x] 4 empresas (gimi, gbl, gpb, filial), pelo menos 2 anos de histórico, com sazonalidade e volume parecido com o real
+- [x] Sujeiras que as regras tratam: registros de teste, contrato com valor 0, datas antes do corte 2024-01-01, vendedor com sufixo " - (id)" e "_", classe entre parênteses no grupo, duplicados, nulos e campos aninhados
+- [x] Gabarito de vendas e carteira: tipo de venda GIMI × representante, vendedor limpo e classe
+- [x] Gabarito de orçamentos: funil orçado → aprovado ou perdido, e orçado × vendido
+- [x] Gabarito de produtos: classificação por prefixo de SKU
+- [x] Gabarito de RH: quadro, admissões, desligamentos e vendedor ativo
+- [x] A base disponível como API simulada no catálogo de conectores (iapp, com paginação real) e como arquivos brutos
 
 ## Fase 2 · Agentes contra o gabarito (Claude)
 
-- [ ] Demandas de vendas, orçamentos, produtos e RH rodadas pelos agentes, com as duas camadas
-- [ ] O resultado dos agentes conferido com o gabarito; cada diferença vira achado
+- [x] Demandas de vendas, orçamentos, produtos e RH rodadas pelos agentes, com as duas camadas
+- [x] O resultado dos agentes conferido com o gabarito; cada diferença vira achado
 - [ ] Gold aprovado publicado no BI (LST-33) de uma empresa de teste
 
 ## Fase 3 · Power BI e Data Studio (Tiago, com os agentes)
@@ -46,3 +46,26 @@ Gabarito × agentes sem diferença inexplicada, PBIP aberto no Power BI Desktop 
 ## Histórico
 
 - 25/11: escopo original (só testar o BI da lixum no Looker e no Power BI) trocado por este, a pedido do Tiago. Ainda não há bases reais conectadas.
+
+## Evidências (25/11/2026)
+
+- **Fase 1:** `lastro/simulados/gimi.py` e `lastro simular-gimi`. Semente 36 com 3000 contratos por empresa roda em 0,8 s. A IApp simulada serve a mesma base (`SaasSimulado(dados_base=...)`). Testes em `tests/test_gimi_simulada.py`. Commit 55ec064.
+- **Fase 2:** `lastro/simulados/avaliacao.py`, relatório em `docs/testes/gimi-agentes.md`. As **8 de 8 checagens batem** com o gabarito:
+  - vendido 211.290.267,16;
+  - funil 3790 / 2380 / 2109 / 1243;
+  - orçado 532.781.125,76;
+  - itens;
+  - RH por setor.
+
+  Teste em `tests/test_avaliacao_gimi.py`. Commit b6886dc.
+- **Achados (próximos cards):**
+  1. coluna derivada por regra no grill (nome limpo do vendedor, tipo de venda, classe, categoria por SKU);
+  2. "NAO DEFINIDO" no agrupamento (8,17 mi sem vendedor somem da tabela);
+  3. contagem como medida explícita;
+  4. "ativos" virando dimensão;
+  5. a regra real `diego_vaz` → "Diego" perde o sobrenome (confirmar com o cliente).
+- **Corrigido no caminho:** `count(*)` duplicado sem medida. A primeira planilha real do Tiago (`processos_gbl.xlsx`) não lia por três motivos, já corrigidos (commit 78949d5, nota `docs/memory/planilha-do-mundo-real.md`):
+  - aspas no nome da coluna;
+  - valor em texto `R$ …`;
+  - painel somando o nº do processo.
+- **Falta na fase 2:** publicar o gold no BI de uma empresa de teste em produção. Depende do Tiago escolher a empresa.
