@@ -1,0 +1,1615 @@
+Fonte: https://render.com/docs/blueprint-spec
+Baixado em 2026-11-25
+
+Blueprint YAML Reference
+
+Every Render Blueprint is backed by a YAML file that defines a set of interconnected services, databases, and environment groups. By default, this file has the name render.yaml and resides in your Git repository's root directory (you can customize this during setup).
+
+This reference page provides an example Blueprint file, along with documentation for supported fields.
+
+Example Blueprint file
+
+The following render.yaml file demonstrates usage for most supported fields. These fields are documented in further detail below.
+
+Show example Blueprint file
+Validating Blueprints
+
+You can validate the structure of your Blueprint file directly from your IDE. Additionally, the Render CLI and API both provide Blueprint validation capabilities for programmatic use.
+
+IDE
+Render CLI
+Render API
+IDE validation
+
+The Render Blueprint specification is served from SchemaStore.org, which many popular IDEs use to provide live validation and autocompletion for JSON and YAML files.
+
+For VS Code / Cursor, install the YAML extension by Red Hat to enable validation of your Blueprint file:
+
+If your IDE doesn't integrate with SchemaStore.org, the Blueprint specification is also hosted in JSON Schema format at the following URL:
+
+PLAINTEXT
+Copy to clipboard
+https://render.com/schema/render.yaml.json
+
+Consult your IDE's documentation to learn how to use this schema for validation.
+
+Root-level fields
+
+The following fields are valid at the root level of a Blueprint file:
+
+FIELD	DESCRIPTION
+
+services
+	
+
+A list of non-Postgres services to manage with the Blueprint. Each entry is an object that represents a single service. See all service fields.
+
+Services in this top-level list keep their currently assigned environment (if any) after each sync.
+
+To move a service into a specific environment, instead define it in the services list for that environment.
+To remove a service from its current environment, instead define it under the ungrouped field.
+
+Do not define the same service in more than one location.
+
+
+
+databases
+	
+
+A list of Postgres databases to manage with the Blueprint. Each entry is an object that represents a single database. See all database fields.
+
+Databases in this top-level list keep their currently assigned environment (if any) after each sync.
+
+To move a database into a specific environment, instead define it in the databases list for that environment.
+To remove a database from its current environment, instead define it under the ungrouped field.
+
+Do not define the same database in more than one location.
+
+
+
+envVarGroups
+	
+
+A list of environment groups to manage with the Blueprint. Each entry is an object that represents a single environment group. See supported fields.
+
+Environment groups in this top-level list keep their currently assigned environment (if any) after each sync.
+
+To move an environment group into a specific environment, instead define it in the envVarGroups list for that environment.
+To remove an environment group from its current environment, instead define it under the ungrouped field.
+
+Do not define the same environment group in more than one location.
+
+
+
+projects
+	
+
+A list of projects to manage with the Blueprint. A project defines one or more environments, each of which lists the services and environment groups that belong to it.
+
+For details, see Projects and environments.
+
+
+
+ungrouped
+	
+
+An object for defining resources that should not belong to any environment. Can contain optional fields services, databases, and envVarGroups, each of which matches the format of its root-level counterpart.
+
+YAML
+Copy to clipboard
+ungrouped:
+  services:
+    - type: web
+      name: my-service
+      #...
+
+Moving a resource definition into this object removes it from its current environment, guaranteeing that it is "ungrouped". In contrast, root-level definitions keep their currently assigned environment (if any).
+
+Do not define the same resource in more than one location.
+
+
+
+previews.generation
+	
+
+The generation mode to use for preview environments.
+
+YAML
+Copy to clipboard
+previews:
+  generation: manual
+
+Supported values include:
+
+off
+manual
+automatic
+
+For details on each, see Manual vs. automatic preview environments.
+
+If you omit this field, preview environments are disabled for any linked Blueprints.
+
+Setting the deprecated field previewsEnabled: true is equivalent to setting this field to automatic.
+
+This field does not affect configuration for individual service previews.
+
+
+
+previews.expireAfterDays
+	
+
+The number of days to retain a preview environment that receives no updates. After this period, Render automatically deprovisions the preview environment to help reduce your compute costs.
+
+By default, preview environments are retained indefinitely until their associated pull request is closed.
+
+For details, see Automatic expiration.
+
+Service fields
+
+Each entry in a Blueprint file's services list is an object that represents a single, non-Postgres service. (You define Postgres databases in the databases list.)
+
+See below for supported fields.
+
+Essential fields
+
+These fields pertain to a service's core configuration (name, runtime, region, and so on).
+
+FIELD	DESCRIPTION
+
+name
+	
+
+Required. The service's name. Provide a unique name for each resource in your Blueprint file.
+
+If you add the name of an existing service to your Blueprint file, Render attempts to apply the Blueprint's configuration to that existing service.
+
+
+
+type
+	
+
+Required. The type of service. One of the following:
+
+web for a web service or static site
+For a static site, you also set runtime: static.
+pserv for a private service
+worker for a background worker
+cron for a cron job
+keyvalue for a Render Key Value instance
+redis is a deprecated alias for keyvalue.
+workflow for a workflow
+
+You can't modify this value after creation.
+
+You define Render Postgres databases separately, in the databases list.
+
+
+
+runtime
+	
+
+Required unless type is keyvalue or redis. The service's runtime.
+
+Supported values include:
+
+Native language runtimes
+
+node
+python
+ruby
+go
+elixir
+rust
+
+Special-case runtimes
+
+docker for services that build an image from a Dockerfile
+image for services that pull a prebuilt image from a registry
+static for static sites
+
+You can change a service's runtime after creation (except for static sites).
+
+Workflow services currently only support node and python.
+
+This field replaces the deprecated env field.
+
+
+
+plan
+	
+
+The service's compute plan, such as free or 1c-2g. Sets the service's available compute resources.
+
+Show service compute plans
+
+If you omit this field:
+
+Render uses 0.5c-512mb for a new web service, private service, background worker, or cron job.
+Render uses 256mb for a new Key Value instance.
+Render retains the current compute plan for an existing service.
+
+Not supported for:
+
+Static sites (which don't have a compute plan)
+Workflows (which instead set per-task compute plans in code)
+
+
+previews
+	
+
+An object for configuring this service's pull request previews and preview environments.
+
+Not supported for workflows.
+
+Supported subfields
+
+generation
+
+The preview generation mode to use for this service's pull request previews.
+
+Supported values include:
+
+manual
+automatic
+
+For details on each, see Manual vs. automatic PR previews.
+
+If you omit this subfield, pull request previews are disabled for the service.
+
+Setting the deprecated field pullRequestPreviewsEnabled: true is equivalent to setting this subfield to automatic.
+
+This subfield does not affect configuration for preview environments.
+
+numInstances
+
+The number of instances to use for this service in preview environments.
+
+If you omit this subfield, preview instances use the same number of instances as the base service. If the base service uses autoscaling, preview instances use the minimum number of instances for the base service.
+
+plan
+
+The compute plan to use for this service in preview environments. Sets the preview instance's available compute resources.
+
+See all compute plans.
+
+If you omit this subfield, preview instances use the same compute plan as the base service.
+
+
+
+ipAllowList
+	
+
+Web services and static sites only. Requires a Scale or Enterprise plan. A list of the IP address ranges allowed to connect to your service over the public internet.
+
+If you omit this field:
+
+Render allows all IPs for a new service.
+Render retains the current IP ranges for an existing service.
+
+For details, see Inbound IP rules.
+
+
+
+buildCommand
+	
+
+Required for non-Docker-based services. The command that Render runs to build your service.
+
+Basic examples include:
+
+npm install (Node.js)
+pip install -r requirements.txt (Python)
+
+
+startCommand
+	
+
+The command that Render runs to start your service.
+
+Basic examples include:
+
+npm start (Node.js)
+gunicorn your_application.wsgi (Python)
+
+Required for most services.
+
+Unsupported for static sites (which instead set staticPublishPath).
+
+
+
+schedule
+	
+
+Required for cron jobs, omit otherwise. The schedule for running the cron job, as a cron expression.
+
+
+
+preDeployCommand
+	
+
+Available for paid web services, private services, and background workers. If specified, this command runs after the service’s buildCommand but before its startCommand. Recommended for running database migrations and other pre-deploy tasks.
+
+Learn more about the pre-deploy command.
+
+
+
+region
+	
+
+The region to deploy the service to. One of the following:
+
+oregon (default for non-workflow services)
+ohio
+virginia
+frankfurt
+singapore
+
+You can't modify this value after creation.
+
+Required for workflows.
+
+Unsupported for static sites (which are hosted on a global CDN).
+
+If omitted for other service types, the default value is oregon.
+
+
+
+repo
+	
+
+For Git-based services, the URL of the Git provider repo to use. Your Git provider account must have access to the repo.
+
+If omitted, Render uses the repo that contains the Blueprint file.
+
+For services that pull a prebuilt Docker image, set image instead of this field.
+
+
+
+branch
+	
+
+For Git-based services, the branch of the linked repo to use.
+
+If you omit this field:
+
+Render uses the repo's default branch (most commonly main or master) if the service uses a different repo from the Blueprint file.
+Render uses the Blueprint's branch if the service uses the same repo as the Blueprint file.
+
+If you're using preview environments, you probably don't want to set this field. If you do set it, Render uses the specified branch in all preview environments, instead of your pull request's associated branch. This prevents you from testing code changes in the preview environment.
+
+
+
+autoDeployTrigger
+	
+
+Sets the automatic deploy behavior for a Git-based service.
+
+One of the following:
+
+commit: Trigger a deploy on each commit to the service's linked branch.
+Equivalent to the deprecated setting autoDeploy: true
+checksPass: Trigger a deploy only if the linked branch's CI checks pass.
+off: Disable auto-deploys.
+Equivalent to the deprecated setting autoDeploy: false
+
+This field replaces the deprecated autoDeploy field. If you include both, autoDeployTrigger takes precedence.
+
+This field has no effect for services that deploy a prebuilt Docker image.
+
+If you omit this field:
+
+Render uses commit for a new service.
+Render retains the current value for an existing service.
+
+
+domains
+	
+
+Web services and static sites only. A list of custom domains for the service. Internet-accessible services are always reachable at their onrender.com subdomain.
+
+For each root domain in the list, Render automatically adds a www. subdomain that redirects to the root domain.
+
+For each www. subdomain in the list, Render automatically adds the corresponding root domain and redirects it to the www. subdomain.
+
+
+
+renderSubdomainPolicy
+	
+
+Web services and static sites only. Controls whether the service is reachable at its onrender.com subdomain.
+
+One of the following:
+
+enabled: The service is reachable at its onrender.com subdomain.
+disabled: The service is not reachable at its onrender.com subdomain. Requests to the subdomain receive a 404 response.
+
+Disabling a service's onrender.com subdomain requires the service to have at least one custom domain. Learn more.
+
+If you omit this field:
+
+Render uses enabled for a new service.
+Render retains the current value for an existing service.
+
+
+healthCheckPath
+	
+
+Web services only. The path of the service's health check endpoint.
+
+This value always starts with a / character.
+
+
+
+maxShutdownDelaySeconds
+	
+
+Web services, private services, and background workers only. The maximum amount of time (in seconds) that Render waits for your application process to exit gracefully after sending it a SIGTERM signal. For details, see Zero-downtime deploys.
+
+After this delay, Render terminates the process with a SIGKILL signal if it's still running.
+
+Render most commonly shuts down instances as part of redeploying your service or scaling it down. Set this field to give instances more time to finish any existing work before termination.
+
+This value must be an integer between 1 and 300, inclusive.
+
+If omitted, the default value is 30.
+
+
+
+maintenanceMode
+	
+
+Web services only. Requires a paid compute plan. Use this field to enable maintenance mode for a service and temporarily disable public traffic.
+
+YAML
+Copy to clipboard
+maintenanceMode:
+  enabled: true # default: false
+  uri: https://example.com/maintenance # Optional custom maintenance page URL
+
+Set enabled to true to enable maintenance mode or false to disable it. Optionally, set uri to an absolute URL for a custom maintenance page. The URL must not point to the same service. If you omit uri, Render displays its default maintenance page.
+
+
+
+initialDeployHook
+	
+
+Web services, private services, and background workers only. Render runs this command after a service's first successful deploy. Useful for one-time initialization tasks such as seeding a database or downloading files to a persistent disk.
+
+This command runs only once per service instance (including in preview environments). For commands that should run before every deploy, use preDeployCommand instead.
+
+afterFirstDeployCommand is a deprecated alias for this field.
+
+Docker
+
+The following fields are specific to Docker-based services. This includes both services that build an image with a Dockerfile (runtime: docker) and services that pull a prebuilt image from a registry (runtime: image).
+
+Workflow services do not currently support these Docker-specific fields.
+
+Building from a Dockerfile
+FIELD	DESCRIPTION
+
+dockerCommand
+	
+
+The command to run when starting the Docker-based service.
+
+If omitted, Render uses the CMD defined in the Dockerfile.
+
+Not supported for workflows.
+
+
+
+dockerfilePath
+	
+
+The path to the service's Dockerfile, relative to the service's rootDir. Typically used for services in a monorepo.
+
+If omitted, Render uses ./Dockerfile.
+
+Not supported for workflows.
+
+
+
+dockerContext
+	
+
+The path to the service's Docker build context, relative to the service's rootDir. Typically used for services in a monorepo.
+
+If omitted, Render uses rootDir.
+
+Not supported for workflows.
+
+
+
+registryCredential
+	
+
+If your Dockerfile references any private images, you must specify a valid credential that can access those images.
+
+This field uses the following format:
+
+YAML
+Copy to clipboard
+registryCredential:
+  fromRegistryCreds:
+    name: my-credentials # The name of a credential you've added to your workspace
+
+Add registry credentials in the Render Dashboard under Container Registry Credentials on your Workspace Settings page, or via the Render API.
+
+Not supported for workflows.
+
+Pulling a prebuilt image
+FIELD	DESCRIPTION
+
+image
+	
+
+Details for the Docker image to pull from a registry.
+
+This field uses the following format:
+
+YAML
+Copy to clipboard
+image:
+  url: docker.io/my-name/my-image:latest
+  creds: # Only for private images
+    fromRegistryCreds:
+      name: my-credential-name # The name of a credential you've added to your workspace
+
+Provide creds only if you're pulling a private image. Add registry credentials in the Render Dashboard under Container Registry Credentials on your Workspace Settings page, or via the Render API.
+
+Not supported for workflows.
+
+For more information, see Deploy a Prebuilt Docker Image.
+
+Scaling
+
+These fields apply scaling settings for the following service types:
+
+Web services
+Private services
+Background workers
+
+Other service types do not support these fields.
+
+Note the following about scaling:
+
+You can't scale a service with an attached persistent disk.
+Autoscaling requires a Pro workspace or higher.
+Manual scaling is available for all workspaces.
+If you add an existing service to a Blueprint, that service retains any existing autoscaling settings unless you add the scaling field in your Blueprint.
+Autoscaling is disabled in preview environments.
+Instead, autoscaled services run a fixed number of instances equal to their minInstances (unless you override by setting previews.numInstances).
+FIELD	DESCRIPTION
+
+numInstances
+	
+
+For a manually scaled service, the number of instances to scale the service to.
+
+If you omit this field:
+
+Render uses 1 for a new service.
+Render retains the current value for an existing service.
+
+This value has no effect for services with autoscaling enabled. Configure autoscaling behavior with the scaling field.
+
+
+
+scaling
+	
+
+For an autoscaled service, configuration details for the service's autoscaling behavior.
+
+Example:
+
+YAML
+Copy to clipboard
+scaling:
+  minInstances: 1 # Required
+  maxInstances: 3 # Required
+  targetMemoryPercent: 60 # Optional if targetCPUPercent is set (valid: 1-90)
+  targetCPUPercent: 60 # Optional if targetMemory is set (valid: 1-90)
+Build
+FIELD	DESCRIPTION
+
+buildFilter
+	
+
+File paths in the service's repo to include or ignore when determining whether to trigger an automatic build. Especially useful for monorepos.
+
+Build filter paths use glob syntax. They are always relative to the repo's root directory.
+
+When synced, this value fully replaces an existing service's build filter settings. If you omit this field for a service with existing build filter settings, Render replaces those settings with empty lists.
+
+YAML
+Copy to clipboard
+buildFilter:
+  paths: # Only trigger a build with changes to these files
+    - src/**/*.js
+  ignoredPaths: # Ignore these files, even if they match a path in 'paths'
+    - src/**/*.test.js
+
+
+rootDir
+	
+
+The service's root directory within its repo. Changes to files outside the root directory do not trigger a build for the service. Set this when working in a monorepo.
+
+If omitted, Render uses the repo's root directory.
+
+Disks
+
+Attach a persistent disk to a compatible service with the disk field:
+
+YAML
+Copy to clipboard
+disk:
+  name: app-data # Required field
+  mountPath: /opt/data # Required field
+  sizeGB: 5 # Default: 10
+
+You can modify the name and mountPath of an existing disk. You can increase the sizeGB of an existing disk, but you can't reduce it.
+
+The name field can be any string value, including disk. This value is not currently displayed in the Render Dashboard.
+
+Static sites
+
+The following fields are specific to static sites:
+
+FIELD	DESCRIPTION
+
+staticPublishPath
+	
+
+Required. The path to the directory that contains the static files to publish, relative to the service's rootDir. Common examples include ./build and ./dist.
+
+
+
+headers
+	
+
+Configuration details for a static site's HTTP response headers.
+
+Example:
+
+YAML
+Copy to clipboard
+headers:
+  # Adds X-Frame-Options: sameorigin to all site paths
+  - path: /*
+    name: X-Frame-Options
+    value: sameorigin
+  # Adds Cache-Control: must-revalidate to /blog paths
+  - path: /blog/*
+    name: Cache-Control
+    value: must-revalidate
+
+You can modify existing header rules and add new ones. Render preserves any existing header rules that are not included in the Blueprint file.
+
+
+
+routes
+	
+
+Configuration details for a static site's redirect and rewrite routes.
+
+Example:
+
+YAML
+Copy to clipboard
+routes:
+  # Redirect (HTTP status 301) from /a to /b
+  - type: redirect
+    source: /a
+    destination: /b
+  # Rewrite all /app/* requests to /app
+  - type: rewrite
+    source: /app/*
+    destination: /app
+
+You can modify existing routing rules and add new ones. Render preserves any existing routing rules that are not included in the Blueprint file.
+
+Render Key Value
+
+You define Render Key Value instances in the services field of render.yaml alongside your other non-Postgres services. A Key Value instance has the type keyvalue (or its deprecated alias redis).
+
+Example definitions
+Show example Key Value definitions
+Key-Value-specific fields
+FIELD	DESCRIPTION
+
+ipAllowList
+	
+
+Required. A list of the IP address ranges allowed to connect to your Key Value instance over the public internet.
+
+For details, see Inbound IP rules.
+
+
+
+maxmemoryPolicy
+	
+
+The Key Value instance's eviction policy for when it reaches its maximum memory limit. One of the following:
+
+allkeys-lru (default)
+volatile-lru
+allkeys-random
+volatile-random
+volatile-ttl
+noeviction
+
+For details on these policies, see the Render Key Value documentation.
+
+
+
+persistenceMode
+	
+
+The Key Value instance's data persistence behavior. One of the following:
+
+journal-snapshot
+snapshot
+off
+
+If you omit this field:
+
+Render uses journal-snapshot for a new paid instance.
+Render retains the current value for an existing paid instance.
+Render uses off for a new free instance (data persistence is not available for free instances).
+
+For details on persistence modes, see the Render Key Value documentation.
+
+Environment variables
+
+See Setting environment variables.
+
+Database fields
+
+Each entry in a Blueprint file's databases list is an object that represents a Render Postgres instance.
+
+See below for supported fields.
+
+Example definitions
+Show example database definitions
+Essential fields
+FIELD	DESCRIPTION
+
+name
+	
+
+Required. The Postgres instance's name. Provide a unique name for each resource in your Blueprint file.
+
+If you add the name of an existing instance to your Blueprint file, Render attempts to apply the Blueprint's configuration to that existing instance.
+
+You can't modify this value after creation.
+
+
+
+plan
+	
+
+The database's compute plan, such as 0.5c-1g or 2c-8g. Sets the database's available compute resources.
+
+Show Render Postgres compute plans
+
+If your database uses a legacy instance type, you cannot move it back if you move it to a current compute plan.
+
+If you omit this field:
+
+Render uses 0.1c-256mb for a new database.
+Render retains the current compute plan for an existing database.
+
+
+previewPlan
+	
+
+The compute plan to use for this database in preview environments. Sets the preview database's available compute resources.
+
+See all Render Postgres compute plans.
+
+If you omit this field, preview instances use the same compute plan as the primary database (specified by plan).
+
+
+
+diskSizeGB
+	
+
+The database's disk size, in GB. Not valid for legacy instance types, which have a fixed disk size.
+
+This value must be either 1 or a multiple of 5.
+
+You can increase disk size, but you can't decrease it.
+
+If you omit this field:
+
+For a new database, Render sets the disk size based on plan:
+
+COMPUTE PLAN	DEFAULT DISK SIZE
+free	1 GB (fixed)
+0.1c-256mb, 0.5c-1g, 2c-4g	15 GB
+1c-2g, all paid plans with 4 GB RAM per CPU	100 GB
+All paid plans with 8 GB RAM per CPU	250 GB
+
+For an existing database, Render retains the current disk size.
+
+
+
+previewDiskSizeGB
+	
+
+The disk size to use for this database in preview environments.
+
+If you omit this field, preview instances use the same disk size as the primary database (specified by diskSizeGB).
+
+
+
+storageAutoscalingEnabled
+	
+
+If true, enables storage autoscaling for the database. If false, disables storage autoscaling.
+
+Not valid for legacy instance types, which have a fixed disk size.
+
+If you omit this field:
+
+Render uses false for a new database.
+Render retains the current value for an existing database.
+
+
+region
+	
+
+The region to deploy the instance to. One of the following:
+
+oregon (default)
+ohio
+virginia
+frankfurt
+singapore
+
+You can't modify this value after creation.
+
+If omitted, the default value is oregon.
+
+
+
+ipAllowList
+	
+
+A list of the IP address ranges allowed to connect to your database over the public internet.
+
+If you omit this field:
+
+Render allows all IPs for a new database (all connections require valid credentials).
+Render retains the current IP ranges for an existing database.
+
+For details, see Inbound IP rules.
+
+
+
+connectionPool
+	
+
+The type of connection pool to operate in front of the database, if any. One of the following:
+
+pgbouncer
+none
+
+If you omit this field:
+
+Render uses none for a new database.
+Render retains the current setting for an existing database.
+
+For details, see Connection Pooling for Render Postgres.
+
+PostgreSQL settings
+FIELD	DESCRIPTION
+
+postgresMajorVersion
+	
+
+The major version number of PostgreSQL to use, as a string (e.g., "17").
+
+If omitted, Render uses the most recent version supported by the platform (currently 18).
+
+You can't modify this value after creation.
+
+
+
+databaseName
+	
+
+The name of your database in the PostgreSQL instance. This is different from the name of the Render Postgres instance itself.
+
+If omitted, Render automatically generates a name for the database based on name.
+
+You can't modify this value after creation.
+
+
+
+user
+	
+
+The name of the PostgreSQL user to create for your instance.
+
+If omitted, Render automatically generates a name for the database based on name.
+
+You can't modify this value after creation.
+
+Database replicas
+
+You can add two types of replica to a Render Postgres instance:
+
+Read replicas for increased query throughput
+A high availability standby for rapid recovery from primary instance failures
+FIELD	DESCRIPTION
+
+readReplicas
+	
+
+Add one or more read replicas to a Render Postgres instance with the following syntax:
+
+YAML
+Copy to clipboard
+readReplicas:
+  - name: my-db-replica
+
+Note the following:
+
+You can add up to five read replicas to a given Render Postgres instance.
+If you omit this field, Render preserves any existing read replicas for the instance.
+If you provide different name values from a database's existing read replicas, Render creates a new replica for each new name and destroys any existing replicas that don't match any provided name.
+If you provide an empty list (e.g., readReplicas: []), Render destroys any existing replicas and does not create new replicas.
+You can reference a read replica's properties in another service's environment variables, as you would for any other database. See Referencing service properties.
+
+For more information, see Read Replicas for Render Postgres.
+
+
+
+highAvailability
+	
+
+Add a high availability standby to a Render Postgres instance with the following syntax:
+
+YAML
+Copy to clipboard
+highAvailability:
+  enabled: true
+
+For your database to support high availability, it must:
+
+Belong to a Pro workspace or higher
+Use a compute plan with at least 1 CPU
+Use PostgreSQL version 13 or later
+
+For more information, see High Availability for Render Postgres.
+
+Inbound IP rules
+
+Configure which IP addresses can access your Render resources over the public internet using the ipAllowList field:
+
+YAML
+Copy to clipboard
+ipAllowList:
+  - source: 203.0.113.4/30
+    description: office
+
+Different resources have different requirements for setting ipAllowList:
+
+SERVICE TYPE	WORKSPACE PLAN	REQUIRED
+Render Postgres	Any	Optional (defaults to allow all)
+Render Key Value	Any	Required
+Web services and static sites	Scale or Enterprise plan	Optional (defaults to allow all)
+
+If you omit the ipAllowList field from a web service, static site, or Render Postgres instance, the resource allows connections from any IP. The ipAllowList field is required for Render Key Value instances.
+
+Each ipAllowList entry supports the following fields:
+
+FIELD	DESCRIPTION
+
+source
+	
+
+Required. The IP address or range in CIDR notation, such as 203.0.113.4/30.
+
+
+
+description
+	
+
+A label for this IP address or range (e.g., office, home, VPN).
+
+To block all external connections, set ipAllowList to an empty list:
+
+YAML
+Copy to clipboard
+ipAllowList: [] # Only allow internal connections
+
+To allow all external connections, provide the following CIDR block:
+
+YAML
+Copy to clipboard
+ipAllowList: # allow external connections from everywhere
+  - source: 0.0.0.0/0
+    description: everywhere
+
+For more details, see Inbound IP Rules.
+
+Projects and environments
+
+Learn more about projects and environments.
+
+Show an example project definition
+Project fields
+FIELD	DESCRIPTION
+
+name
+	
+
+Required. The project's name.
+
+
+
+environments
+	
+
+Required. A list of the project's environments. Each project must have at least one environment.
+
+Environment fields
+FIELD	DESCRIPTION
+
+name
+	
+
+Required. The environment's name.
+
+
+
+services
+	
+
+A list of the services that belong to the environment.
+
+Matches the format of the root-level services field.
+
+Do not define the same service in more than one location.
+
+
+
+databases
+	
+
+A list of the Render Postgres databases that belong to the environment.
+
+Matches the format of the root-level databases field.
+
+Do not define the same database in more than one location.
+
+
+
+envVarGroups
+	
+
+A list of the environment groups that belong to the environment.
+
+Matches the format of the root-level envVarGroups field.
+
+Do not define the same environment group in more than one location.
+
+
+
+networking.isolation
+	
+
+Controls private network isolation for the environment.
+
+YAML
+Copy to clipboard
+networking:
+  isolation: enabled # Block private network traffic into/out of environment
+
+Supported values include:
+
+enabled
+disabled
+
+If omitted, the default value is disabled.
+
+
+
+permissions.protection
+	
+
+Controls whether the environment is protected, which prevents destructive actions by non-admin workspace members.
+
+YAML
+Copy to clipboard
+permissions:
+  protection: enabled # Prevent destructive actions by non-admins
+
+Supported values include:
+
+enabled
+disabled
+
+If omitted, the default value is disabled.
+
+Setting environment variables
+
+Set names and values for a service's environment variables in the envVars field:
+
+YAML
+Copy to clipboard
+envVars:
+  # Sets a hardcoded value
+  # (DO NOT hardcode secrets in your Blueprint file!)
+  - key: API_BASE_URL
+    value: https://api.example.com
+
+
+  # Generates a base64-encoded 256-bit value
+  # (unless a value already exists)
+  - key: APP_SECRET
+    generateValue: true
+
+
+  # Prompts for a value in the Render Dashboard on creation
+  # (useful for secrets)
+  - key: ANTHROPIC_API_KEY
+    sync: false
+
+
+  # References a property of a database
+  # (see available properties below)
+  - key: DATABASE_URL
+    fromDatabase:
+      name: mydatabase
+      property: connectionString
+
+
+  # References an environment variable of another service
+  # (see available properties below)
+  - key: MINIO_PASSWORD
+    fromService:
+      name: minio
+      type: pserv
+      envVarKey: MINIO_ROOT_PASSWORD
+
+
+  # Adds all environment variables from an environment group
+  - fromGroup: my-env-group
+
+A Blueprint can create new environment variables or modify the values of existing ones. Render preserves existing environment variables, even if you omit them from the Blueprint file.
+
+Referencing service properties
+
+Environment variables can dynamically reference properties from services in your workspace (including the current service).
+
+These environment variables update to match the current value of the referenced property on each Blueprint sync. They do not update immediately whenever that property changes.
+
+To reference a value from most service types, use the fromService field.
+To reference from Render Postgres, use fromDatabase.
+
+See example definitions below. All fields shown in each example are required.
+
+render.yaml
+YAML
+Copy to clipboard
+envVars:
+
+
+  # Referencing a property of any non-Postgres service
+  - key: MINIO_HOST
+    fromService:
+      name: minio
+      type: pserv
+      property: host
+
+
+  # Referencing an environment variable (use envVarKey instead of property)
+  - key: MINIO_PASSWORD
+    fromService:
+      name: minio
+      type: pserv
+      envVarKey: MINIO_ROOT_PASSWORD
+
+
+  # Referencing Render Postgres
+  - key: DATABASE_URL
+    fromDatabase:
+      name: mydatabase
+      property: connectionString
+
+You can reference a service that is not defined in your Blueprint file, but that service must exist in your workspace. Otherwise, your Blueprint fails to sync.
+
+You can also make a service reference itself to expose a default environment variable (such as RENDER_EXTERNAL_HOSTNAME) under another key.
+
+Self-referencing environment variables
+
+To self-reference, provide the service's own name:
+
+YAML
+Copy to clipboard
+services:
+  - type: web
+    name: my-app 
+    runtime: node
+    envVars:
+      - key: APP_HOST
+        fromService:
+          name: my-app 
+          type: web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+
+Self-referencing can be useful for exposing one of Render's built-in environment variables at an additional key that your framework expects. The example above duplicates RENDER_EXTERNAL_HOSTNAME as APP_HOST.
+
+A service can self-reference most default environment variables, depending on its service type and deploy method, except for the following:
+
+RENDER_CPU_COUNT
+RENDER_GIT_COMMIT
+RENDER_INSTANCE_ID
+RENDER_WEB_CONCURRENCY
+WEB_CONCURRENCY
+Supported properties
+
+In addition to referencing other environment variables, you can reference the following properties of your services. As indicated, most properties are only available for specific service types.
+
+PROPERTY	DESCRIPTION
+
+host
+	
+
+Web services and private services only. The service's hostname on the private network.
+
+
+
+port
+	
+
+Web services and private services only. The port of the service's HTTP server.
+
+
+
+hostport
+	
+
+Web services and private services only. The service's host and port, separated by a colon. Use this value to connect to the service over the private network.
+
+Example: my-service:10000
+
+
+
+slug
+	
+
+Workflow services only. The workflow's slug, such as my-workflow.
+
+Each of your workflow's defined tasks has a slug that starts with this value. For example, if the workflow's slug is my-workflow, task slugs might include my-workflow/run-agent and my-workflow/extract-data.
+
+You provide a task's slug when triggering runs.
+
+
+
+connectionString
+	
+
+Render Postgres and Key Value only. The URL for connecting to the datastore over the private network.
+
+For Render Postgres, has the format postgresql://user:password@host:port/database
+For Render Key Value, has the format redis://red-xxxxxxxxxxxxxxxxxxxx:6379 (or redis://user:password@red-xxxxxxxxxxxxxxxxxxxx:6379 if internal authentication is enabled)
+
+
+connectionPoolString
+	
+
+Render Postgres only. The URL for connecting to the database through its managed connection pool (if enabled).
+
+Has the format postgresql://user:password@host:port/database
+
+
+
+user
+	
+
+Render Postgres only. The name of the user for your PostgreSQL database.
+
+Included as a component of connectionString.
+
+
+
+password
+	
+
+Render Postgres only. The password for your PostgreSQL database.
+
+Included as a component of connectionString.
+
+
+
+database
+	
+
+Render Postgres only. The name of your database within the PostgreSQL instance (not the name of the PostgreSQL instance itself).
+
+Included as a component of connectionString.
+
+Prompting for secret values
+
+Some environment variables contain secret credentials, such as an API key or access token. Do not hardcode these values in your Blueprint file!
+
+Instead, you can define these environment variables with sync: false, like so:
+
+YAML
+Copy to clipboard
+- key: ANTHROPIC_API_KEY
+  sync: false
+
+During the initial Blueprint creation flow in the Render Dashboard, you're prompted to provide a value for each environment variable with sync: false:
+
+Note the following limitations:
+
+Render prompts you for these values only during the initial Blueprint creation.
+When you update an existing Blueprint, Render ignores any environment variables with sync: false.
+Add any new secret credentials to your existing services manually.
+Render does not include sync: false environment variables in preview environments.
+As a workaround, you can also manually define the environment variable in an environment group that you apply to the service. For details, see this page.
+You can't apply sync: false to environment variables defined in an environment group.
+If you do this, Render ignores the environment variable.
+Generating random secrets
+
+You can generate a random value for an environment variable by setting generateValue: true:
+
+YAML
+Copy to clipboard
+- key: JWT_SECRET
+  generateValue: true
+
+If the environment variable doesn't already exist, Render adds it and sets its value to a randomized, base64-encoded, 256-bit value (looks like this: B0jrphAPOY7pg92AN0c9MN4yecczLMdwnx4OkA1KFUk=).
+
+Environment groups
+
+You can define environment groups in the root-level envVarGroups field of your Blueprint file:
+
+YAML
+Copy to clipboard
+envVarGroups:
+  - name: my-env-group
+    envVars:
+      - key: CONCURRENCY
+        value: 2
+      - key: SHARED_SECRET
+        generateValue: true
+
+Each environment group has a name and a list of zero or more envVars. Definitions in the envVars list can use some (but not all) of the same formats as envVars for a service:
+
+An environment group can't reference values from your services, or from other environment groups.
+You can't define an environment variable with sync: false in an environment group.
+Variable interpolation
+
+Render does not support variable interpolation in Blueprint files.
+
+To achieve a similar behavior, pair environment variables with a build or start script that performs the interpolation for you.
+
+Preview environments
+
+Use the previewValue field to override environment variable values for web and private services in preview environments:
+
+YAML
+Copy to clipboard
+envVars:
+  - key: API_BASE_URL
+    value: https://api.example.com
+    previewValue: https://api-staging.example.com 
+
+To learn more, see Preview environments.
+
+Copy page
+Blueprint YAML Reference
+Example Blueprint file
+Validating Blueprints
+Root-level fields
+Service fields
+Essential fields
+Docker
+Scaling
+Build
+Disks
+Static sites
+Render Key Value
+Environment variables
+Database fields
+Example definitions
+Essential fields
+PostgreSQL settings
+Database replicas
+Inbound IP rules
+Projects and environments
+Project fields
+Environment fields
+Setting environment variables
+Referencing service properties
+Prompting for secret values
+Generating random secrets
+Environment groups
+Variable interpolation
+Preview environments
+Did this page help?
+Start
+Home
+Your first deploy
+Free instances
+Platform features by plan
+Use with coding agents
+FAQ
+Templates
+Migrate from…
+Heroku
+Railway
+Compute
+Compute plans
+Sandboxes
+BETA
+Service types
+Which to use?
+Static sites
+Web services
+Private services
+Background workers
+Cron jobs
+Workflows
+Multi-service architectures
+Data storage
+Render Postgres
+Render Key Value (Redis®-compatible)
+Persistent disks
+Deploys
+How deploys work
+Supported languages
+Git providers (GitHub, etc.)
+Build pipeline
+Deploy hooks
+Monorepo support
+Troubleshooting deploys
+Previewing changes
+Single-service previews
+Preview environments (multi-service)
+Docker deploys
+Overview
+Deploy a registered image
+Using secrets
+Runtime
+Native runtimes
+Environment variables & secrets
+Default environment variables
+Sandboxes
+BETA
+Intro to sandboxes
+Limits & pricing
+How to…
+Create & configure sandboxes
+Execute commands
+Upload and download files
+Manage snapshots
+Use with…
+Claude Managed Agents
+Cursor Cloud Agents
+OpenAI Agents API
+SDK/CLI reference
+TypeScript SDK
+Python SDK
+CLI commands
+Workflows
+Intro to workflows
+Tutorial
+Limits & pricing
+How to…
+Define tasks
+Define flows
+NEW
+Trigger runs
+Develop locally
+SDK reference
+TypeScript SDK
+Python SDK
+Example workflows
+TypeScript examples
+Python examples
+Render Postgres
+Overview
+Create & connect
+Database credentials
+Extensions
+Version upgrades
+Logical replication
+Legacy instance types
+Database recovery
+Recovery & backups
+High availability
+Database performance
+Read replicas
+Connection pooling
+Admin apps
+Repacking tables
+Troubleshooting performance
+Networking
+Regions
+Inbound IP rules
+Edge caching
+WebSockets
+TLS certificates
+Custom domains
+Overview
+Cloudflare
+Namecheap
+Other DNS providers
+Internal traffic
+Private network
+Private links
+Outbound traffic
+Default IP ranges
+Dedicated IP addresses
+Outbound bandwidth
+Handling network changes
+Static site config
+Custom response headers
+Redirects & rewrites
+Operational Controls
+The Render Dashboard
+SSH / Shell access
+Projects & environments
+Service actions
+Scaling
+Rollbacks
+Maintenance mode
+One-off jobs
+Infrastructure as code
+Blueprints overview
+render.yaml reference
+Terraform provider
+Observability
+In-dashboard metrics
+Health checks
+Uptime best practices
+Logging
+In-dashboard logs
+Log streams (syslog/HTTPS)
+OpenTelemetry (OTel) metrics
+Provider setup
+Metrics reference
+Notifications
+Webhooks
+Email / Slack
+Integrations
+API keys
+MCP Server
+Render CLI
+Overview
+Command reference
+REST API
+Overview
+API reference
+Third-party connections
+OIDC support
+Datadog
+User Management
+Workspaces, members, & roles
+Login settings
+Audit logs
+Organizations
+Overview
+SAML SSO
+Platform Protections
+DDoS protection
+Platform maintenance
+Compliance
+Overview
+HIPAA (US health data)
+HIPAA best practices
+Shared responsibility model
+Pentest policy
+Compare
+Heroku vs Render
+Vercel vs Render
+Collapse

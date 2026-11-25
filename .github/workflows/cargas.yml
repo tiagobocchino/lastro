@@ -1,0 +1,26 @@
+# Dispara as cargas agendadas do Lastro (LST-7) de hora em hora e mantém o Supabase acordado (plano B, ADR 0009).
+# Segredos do repositório: LASTRO_URL_API (ex.: https://lastro-api.onrender.com) e LASTRO_TAREFA_SEGREDO
+# (o mesmo valor que o Render gerou). Minuto 17: fora do pico do começo da hora, quando o GitHub atrasa agendamentos.
+name: cargas agendadas
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch: {}
+permissions: {}
+jobs:
+  disparar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: POST /tarefas/cargas
+        env:
+          URL_API: ${{ secrets.LASTRO_URL_API }}
+          SEGREDO: ${{ secrets.LASTRO_TAREFA_SEGREDO }}
+        run: |
+          if [ -z "$URL_API" ] || [ -z "$SEGREDO" ]; then
+            echo "::notice::segredos LASTRO_URL_API e LASTRO_TAREFA_SEGREDO não configurados; nada a fazer"
+            exit 0
+          fi
+          # o Render gratuito leva cerca de 1 minuto para acordar: espera até 3 minutos
+          curl -fsS --retry 3 --retry-delay 30 --retry-all-errors --max-time 180 \
+            -X POST "$URL_API/tarefas/cargas" -H "X-Lastro-Tarefa: $SEGREDO"

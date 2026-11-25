@@ -2,7 +2,7 @@
 chave: LST-22
 jira: https://adelecrm.atlassian.net/browse/LST-22
 secao: OPS
-status: backlog
+status: bloqueado
 especialista: engenheiro-backend
 ---
 
@@ -22,3 +22,13 @@ especialista: engenheiro-backend
 `curl https://<servico>.onrender.com/saude` = 200 + uma execução do job registrada no rastro.
 
 Passos manuais do Tiago: criar a conta no Render, ligar o repositório e colar as variáveis.
+
+## Preparado (25/11)
+
+- `render.yaml` (Blueprint): serviço Docker gratuito em virginia, com health check `/saude`. `LASTRO_SEGREDO` e `LASTRO_TAREFA_SEGREDO` são gerados pelo Render; banco, Storage e URL pública são pedidos no painel (`sync: false`). Nenhum valor no repositório.
+- `.github/workflows/cargas.yml`: agendado no minuto 17 de cada hora e também manual. Aprovado pelo actionlint. Testado contra a API local (resposta `{"executadas":0,…}`). Sem os segredos, só registra um aviso e não falha.
+- Passo a passo: `docs/infra/render-passo-a-passo.md`. O banco da v1 é o `lastro-teste`, que já tem as migrações 0001 a 0003 e o bucket.
+
+## Bloqueio
+
+Passos do Tiago: conta no Render, Blueprint com os 4 valores, os 2 segredos no GitHub e mandar o endereço do serviço.

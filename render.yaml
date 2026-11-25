@@ -1,0 +1,28 @@
+# Blueprint do Render para a API do Lastro (plano B, ADR 0009 · card LST-22).
+# No painel do Render: New > Blueprint > escolher este repositório. Segredos: o Render pede (sync: false) ou gera (generateValue).
+services:
+  - type: web
+    name: lastro-api
+    runtime: docker
+    plan: free
+    region: virginia          # a mais perto do Supabase em São Paulo; o Render não tem região na América do Sul
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /saude
+    autoDeployTrigger: commit
+    envVars:
+      - key: LASTRO_AMBIENTE
+        value: producao
+      - key: LASTRO_SEGREDO          # assina os logins do portal
+        generateValue: true
+      - key: LASTRO_TAREFA_SEGREDO   # o GitHub Actions usa o mesmo valor para disparar as cargas
+        generateValue: true
+      - key: LASTRO_BANCO_URL        # pooler do Supabase (modo transação), com senha: só aqui
+        sync: false
+      - key: LASTRO_STORAGE_URL      # https://<ref>.supabase.co
+        sync: false
+      - key: LASTRO_STORAGE_CHAVE    # sb_secret_... (vai no cabeçalho apikey)
+        sync: false
+      - key: LASTRO_STORAGE_BUCKET
+        value: tenants
+      - key: LASTRO_URL_PUBLICA      # https://lastro-api.onrender.com ou o domínio próprio
+        sync: false
