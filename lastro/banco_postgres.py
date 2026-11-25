@@ -16,7 +16,7 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 from psycopg_pool import ConnectionPool
 
-from .banco import confere_senha, hash_senha
+from .banco import CAMPOS_CARGA_ATUALIZAVEIS, confere_senha, hash_senha
 
 
 def claims(tenant: str, email: str, papel: str) -> str:
@@ -70,8 +70,19 @@ class BancoPostgres:
     def repo(self, tenant: str, email: str = "sistema@lastro", papel: str = "admin") -> RepoPostgres:
         return RepoPostgres(self, tenant, email, papel)
 
+    def cargas_ativas(self) -> list[dict]:
+        """Todas as empresas: só o executor agendado usa (conexão de dono)."""
+        with self._dono() as con:
+            return [dict(r) for r in con.execute(f"SELECT {_COLS_CARGA} FROM cargas WHERE ativa ORDER BY id").fetchall()]
+
     def fechar(self) -> None:
         self.pool.close()
+
+
+_COLS_CARGA = (
+    "id, tenant_id, fonte_id, saas, entidade, variaveis, chave, modo, hora, cota_diaria, marca_dagua, ultima_execucao, "
+    "ultimo_status, ultimo_aviso, dia_cota, chamadas_no_dia, ativa, extract(epoch FROM criado_em)::float AS criado_em"
+)
 
 
 class RepoPostgres:
@@ -146,6 +157,35 @@ class RepoPostgres:
         with self._con() as con:
             ids = [r["id"] for r in con.execute("SELECT id FROM demandas WHERE tenant_id=%s ORDER BY id DESC", (self.tenant,))]
         return [self.demanda(i) for i in ids]  # type: ignore[misc]
+
+    # ---- cargas agendadas (LST-7) ----------------------------------------------------
+    def criar_carga(self, fonte_id: int, saas: str, entidade: str, variaveis: dict, chave: str = "id", modo: str = "real",
+                    hora: int = 6, cota_diaria: int | None = None, marca_dagua: float | None = None) -> int:
+        if fonte_id not in {f["id"] for f in self.fontes()}:
+            raise PermissionError("fonte fora deste tenant")
+        with self._con() as con:
+            r = con.execute(
+                "INSERT INTO cargas (tenant_id, fonte_id, saas, entidade, variaveis, chave, modo, hora, cota_diaria, marca_dagua) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id",
+                (self.tenant, fonte_id, saas, entidade, Jsonb(variaveis), chave, modo, hora, cota_diaria, marca_dagua),
+            ).fetchone()
+        return int(r["id"])
+
+    def cargas(self) -> list[dict]:
+        with self._con() as con:
+            return [dict(r) for r in con.execute(f"SELECT {_COLS_CARGA} FROM cargas WHERE tenant_id=%s ORDER BY id", (self.tenant,))]
+
+    def carga(self, carga_id: int) -> dict | None:
+        with self._con() as con:
+            r = con.execute(f"SELECT {_COLS_CARGA} FROM cargas WHERE tenant_id=%s AND id=%s", (self.tenant, carga_id)).fetchone()
+        return dict(r) if r else None
+
+    def atualizar_carga(self, carga_id: int, **campos: object) -> None:
+        if not set(campos) <= CAMPOS_CARGA_ATUALIZAVEIS:
+            raise ValueError(sorted(set(campos) - CAMPOS_CARGA_ATUALIZAVEIS))
+        sets = ", ".join(f"{k}=%s" for k in campos)
+        with self._con() as con:
+            con.execute(f"UPDATE cargas SET {sets} WHERE tenant_id=%s AND id=%s", (*campos.values(), self.tenant, carga_id))
 
     def atualizar_demanda(self, demanda_id: int, **campos: object) -> None:
         sets, vals = [], []

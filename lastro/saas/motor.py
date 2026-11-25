@@ -38,6 +38,10 @@ class EscritaNaFonte(PermissionError):
     """Tentativa de chamada que não é leitura."""
 
 
+class CotaEsgotada(ErroSaaS):
+    """A próxima requisição passaria da cota diária do contrato do cliente (LST-7)."""
+
+
 class Credencial(RuntimeError):
     """Credencial ausente, inválida ou expirada sem como renovar."""
 
@@ -113,6 +117,7 @@ class Leitor:
         catalogo: dict | None = None,
         max_tentativas: int = 5,
         oauth: Any = None,
+        orcamento: int | None = None,
     ):
         cat = catalogo or carregar_catalogo()
         if saas not in cat:
@@ -125,6 +130,7 @@ class Leitor:
         self.relogio = relogio or RelogioReal()
         self.limitador = Limitador(self.c.get("limite", {}), self.relogio)
         self.max_tentativas = max_tentativas
+        self.orcamento = orcamento  # máximo de requisições nesta execução (cota diária restante)
         self.oauth = oauth  # GerenteToken (lastro/saas/oauth.py): token renovado e guardado no cofre
         self.token: str | None = None
         self.chamadas = 0
@@ -202,6 +208,8 @@ class Leitor:
             raise EscritaNaFonte(f"{self.saas}: chamada '{call}' não é de leitura")
         relogou = False
         for tentativa in range(1, self.max_tentativas + 1):
+            if self.orcamento is not None and self.chamadas >= self.orcamento:
+                raise CotaEsgotada(f"{self.saas}: cota diária do contrato esgotada ({self.orcamento} requisições restantes hoje)")
             self.limitador.esperar()
             cab = self._cabecalhos()
             if rpc:

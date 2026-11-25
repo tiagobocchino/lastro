@@ -231,3 +231,36 @@ def test_cofre_supabase_guarda_atualiza_e_authenticated_nao_le(banco_pg):
     with banco_pg.repo("acme", "adm@acme", "admin")._con() as con:  # noqa: SLF001
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             con.execute("SELECT * FROM vault.decrypted_secrets")
+
+
+# --- LST-7: cargas agendadas --------------------------------------------------------------
+
+def test_cargas_mesma_interface_e_isoladas(banco):
+    b, a, o = banco
+    ra = b.repo(a, f"adm@{a}", "admin")
+    fid = ra.adicionar_fonte("sienge_contratos", "arquivo", "/x.csv")
+    cid = ra.criar_carga(fid, "sienge", "contratos_venda", {"subdominio": "acme"}, hora=7, cota_diaria=100)
+    ra.atualizar_carga(cid, ultimo_status="ok", marca_dagua=123.5, dia_cota="2026-11-24", chamadas_no_dia=3)
+    c = ra.carga(cid)
+    assert (c["saas"], c["variaveis"], c["hora"], c["cota_diaria"], c["marca_dagua"], c["chamadas_no_dia"], c["ativa"]) == (
+        "sienge", {"subdominio": "acme"}, 7, 100, 123.5, 3, True)
+    ro = b.repo(o, f"zed@{o}", "admin")
+    assert ro.cargas() == [] and ro.carga(cid) is None
+    with pytest.raises(PermissionError):
+        ro.criar_carga(fid, "sienge", "contratos_venda", {})
+    assert cid in {x["id"] for x in b.cargas_ativas()}  # o executor (dono) vê todas as empresas
+
+
+def test_rls_carga_so_admin_cria_e_ninguem_mexe_na_de_outro(dois_tokens, banco_pg):
+    import psycopg
+
+    a, o, como = dois_tokens
+    fid_o = banco_pg.repo(o, f"adm@{o}", "admin").fontes()[0]["id"]
+    banco_pg.repo(o, f"adm@{o}", "admin").criar_carga(fid_o, "sienge", "clientes", {})
+    con = como(a)
+    assert con.execute("SELECT count(*) AS n FROM cargas WHERE tenant_id=%s", (o,)).fetchone()["n"] == 0
+    assert con.execute("UPDATE cargas SET ativa=false WHERE tenant_id=%s", (o,)).rowcount == 0
+    dem = como(a, "demandante", f"ana@{a}")
+    fid_a = banco_pg.repo(a, f"adm@{a}", "admin").fontes()[0]["id"]
+    with pytest.raises(psycopg.errors.InsufficientPrivilege):
+        dem.execute("INSERT INTO cargas (tenant_id, fonte_id, saas, entidade) VALUES (%s,%s,'sienge','clientes')", (a, fid_a))

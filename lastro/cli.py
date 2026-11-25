@@ -28,6 +28,14 @@ def preparar_demo() -> tuple[Plataforma, int]:
     for email, nome, papel in DEMO_USUARIOS:
         banco.criar_usuario(DEMO_TENANT, email, nome, papel, DEMO_SENHA)
     repo = banco.repo(DEMO_TENANT, "admin@demo.lastro", "admin")
+    arq_politica = cfg.pasta_tenant(DEMO_TENANT) / "politica.yaml"
+    if not arq_politica.exists():  # a demo mostra o plano Operação (cargas agendadas)
+        from .politica import politica_padrao  # noqa: PLC0415
+
+        pol = politica_padrao()
+        pol.plano = "operacao"
+        arq_politica.parent.mkdir(parents=True, exist_ok=True)
+        pol.salvar(arq_politica)
     existentes = [f for f in repo.fontes() if f["nome"] == "orcamentos"]
     if existentes:
         return Plataforma(cfg, repo), existentes[0]["id"]
@@ -68,6 +76,7 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("demo", help="cria o tenant demo e roda uma demanda de ponta a ponta")
     s = sub.add_parser("serve", help="sobe a API e o portal")
     s.add_argument("--porta", type=int, default=int(os.environ.get("PORT", "8000")))
+    sub.add_parser("cargas", help="roda as cargas agendadas que estão na hora (o Cloud Scheduler faz isso em produção)")
     b = sub.add_parser("buscar", help="busca na Caixa de Ferramenta global")
     b.add_argument("pergunta")
     a = p.parse_args(argv)
@@ -79,6 +88,15 @@ def main(argv: list[str] | None = None) -> None:
         if os.environ.get("LASTRO_AMBIENTE", "local") != "producao":
             preparar_demo()  # contas de demonstração só fora de produção
         uvicorn.run("lastro.api:app", host="0.0.0.0", port=a.porta)
+    elif a.cmd == "cargas":
+        from .banco import abrir_banco as _abrir  # noqa: PLC0415
+        from .cargas import executar_devidas  # noqa: PLC0415
+        from .cofre import abrir_cofre  # noqa: PLC0415
+
+        cfg = carregar()
+        banco = _abrir(cfg)
+        for r in executar_devidas(banco, abrir_cofre(cfg, banco), cfg):
+            print(f"carga {r['carga']} ({r['tenant']}, {r['saas']}): {r['status']} · {r['chamadas']} requisições {r.get('aviso', '')}")
     elif a.cmd == "buscar":
         caixa = Caixa({"global": CAIXA_GLOBAL})
         for t in caixa.buscar(a.pergunta):

@@ -17,3 +17,6 @@
   --ok: #7CC4A0; --erro: #F08A7C; --aviso: #E7C06B; color-scheme: dark; }
 
 .aviso-oauth { border-left: 3px solid var(--ouro); padding-left: 14px; display: grid; gap: 8px }
+.aviso-carga { white-space: normal; color: var(--aviso); font-size: 13px }
+.aviso-portal { display: grid; gap: 4px; text-align: left; width: 100%; margin-bottom: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--aviso); background: transparent; color: inherit; font: inherit; cursor: pointer }
+.aviso-portal span { font-size: 13px; color: var(--quieta) }

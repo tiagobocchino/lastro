@@ -84,6 +84,18 @@ gcloud run deploy lastro-api --image <imagem> --region us-central1 \
 
 A conta de serviço da API precisa do papel `roles/storage.objectUser` só nesse bucket. Os nomes das flags e a exigência de `gen2` devem ser conferidos na documentação do Cloud Run no dia do deploy.
 
+## Cargas agendadas (LST-7)
+
+Um job do Cloud Scheduler chama a API de hora em hora; ela roda só as cargas que estão no horário (America/Sao_Paulo):
+
+```bash
+gcloud scheduler jobs create http lastro-cargas --location us-central1 --schedule "5 * * * *" \
+  --uri https://<api>/tarefas/cargas --http-method POST \
+  --headers X-Lastro-Tarefa=<valor de LASTRO_TAREFA_SEGREDO>
+```
+
+`LASTRO_TAREFA_SEGREDO` (32+ caracteres) fica no Secret Manager e é passado ao Cloud Run como variável. Sem ele, a rota responde 503 e nada roda. O mesmo job pode servir de keepalive do Supabase.
+
 ## Riscos
 
 | Risco | Efeito | Mitigação |

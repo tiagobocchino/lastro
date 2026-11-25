@@ -72,6 +72,9 @@ async function carregarLista() {
     : `<p class="quem">Nenhuma demanda ainda. Comece pela primeira pergunta.</p>`;
   document.querySelectorAll(".item").forEach((b) => (b.onclick = () => abrirDemanda(Number(b.dataset.id))));
   marcarLista();
+  const problemas = (await (await api("/api/cargas")).json()).filter((k) => k.ultimo_status === "falhou" || k.ultimo_status === "cota");
+  if (problemas.length) $("#lista").insertAdjacentHTML("afterbegin", `<button class="aviso-portal" id="b-aviso-cargas"><b>${plural(problemas.length, "carga não atualizou", "cargas não atualizaram")}</b><span>${esc(problemas[0].fonte)}: ${esc(problemas[0].ultimo_aviso)}</span></button>`);
+  if ($("#b-aviso-cargas")) $("#b-aviso-cargas").onclick = () => telaConectores(problemas[0].saas);
 }
 
 function marcarLista() { document.querySelectorAll(".item").forEach((b) => b.classList.toggle("ativo", Number(b.dataset.id) === atual)); }
@@ -194,6 +197,7 @@ async function telaConectores(escolhido) {
   const admin = sessao.papel === "admin";
   $("#painel").innerHTML = `<p class="rot">conector</p><h1>${esc(c.nome)}</h1>
     <ol class="passos">${PASSOS.map((p, i) => `<li${i < 4 ? ' class="feito"' : ""}>${esc(p)}</li>`).join("")}</ol>
+    <div id="cargas"></div>
     <h2>Contrato da API</h2>
     <div class="bloco tabela"><table class="contrato"><tbody>
       <tr><th>origem do contrato</th><td>${esc(c.confianca)}</td></tr>
@@ -218,6 +222,7 @@ async function telaConectores(escolhido) {
       <div class="linha-btn"><button class="btn ouro" type="submit" value="testar">testar conexão</button><button class="btn sec" type="submit" value="importar">testar e importar como fonte</button><button class="btn sec" type="button" id="b-postman">baixar coleção do Postman</button></div>
       <p class="quem">No Postman: importe a coleção e rode na ordem. Ela já aponta para o sandbox deste servidor e testa as armadilhas do contrato.</p>
     </form><div id="laudo"></div>` : `<p class="quem">Só o admin da empresa conecta sistemas.</p>`}`;
+  cargasHtml();
   if (!admin) return;
   if ($("#b-autorizar")) $("#b-autorizar").onclick = async () => {
     try { location.href = (await (await api(`/api/saas/${c.id}/oauth/iniciar`)).json()).url; }
@@ -235,9 +240,44 @@ async function telaConectores(escolhido) {
     const corpo = { entidade: $("#ent").value, credenciais: cred, variaveis: vars, desde: $("#desde")?.value || null,
       modo: document.querySelector("[name=modo]:checked").value, importar: e.submitter?.value === "importar" };
     $("#laudo").innerHTML = `<div class="bloco"><p class="quem">conectando…</p></div>`;
-    try { $("#laudo").innerHTML = laudoHtml(await (await api(`/api/saas/${c.id}/testar`, { method: "POST", json: corpo })).json()); }
+    try {
+      const l = await (await api(`/api/saas/${c.id}/testar`, { method: "POST", json: corpo })).json();
+      $("#laudo").innerHTML = laudoHtml(l) + (l.fonte_id ? agendarHtml(c) : "");
+      if (l.fonte_id && $("#f-agendar")) $("#f-agendar").onsubmit = (ev) => agendar(ev, c, corpo, l.fonte_id);
+    }
     catch (err) { $("#laudo").innerHTML = `<div class="bloco"><p class="erro-msg">${esc(err.message)}</p></div>`; }
   };
+}
+
+function agendarHtml(c) {
+  const horas = Array.from({ length: 24 }, (_, h) => `<option value="${h}"${h === 6 ? " selected" : ""}>${String(h).padStart(2, "0")}h</option>`).join("");
+  return `<form class="bloco" id="f-agendar"><h3 style="margin:0">Manter esta fonte atualizada</h3>
+    <p class="quem">Todo dia, o Lastro busca só o que mudou desde a última carga boa. Se der erro ou a cota do contrato acabar, nada é alterado e o aviso aparece aqui. Plano Operação.</p>
+    <div class="duas-col"><label for="ag-hora">Horário (Brasília)<select id="ag-hora">${horas}</select></label>
+    ${c.pacotes.length ? `<label for="ag-pacote">Pacote do contrato <small>define a cota diária</small><select id="ag-pacote"><option value="">não sei / sem cota</option>${c.pacotes.map((p) => `<option>${esc(p)}</option>`).join("")}</select></label>` : ""}</div>
+    <div class="linha-btn"><button class="btn ouro" type="submit">agendar carga diária</button></div><p class="erro-msg" id="msg-ag"></p></form>`;
+}
+
+async function agendar(e, c, corpo, fonteId) {
+  e.preventDefault();
+  try {
+    const r = await (await api("/api/cargas", { method: "POST", json: { fonte_id: fonteId, saas: c.id, entidade: corpo.entidade, variaveis: corpo.variaveis,
+      credenciais: corpo.credenciais, modo: corpo.modo, hora: Number($("#ag-hora").value), pacote: $("#ag-pacote")?.value || null } })).json();
+    $("#f-agendar").outerHTML = `<div class="bloco"><p class="ok"><b>Carga agendada.</b> Todo dia às ${String(r.hora).padStart(2, "0")}h${r.cota_diaria ? `, até ${r.cota_diaria} requisições por dia` : ""}.</p></div>`;
+    cargasHtml();
+  } catch (err) { $("#msg-ag").textContent = err.message; }
+}
+
+const STATUS_CARGA = { nunca: "ainda não rodou", ok: "atualizada", falhou: "falhou", cota: "cota esgotada" };
+const quando = (t) => t ? new Date(t * 1000).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
+
+async function cargasHtml() {
+  const alvo = $("#cargas");
+  if (!alvo) return;
+  const cs = await (await api("/api/cargas")).json();
+  alvo.innerHTML = cs.length ? `<h2>Cargas agendadas</h2><div class="bloco tabela"><table><thead><tr><th>fonte</th><th>horário</th><th>situação</th><th>última carga boa</th><th>requisições hoje</th></tr></thead><tbody>
+    ${cs.map((k) => `<tr><td>${esc(k.fonte)}</td><td>${String(k.hora).padStart(2, "0")}h</td><td><span class="status ${k.ultimo_status === "ok" ? "aprovada" : k.ultimo_status === "nunca" ? "" : "reprovada"}">${STATUS_CARGA[k.ultimo_status]}</span></td><td>${quando(k.marca_dagua)}</td><td>${k.chamadas_no_dia}${k.cota_diaria ? " de " + k.cota_diaria : ""}</td></tr>
+      ${k.ultimo_aviso ? `<tr><td colspan="5" class="aviso-carga">${esc(k.ultimo_aviso)}</td></tr>` : ""}`).join("")}</tbody></table></div>` : "";
 }
 
 function laudoHtml(l) {

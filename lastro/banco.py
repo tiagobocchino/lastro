@@ -32,11 +32,19 @@ CREATE TABLE IF NOT EXISTS demandas (
   pergunta TEXT NOT NULL, fontes TEXT NOT NULL, status TEXT NOT NULL,
   grill TEXT NOT NULL DEFAULT '[]', respostas TEXT NOT NULL DEFAULT '{}',
   resultado TEXT NOT NULL DEFAULT '{}', criado_em REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS cargas (
+  id INTEGER PRIMARY KEY, tenant_id TEXT NOT NULL REFERENCES tenants(id), fonte_id INTEGER NOT NULL REFERENCES fontes(id),
+  saas TEXT NOT NULL, entidade TEXT NOT NULL, variaveis TEXT NOT NULL DEFAULT '{}', chave TEXT NOT NULL DEFAULT 'id',
+  modo TEXT NOT NULL DEFAULT 'real', hora INTEGER NOT NULL DEFAULT 6, cota_diaria INTEGER,
+  marca_dagua REAL, ultima_execucao REAL, ultimo_status TEXT NOT NULL DEFAULT 'nunca', ultimo_aviso TEXT NOT NULL DEFAULT '',
+  dia_cota TEXT NOT NULL DEFAULT '', chamadas_no_dia INTEGER NOT NULL DEFAULT 0, ativa INTEGER NOT NULL DEFAULT 1,
+  criado_em REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS eventos (
   id INTEGER PRIMARY KEY, tenant_id TEXT NOT NULL, demanda_id INTEGER, ator TEXT NOT NULL,
   acao TEXT NOT NULL, detalhe TEXT NOT NULL, em REAL NOT NULL);
 """
 
+CAMPOS_CARGA_ATUALIZAVEIS = {"marca_dagua", "ultima_execucao", "ultimo_status", "ultimo_aviso", "dia_cota", "chamadas_no_dia", "ativa", "hora", "cota_diaria"}
 PAPEIS_QUE_DEMANDAM = {"admin", "demandante"}
 PAPEIS_QUE_REVISAM = {"admin", "revisor"}
 
@@ -158,6 +166,34 @@ class Repo:
         rows = self.con.execute("SELECT id FROM demandas WHERE tenant_id=? ORDER BY id DESC", (self.tenant,)).fetchall()
         return [self.demanda(r["id"]) for r in rows]  # type: ignore[misc]
 
+    # ---- cargas agendadas (LST-7) ----------------------------------------------------
+    def criar_carga(self, fonte_id: int, saas: str, entidade: str, variaveis: dict, chave: str = "id", modo: str = "real",
+                    hora: int = 6, cota_diaria: int | None = None, marca_dagua: float | None = None) -> int:
+        if fonte_id not in {f["id"] for f in self.fontes()}:
+            raise PermissionError("fonte fora deste tenant")
+        cur = self.con.execute(
+            "INSERT INTO cargas (tenant_id, fonte_id, saas, entidade, variaveis, chave, modo, hora, cota_diaria, marca_dagua, criado_em) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (self.tenant, fonte_id, saas, entidade, json.dumps(variaveis), chave, modo, hora, cota_diaria, marca_dagua, time.time()),
+        )
+        self.con.commit()
+        return int(cur.lastrowid)
+
+    def cargas(self) -> list[dict]:
+        rows = self.con.execute("SELECT * FROM cargas WHERE tenant_id=? ORDER BY id", (self.tenant,)).fetchall()
+        return [_carga_sqlite(r) for r in rows]
+
+    def carga(self, carga_id: int) -> dict | None:
+        r = self.con.execute("SELECT * FROM cargas WHERE tenant_id=? AND id=?", (self.tenant, carga_id)).fetchone()
+        return _carga_sqlite(r) if r else None
+
+    def atualizar_carga(self, carga_id: int, **campos: object) -> None:
+        if not set(campos) <= CAMPOS_CARGA_ATUALIZAVEIS:
+            raise ValueError(sorted(set(campos) - CAMPOS_CARGA_ATUALIZAVEIS))
+        sets = ", ".join(f"{k}=?" for k in campos)
+        self.con.execute(f"UPDATE cargas SET {sets} WHERE tenant_id=? AND id=?", (*campos.values(), self.tenant, carga_id))
+        self.con.commit()
+
     def atualizar_demanda(self, demanda_id: int, **campos: object) -> None:
         sets, vals = [], []
         for k, v in campos.items():
@@ -167,6 +203,13 @@ class Repo:
             vals.append(v if isinstance(v, str) else json.dumps(v, ensure_ascii=False, default=str))
         self.con.execute(f"UPDATE demandas SET {', '.join(sets)} WHERE tenant_id=? AND id=?", (*vals, self.tenant, demanda_id))
         self.con.commit()
+
+
+def _carga_sqlite(r: sqlite3.Row) -> dict:
+    d = dict(r)
+    d["variaveis"] = json.loads(d["variaveis"])
+    d["ativa"] = bool(d["ativa"])
+    return d
 
 
 class BancoSqlite:
@@ -190,6 +233,10 @@ class BancoSqlite:
 
     def repo(self, tenant: str, email: str = "sistema@lastro", papel: str = "admin") -> Repo:  # noqa: ARG002
         return Repo(self.con, tenant)
+
+    def cargas_ativas(self) -> list[dict]:
+        """Todas as empresas: só o executor agendado usa (conexão de dono)."""
+        return [_carga_sqlite(r) for r in self.con.execute("SELECT * FROM cargas WHERE ativa=1 ORDER BY id").fetchall()]
 
     def fechar(self) -> None:
         self.con.close()

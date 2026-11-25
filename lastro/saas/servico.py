@@ -29,6 +29,7 @@ def resumo_catalogo() -> list[dict]:
             "campos": campos_credencial(k), "paginacao": c["paginacao"]["tipo"], "maximo_pagina": c["paginacao"]["maximo"],
             "limite": limite, "incremental": (c.get("incremental") or {}).get("param"), "erro_200": bool(c.get("erro_200")),
             "entidades": list(c["entidades"]), "armadilhas": c.get("armadilhas", []), "variaveis_url": _variaveis(k),
+            "pacotes": list((lim.get("por_dia_por_pacote") or {}).keys()),
         })
     return lista
 

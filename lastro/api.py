@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hmac
 import html
+import json
 import os
 import re
 import time
@@ -22,6 +24,7 @@ from .conectores import EXTENSOES
 from .politica import PermissaoNegada
 from .servico import Plataforma
 from .somente_leitura import EscritaBloqueada
+from . import cargas
 from .saas import oauth
 
 cfg = carregar()
@@ -324,6 +327,71 @@ def postman(saas: str, request: Request, s: Annotated[Sessao, Depends(sessao)]) 
         raise HTTPException(404, "SaaS fora do catálogo")
     base = str(request.base_url).rstrip("/")
     return JSONResponse(saas_servico.colecao_postman(saas, base), headers={"Content-Disposition": f'attachment; filename="lastro-{saas}.postman_collection.json"'})
+
+
+# ---- Cargas agendadas (LST-7, plano Operação) ---------------------------------------------
+
+class NovaCarga(BaseModel):
+    fonte_id: int
+    saas: str
+    entidade: str
+    variaveis: dict[str, str] = {}
+    credenciais: dict[str, str] = {}
+    modo: str = "real"
+    hora: int = 6
+    pacote: str | None = None
+    cota_diaria: int | None = None
+    chave: str = "id"
+
+
+def _publica(c: dict, nomes: dict[int, str]) -> dict:
+    return {k: c[k] for k in ("id", "fonte_id", "saas", "entidade", "modo", "hora", "cota_diaria", "marca_dagua",
+                              "ultima_execucao", "ultimo_status", "ultimo_aviso", "chamadas_no_dia", "ativa")} | {"fonte": nomes.get(c["fonte_id"], "")}
+
+
+@app.post("/api/cargas")
+def criar_carga(dados: NovaCarga, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    _papel(s, {"admin"})
+    if p.politica.plano != "operacao":
+        raise HTTPException(403, "carga agendada é do plano Operação")
+    contrato = saas_servico.CAT.get(dados.saas)
+    if not contrato or dados.entidade not in contrato["entidades"] or dados.modo not in ("real", "sandbox") or not 0 <= dados.hora <= 23:
+        raise HTTPException(400, "sistema, entidade, modo ou hora inválidos")
+    try:
+        cota = dados.cota_diaria or cargas.cota_do_contrato(dados.saas, dados.pacote)
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
+    if dados.modo == "real" and contrato["auth"]["tipo"] != "oauth2_refresh":
+        if not dados.credenciais:
+            raise HTTPException(400, "informe a credencial somente leitura do sistema")
+        cofre.guardar(cargas.nome_credencial(s.tenant, dados.saas), json.dumps(dados.credenciais))  # só no cofre
+    try:
+        # a fonte acabou de ser importada inteira: a próxima carga já pede só o que mudou
+        cid = p.repo.criar_carga(dados.fonte_id, dados.saas, dados.entidade, dados.variaveis, dados.chave, dados.modo,
+                                 dados.hora, cota, marca_dagua=time.time())
+    except PermissionError as e:
+        raise HTTPException(404, "fonte não encontrada") from e
+    p.repo.registrar(s.email, "agendou_carga", {"carga": cid, "saas": dados.saas, "entidade": dados.entidade, "hora": dados.hora, "cota_diaria": cota})
+    nomes = {f["id"]: f["nome"] for f in p.repo.fontes()}
+    return _publica(p.repo.carga(cid), nomes)
+
+
+@app.get("/api/cargas")
+def listar_cargas(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> list[dict]:
+    nomes = {f["id"]: f["nome"] for f in p.repo.fontes()}
+    return [_publica(c, nomes) for c in p.repo.cargas()]
+
+
+@app.post("/tarefas/cargas", include_in_schema=False)
+def tarefa_cargas(x_lastro_tarefa: Annotated[str | None, Header()] = None) -> dict:
+    """Chamado pelo Cloud Scheduler de hora em hora. Protegido por segredo próprio, não por login."""
+    esperado = os.environ.get("LASTRO_TAREFA_SEGREDO", "")
+    if len(esperado) < 32:
+        raise HTTPException(503, "LASTRO_TAREFA_SEGREDO não configurado")
+    if not x_lastro_tarefa or not hmac.compare_digest(x_lastro_tarefa, esperado):
+        raise HTTPException(401, "tarefa não autorizada")
+    feitas = cargas.executar_devidas(banco, cofre, cfg, cliente=_cliente_oauth)
+    return {"executadas": len(feitas), "por_status": {st: sum(f["status"] == st for f in feitas) for st in ("ok", "cota", "falhou")}}
 
 
 @app.api_route("/sandbox/{saas}/{caminho:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"], include_in_schema=False)

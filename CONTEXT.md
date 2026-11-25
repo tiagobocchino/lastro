@@ -20,3 +20,6 @@ Glossário. Um termo por linha; agentes e código usam estes nomes.
 - **Plano**: contrato do tenant: `consulta`, `pipeline` ou `operacao`.
 - **Liberdade**: ação que a política do tenant libera para um agente (`sandbox_temporario`, `gerar_pipeline`, `pesquisar_fora` …).
 - **Bronze, Silver, Gold**: as camadas do pipeline: cópia da fonte, dado limpo e deduplicado, modelo dimensional (fato + dimensões).
+- **Carga agendada**: atualização diária de uma fonte vinda de um SaaS (plano Operação). Tudo ou nada: falha não altera a fonte e vira aviso no portal.
+- **Marca d'água**: o início da última carga agendada boa; a próxima pede só o que mudou desde ela (com 1 hora de sobreposição).
+- **Cota diária**: requisições por dia do contrato do cliente no sistema (ex.: Sienge Free = 100), somada entre as cargas do mesmo sistema.
