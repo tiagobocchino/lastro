@@ -1,6 +1,6 @@
 # Plano de nuvem · primeira versão do Lastro
 
-Status: proposta · 25/11/2026 · decisão em `docs/adr/0006-infra-v1-gratuita.md` · cards no épico OPS do Jira.
+Status: proposta · 25/11/2026 · **em vigor o plano B (ADR 0009: Render + Supabase Storage + GitHub Actions) enquanto o faturamento do Google estiver bloqueado** · decisão em `docs/adr/0006-infra-v1-gratuita.md` · cards no épico OPS do Jira.
 
 ## Resumo
 

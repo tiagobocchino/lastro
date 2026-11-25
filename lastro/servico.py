@@ -27,16 +27,23 @@ from .politica import Politica, politica_padrao
 
 
 class Plataforma:
-    def __init__(self, cfg: Config, repo: Repo):
+    def __init__(self, cfg: Config, repo: Repo, espelho=None):  # noqa: ANN001  (EspelhoStorage, LST-30)
         self.cfg = cfg
         self.repo = repo
+        self.espelho = espelho
         self.pasta = cfg.pasta_tenant(repo.tenant)
+        if espelho:  # disco efêmero (Render): traz a pasta da empresa antes de qualquer leitura
+            espelho.restaurar(self.pasta, repo.tenant)
         self.pasta.mkdir(parents=True, exist_ok=True)
         arq_politica = self.pasta / "politica.yaml"
         if not arq_politica.exists():
             politica_padrao().salvar(arq_politica)
         self.politica = Politica.de_arquivo(arq_politica)
         self.llm = LLM(cfg)
+
+    def sincronizar(self) -> int:
+        """Envia ao espelho o que mudou na pasta da empresa (no-op sem espelho)."""
+        return self.espelho.sincronizar(self.pasta, self.repo.tenant) if self.espelho else 0
 
     def caixa(self, demanda_id: int | None = None) -> Caixa:
         pastas = {"global": CAIXA_GLOBAL, "tenant": self.pasta / "caixa"}

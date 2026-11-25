@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hmac
+import logging
 import html
 import json
 import os
@@ -19,6 +20,7 @@ from pydantic import BaseModel
 
 from .banco import PAPEIS_QUE_DEMANDAM, PAPEIS_QUE_REVISAM, abrir_banco, emitir_token, ler_token
 from .cofre import abrir_cofre
+from .espelho import abrir_espelho
 from .config import carregar
 from .conectores import EXTENSOES
 from .politica import PermissaoNegada
@@ -28,8 +30,10 @@ from . import cargas
 from .saas import oauth
 
 cfg = carregar()
+log = logging.getLogger("lastro")
 banco = abrir_banco(cfg)
 cofre = abrir_cofre(cfg, banco)
+espelho = abrir_espelho()
 WEB = Path(__file__).parent / "web"
 app = FastAPI(title="Lastro", version="0.1.0")
 
@@ -49,8 +53,13 @@ def sessao(authorization: Annotated[str | None, Header()] = None) -> Sessao:
     return Sessao(email=carga["e"], tenant=carga["t"], papel=carga["p"])
 
 
-def plataforma(s: Annotated[Sessao, Depends(sessao)]) -> Plataforma:
-    return Plataforma(cfg, banco.repo(s.tenant, s.email, s.papel))
+def plataforma(s: Annotated[Sessao, Depends(sessao)]):  # noqa: ANN201
+    p = Plataforma(cfg, banco.repo(s.tenant, s.email, s.papel), espelho)
+    yield p
+    try:  # o que a requisição gravou vai para o Storage (plano B, ADR 0009)
+        p.sincronizar()
+    except Exception as e:  # noqa: BLE001
+        log.error("espelho: falha ao sincronizar %s: %s", s.tenant, type(e).__name__)
 
 
 def _papel(s: Sessao, permitidos: set[str]) -> None:
@@ -391,7 +400,7 @@ def tarefa_cargas(x_lastro_tarefa: Annotated[str | None, Header()] = None) -> di
         raise HTTPException(503, "LASTRO_TAREFA_SEGREDO não configurado")
     if not x_lastro_tarefa or not hmac.compare_digest(x_lastro_tarefa, esperado):
         raise HTTPException(401, "tarefa não autorizada")
-    feitas = cargas.executar_devidas(banco, cofre, cfg, cliente=_cliente_oauth)
+    feitas = cargas.executar_devidas(banco, cofre, cfg, cliente=_cliente_oauth, espelho=espelho)
     return {"executadas": len(feitas), "por_status": {st: sum(f["status"] == st for f in feitas) for st in ("ok", "cota", "falhou")}}
 
 

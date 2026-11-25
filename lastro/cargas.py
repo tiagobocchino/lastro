@@ -25,6 +25,7 @@ from zoneinfo import ZoneInfo
 import httpx
 import pandas as pd
 
+from .espelho import ErroEspelho
 from .saas import oauth
 from .saas.motor import incremental_da, CotaEsgotada, Credencial, ErroSaaS, EscritaNaFonte, Leitor, Truncamento, carregar_catalogo, gravar_bronze
 from .saas.simulador import Simulador
@@ -116,8 +117,9 @@ def _mesclar(destino: Path, registros: list[dict], chave: str) -> int:
 
 
 def executar(banco: Any, cofre: Any, cfg: Any, carga: dict, agora: float | None = None,
-             cliente: httpx.Client | None = None) -> dict:
+             cliente: httpx.Client | None = None, espelho: Any = None) -> dict:
     agora = time.time() if agora is None else agora
+    pasta = cfg.pasta_tenant(carga["tenant_id"])
     repo = banco.repo(carga["tenant_id"], "agendador@lastro", "admin")
     hoje = _dia(agora)
     gasto_meu = carga["chamadas_no_dia"] if carga["dia_cota"] == hoje else 0
@@ -126,6 +128,8 @@ def executar(banco: Any, cofre: Any, cfg: Any, carga: dict, agora: float | None 
     resultado: dict = {"carga": carga["id"], "tenant": carga["tenant_id"], "saas": carga["saas"], "chamadas": 0}
     leitor = None
     try:
+        if espelho:  # disco efêmero: a fonte e a bronze vêm do Storage antes da carga (LST-30)
+            espelho.restaurar(pasta, carga["tenant_id"])
         if orcamento is not None and orcamento <= 0:
             raise CotaEsgotada(f"{carga['saas']}: cota diária do contrato já foi usada hoje ({carga['cota_diaria']} requisições)")
         fonte = repo.fontes([carga["fonte_id"]])
@@ -144,21 +148,27 @@ def executar(banco: Any, cofre: Any, cfg: Any, carga: dict, agora: float | None 
     except CotaEsgotada as e:
         resultado |= {"status": "cota", "aviso": f"{_frase(e)} Nada foi alterado; a carga volta amanhã."}
         campos = {"ultimo_status": "cota", "ultimo_aviso": resultado["aviso"]}
-    except (Credencial, ErroSaaS, Truncamento, EscritaNaFonte, ValueError, OSError) as e:
+    except (Credencial, ErroSaaS, Truncamento, EscritaNaFonte, ValueError, OSError, ErroEspelho) as e:
         resultado |= {"status": "falhou", "aviso": f"{_frase(e)} Nada foi alterado; nova tentativa na próxima hora."}
         campos = {"ultimo_status": "falhou", "ultimo_aviso": resultado["aviso"]}
     resultado["chamadas"] = leitor.chamadas if leitor else 0
     repo.atualizar_carga(carga["id"], ultima_execucao=agora, dia_cota=hoje,
                          chamadas_no_dia=gasto_meu + resultado["chamadas"], **campos)
     repo.registrar("agendador", "executou_carga", {k: v for k, v in resultado.items() if k != "tenant"})
+    if espelho:
+        try:
+            espelho.sincronizar(pasta, carga["tenant_id"])
+        except ErroEspelho as e:  # a carga valeu no disco; avisa que o espelho ficou para trás
+            resultado["aviso"] = (resultado.get("aviso", "") + f" Espelho no Storage pendente: {e}.").strip()
+            repo.atualizar_carga(carga["id"], ultimo_aviso=resultado["aviso"])
     return resultado
 
 
 def executar_devidas(banco: Any, cofre: Any, cfg: Any, agora: float | None = None,
-                     cliente: Callable[[], httpx.Client] | None = None) -> list[dict]:
+                     cliente: Callable[[], httpx.Client] | None = None, espelho: Any = None) -> list[dict]:
     agora = time.time() if agora is None else agora
     feitas = []
     for carga in banco.cargas_ativas():
         if devida(carga, agora):
-            feitas.append(executar(banco, cofre, cfg, carga, agora, cliente() if cliente else None))
+            feitas.append(executar(banco, cofre, cfg, carga, agora, cliente() if cliente else None, espelho))
     return feitas
