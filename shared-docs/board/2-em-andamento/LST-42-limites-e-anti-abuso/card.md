@@ -2,7 +2,7 @@
 chave: LST-42
 jira: https://adelecrm.atlassian.net/browse/LST-42
 secao: OPS
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-backend
 ---
 
