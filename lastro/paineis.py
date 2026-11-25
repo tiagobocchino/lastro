@@ -90,6 +90,35 @@ def inicial(demanda: dict, gold: Path) -> dict:
     return spec
 
 
+FORMATOS = {"ranking": "barras", "tabela": "tabela", "evolucao": "linha", "numero": "kpi"}
+
+
+def para_visitante(demanda: dict, gold: Path, quebra: str | None, periodo: str | None, formato: str) -> dict:
+    """Grill de "como mostrar" da demonstração (LST-40) direto na especificação do painel: o número principal
+    sempre, mais o visual escolhido (ranking ou tabela pela quebra, ou evolução pelo período)."""
+    modelo = demanda["resultado"]["modelo"]
+    cat = catalogo(gold, modelo)
+    medida = modelo.get("medida") if modelo.get("medida") in cat["medidas"] else (cat["medidas"] or [None])[0]
+    if not medida:
+        raise PedidoInvalido("a planilha não tem coluna numérica para medir")
+    if formato not in FORMATOS:
+        raise PedidoInvalido(f"formato '{formato}' não existe; use {sorted(FORMATOS)}")
+    m = {"id": f"{_slug(medida)}_soma", "nome": _nome(medida), "coluna": medida, "agregacao": "soma"}
+    visuais = [{"id": "v1", "tipo": "kpi", "titulo": f"{m['nome']} (total)", "medida": m["id"]}]
+    tipo = FORMATOS[formato]
+    eixo_q = _slug(quebra) if quebra else None
+    if tipo in {"barras", "tabela"}:
+        eixo = eixo_q if eixo_q in cat["dimensoes"] else (cat["dimensoes"] or [None])[0]
+        if eixo:
+            visuais.append({"id": "v2", "tipo": tipo, "titulo": f"{m['nome']} por {eixo.replace('_', ' ')}", "medida": m["id"], "eixo": eixo})
+    elif tipo == "linha" and cat["tempo"]:
+        eixo = periodo if periodo in cat["tempo"] else "ano_mes"
+        visuais.append({"id": "v2", "tipo": "linha", "titulo": f"{m['nome']} por {TEMPO[eixo]}", "medida": m["id"], "eixo": eixo})
+    spec = {"versao": 1, "demanda": demanda["id"], "titulo": f"{m['nome']}: painel da sua planilha", "medidas": [m], "visuais": visuais}
+    validar(spec, cat)
+    return spec
+
+
 def validar(spec: dict, cat: dict) -> None:
     ids_m = [m["id"] for m in spec["medidas"]]
     if len(ids_m) != len(set(ids_m)):

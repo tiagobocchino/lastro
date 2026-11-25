@@ -26,6 +26,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from . import paineis
+from .agents.construtores import dimensoes_candidatas
 from .config import RAIZ, Config
 from .servico import Plataforma
 
@@ -36,6 +37,29 @@ EXTENSOES = {".csv", ".xlsx"}
 EXEMPLO = RAIZ / "exemplos" / "orcamentos.csv"
 FUSO = ZoneInfo("America/Sao_Paulo")
 PERGUNTA_PADRAO = "Visão geral dos dados enviados"
+FORMATOS = {"ranking (barras)": "ranking", "tabela": "tabela", "evolução no tempo": "evolucao", "só o número": "numero"}
+PERIODOS = {"por mês": "ano_mes", "por ano": "ano"}
+
+
+def perguntas_visitante(perfil: dict, grill: list[dict]) -> list[dict]:
+    """Até 4 perguntas curtas, cada uma com sugestão (LST-40). O resto do grill (chave, data, recorte)
+    fica com a sugestão do Orquestrador, sem ocupar o visitante."""
+    sug = {q["id"]: q.get("sugestao") for q in grill}
+    cols = perfil["colunas"]
+    numeros = [c["nome"] for c in cols if c["papel"] == "numero" and not c["nome"].lower().endswith("id")]
+    dims = dimensoes_candidatas(perfil, (perfil["chaves_candidatas"] or [None])[0])
+    datas = [c["nome"] for c in cols if c["papel"] == "data"]
+    out = []
+    if numeros:
+        out.append({"id": "planilha:medida", "pergunta": "Qual valor você quer acompanhar?",
+                    "sugestao": sug.get("planilha:medida") if sug.get("planilha:medida") in numeros else numeros[0], "opcoes": numeros})
+    if dims:
+        out.append({"id": "demo:quebra", "pergunta": "Quebrado por qual categoria?", "sugestao": dims[0], "opcoes": dims})
+    if datas:
+        out.append({"id": "demo:periodo", "pergunta": "No tempo, agrupar por mês ou por ano?", "sugestao": "por mês", "opcoes": list(PERIODOS)})
+    formatos = [f for f, k in FORMATOS.items() if (k in {"ranking", "tabela"} and dims) or (k == "evolucao" and datas) or k == "numero"]
+    out.append({"id": "demo:formato", "pergunta": "Como você quer ver?", "sugestao": formatos[0], "opcoes": formatos})
+    return out
 
 
 class ErroDemo(ValueError):
@@ -97,10 +121,10 @@ class Demos:
             shutil.rmtree(pasta, ignore_errors=True)
             self._log("abrir_falhou", inicio, len(conteudo), None, erro=type(e).__name__)
             raise ErroDemo("não consegui ler a planilha: confira se a primeira linha tem os nomes das colunas") from e
-        s = Sessao(sid, pasta, agora, plat, d["id"], [q for q in d["grill"] if q["id"] != "geral:revisor"])
+        perfil = next(iter(d["resultado"]["perfis"].values()))
+        s = Sessao(sid, pasta, agora, plat, d["id"], perguntas_visitante(perfil, d["grill"]))
         with self._trava:
             self._sessoes[sid] = s
-        perfil = next(iter(d["resultado"]["perfis"].values()))
         self._log("perfil", inicio, len(conteudo), len(perfil["colunas"]))
         return s, {
             "sessao": sid, "expira_em": datetime.fromtimestamp(agora + self.ttl_s, FUSO).isoformat(timespec="seconds"),
@@ -113,12 +137,18 @@ class Demos:
         inicio = time.perf_counter()
         s = self._pegar(sid, agora)
         plat = s.plataforma
+        escolhas = {}
+        for q in s.perguntas:  # resposta fora das opções volta antes de rodar; a sessão continua aberta
+            valor = str(respostas.get(q["id"]) or q["sugestao"])
+            if valor not in q["opcoes"]:
+                raise ErroDemo(f"resposta inválida para '{q['pergunta']}': escolha uma das opções")
+            escolhas[q["id"]] = valor
         try:
-            validas = {q["id"] for q in s.perguntas}
-            r = {k: str(v) for k, v in respostas.items() if k in validas} | {"geral:revisor": "demonstração (ADR 0010)"}
+            r = {k: v for k, v in escolhas.items() if not k.startswith("demo:")} | {"geral:revisor": "demonstração (ADR 0010)"}
             d = plat.executar(plat.responder_grill(s.demanda_id, "visitante", r)["id"], "visitante")  # type: ignore[arg-type]
             gold = plat.pasta_demanda(d["id"]) / "gold"
-            spec = paineis.inicial(d, gold)
+            spec = paineis.para_visitante(d, gold, escolhas.get("demo:quebra"), PERIODOS.get(escolhas.get("demo:periodo", "")),
+                                          FORMATOS[escolhas["demo:formato"]])
             html = paineis.html_painel(spec, gold, datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"))
             aud = d["resultado"]["auditoria"]
             resultado = {"html": html, "visuais": [v["titulo"] for v in spec["visuais"]],

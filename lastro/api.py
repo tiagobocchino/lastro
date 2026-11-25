@@ -798,7 +798,7 @@ def demo_painel(sid: str, dados: RespostasDemo) -> dict:
     try:
         return _demos().responder(sid, dados.respostas)
     except ErroDemo as e:
-        raise HTTPException(404, str(e)) from e
+        raise HTTPException(404 if "sessão" in str(e) else 400, str(e)) from e
 
 
 @app.delete("/api/demo/sessoes/{sid}")

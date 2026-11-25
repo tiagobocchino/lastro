@@ -20,6 +20,13 @@ def ident(col: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", _sem_acento(col)).strip("_") or "col"
 
 
+def dimensoes_candidatas(perfil: dict, chave: str | None) -> list[str]:
+    """Colunas de texto que viram dimensão: mais de um valor e no máximo max(40, 20% das linhas), fora a chave.
+    Regra única: o Arquiteto modela com ela e a demonstração do site oferece as mesmas opções (LST-40)."""
+    limite = max(40, int(perfil["linhas"] * 0.2))
+    return [c["nome"] for c in perfil["colunas"] if c["papel"] == "texto" and c["nome"] != chave and 1 < c["distintos"] <= limite]
+
+
 class Arquiteto(Agente):
     nome = "arquiteto"
 
@@ -27,7 +34,7 @@ class Arquiteto(Agente):
         view, perfil = next(iter(ctx.memoria["perfis"].items()))
         fonte = perfil["fonte"]
         cols = {c["nome"]: c for c in perfil["colunas"]}
-        r = lambda k: (ctx.respostas.get(f"{fonte}:{k}") or "").strip()  # noqa: E731
+        r = lambda k: (ctx.respostas.get(f"{fonte}:{k}") or "").strip()
         numeros = [n for n, c in cols.items() if c["papel"] == "numero" and not n.lower().endswith("id")]
         medida = r("medida") if r("medida") in cols else (numeros[0] if numeros else None)
         data = r("data") if r("data") in cols else next((n for n, c in cols.items() if c["papel"] == "data"), None)
@@ -38,11 +45,7 @@ class Arquiteto(Agente):
         if filtro:
             verificar(f"SELECT 1 FROM {view} WHERE {filtro} LIMIT 0")
             ctx.sandbox.consultar(f"SELECT 1 FROM {view} WHERE {filtro} LIMIT 0")
-        limite = max(40, int(perfil["linhas"] * 0.2))
-        dims = [
-            n for n, c in cols.items()
-            if c["papel"] == "texto" and n != chave and 1 < c["distintos"] <= limite
-        ]
+        dims = dimensoes_candidatas(perfil, chave)
         playbook = self.buscar(ctx, "modelo dimensional star schema planilha fato dimensão", k=1)
         modelo = {
             "fonte": fonte,
@@ -112,7 +115,7 @@ class Engenheiro(Agente):
             ctx.sandbox.executar_pipeline(f"COPY {t} TO '{(gold / f'{t}.parquet').as_posix()}' (FORMAT parquet)")
         script = self._script(etapas, m)
         (ctx.pasta_demanda / "pipeline.py").write_text(script, encoding="utf-8")
-        from ..trilhas import TRILHAS, gerar  # noqa: PLC0415
+        from ..trilhas import TRILHAS, gerar
 
         pasta_trilhas = ctx.pasta_demanda / "trilhas"
         pasta_trilhas.mkdir(exist_ok=True)
@@ -195,11 +198,11 @@ class Analista(Agente):
             esquema.append(f"{t}({', '.join(l[0] for l in linhas)})")
         resposta = ctx.llm.responder(
             self.instrucoes(),
-            f"Esquema DuckDB:\n" + "\n".join(esquema) + f"\n\nPergunta: {ctx.pergunta}\nResponda só com uma consulta SELECT, sem comentários.",
+            "Esquema DuckDB:\n" + "\n".join(esquema) + f"\n\nPergunta: {ctx.pergunta}\nResponda só com uma consulta SELECT, sem comentários.",
         )
         if not resposta:
             return None
-        sql = re.sub(r"^```\w*|```$", "", resposta.strip(), flags=re.M).strip()
+        sql = re.sub(r"^```\w*|```$", "", resposta.strip(), flags=re.MULTILINE).strip()
         try:
             verificar(sql)
             ctx.sandbox.consultar(f"SELECT * FROM ({sql.rstrip(';')}) LIMIT 0")
@@ -218,4 +221,4 @@ def _json(v: object) -> object:
         return str(v)
 
 
-__all__ = ["Arquiteto", "Engenheiro", "Analista", "ident", "q", "SEM_CHAVE", "Path"]
+__all__ = ["SEM_CHAVE", "Analista", "Arquiteto", "Engenheiro", "Path", "ident", "q"]
