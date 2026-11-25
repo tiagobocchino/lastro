@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 import random
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -81,6 +82,8 @@ class Simulador:
                     "status": rnd.choice(["aberto", "ganho", "perdido"]),
                     "atualizado_em": atualizado.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 }
+                if self.saas == "google_sheets":  # última coluna às vezes vazia: a API omite a célula
+                    r["observacao"] = rnd.choice(["", "", "conferir com o financeiro", "cliente novo"])
                 if self.saas == "omie":  # campos aninhados viram colunas com prefixo
                     r["enderecoEntrega"] = {"cidade": rnd.choice(["São Paulo", "Recife", "Goiânia"]), "cep": f"{rnd.randint(10000, 99999)}-000"}
                     r["info"] = {"dInc": atualizado.strftime("%d/%m/%Y")}
@@ -183,7 +186,8 @@ class Simulador:
 
     def _entidade(self, caminho: str, corpo: Any) -> tuple[str | None, dict]:
         for nome, e in self.c["entidades"].items():
-            if caminho.rstrip("/").endswith(e["caminho"].rstrip("/")):
+            padrao = re.sub(r"\\\{[^}]+\\\}", "[^/]+", re.escape(e["caminho"].rstrip("/"))) + "$"
+            if re.search(padrao, caminho.rstrip("/")):
                 if self.c.get("rpc") and (corpo or {}).get("call") != e.get("call"):
                     continue
                 return nome, e
@@ -207,7 +211,16 @@ class Simulador:
         tipo = pag["tipo"]
         cab: dict[str, str] = {}
         corpo: dict[str, Any] = {}
-        if tipo == "offset":
+        if tipo == "nenhuma":
+            lote = regs
+            if e.get("formato") == "matriz":
+                colunas = list(regs[0]) if regs else []
+                linhas = [colunas] + [[r.get(c, "") for c in colunas] for r in regs]
+                for l in linhas[1:]:
+                    while l and l[-1] == "":
+                        l.pop()  # a API real omite células vazias no fim da linha
+                lote = linhas
+        elif tipo == "offset":
             ini = int(params.get(pag["param_offset"], 0))
             tam = min(int(params.get(pag["param_limite"], maximo)), maximo)
             lote = regs[ini:ini + tam]

@@ -136,7 +136,7 @@ class Leitor:
 
     # ---- montagem ------------------------------------------------------------------
     def _url(self, caminho: str) -> str:
-        return self.c["base_url"].format(**self.vars).rstrip("/") + caminho
+        return self.c["base_url"].format(**self.vars).rstrip("/") + caminho.format(**self.vars)
 
     def _cabecalhos(self) -> dict[str, str]:
         a = self.c["auth"]
@@ -225,7 +225,7 @@ class Leitor:
         pag = self.c["paginacao"]
         maximo = int(e.get("maximo", pag["maximo"]))
         caminho_reg = e.get("registros") or pegar(self.c, "envelope.registros")
-        params = dict(filtros or {})
+        params = dict(e.get("params_fixos") or {}) | dict(filtros or {})
         inc = self.c.get("incremental")
         if desde is not None:
             if not inc:
@@ -255,7 +255,11 @@ class Leitor:
             lote = (pegar(corpo, caminho_reg) if caminho_reg else corpo) or []
             if not isinstance(lote, list):
                 raise ErroSaaS(f"{self.saas}: resposta sem lista em '{caminho_reg}'")
+            if e.get("formato") == "matriz":
+                lote = matriz_para_registros(lote)
             registros.extend(lote)
+            if tipo == "nenhuma":
+                break
             if tipo == "offset":
                 t = pegar(corpo, pegar(self.c, "envelope.total"))
                 total = int(t) if t is not None else total
@@ -289,6 +293,14 @@ class Leitor:
         if total is None:
             ext.avisos.append("API não informa total: truncamento não pôde ser conferido")
         return ext
+
+
+def matriz_para_registros(linhas: list[list]) -> list[dict]:
+    """Primeira linha é o cabeçalho. Linhas curtas (células vazias no fim omitidas) são completadas com ""."""
+    if not linhas:
+        return []
+    cab = [str(c) for c in linhas[0]]
+    return [dict(zip(cab, list(l) + [""] * (len(cab) - len(l)))) for l in linhas[1:]]
 
 
 def gravar_bronze(raiz: Path, tenant: str, ext: Extracao, quando: date | None = None) -> Path:

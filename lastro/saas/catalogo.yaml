@@ -183,3 +183,38 @@ contaazul:
     contas_receber: {caminho: /financeiro/eventos-financeiros/contas-a-receber/buscar}
   armadilhas:
     - "OAuth2 com refresh_token: o cliente autoriza uma vez; o token de acesso precisa ser renovado."
+
+google_sheets:
+  nome: Google Sheets (planilhas)
+  confianca: referência pública da Sheets API v4 · a validar no piloto (docs não baixadas nesta sessão)
+  base_url: "https://sheets.googleapis.com/v4/spreadsheets/{planilha_id}"
+  auth: {tipo: oauth2_refresh, escopos: ["https://www.googleapis.com/auth/spreadsheets.readonly"]}
+  paginacao: {tipo: nenhuma, maximo: 0}
+  envelope: {registros: values}
+  limite: {por_minuto: 60}
+  entidades:
+    valores:
+      caminho: "/values/{aba}"
+      formato: matriz
+      params_fixos: {valueRenderOption: UNFORMATTED_VALUE, dateTimeRenderOption: FORMATTED_STRING}
+  armadilhas:
+    - "A resposta é uma matriz: a primeira linha é o cabeçalho, as demais viram registros."
+    - "Células vazias no fim da linha são omitidas: a linha vem mais curta que o cabeçalho."
+    - "Sem valueRenderOption=UNFORMATTED_VALUE os números chegam como texto formatado (\"R$ 1.234,56\")."
+    - "Cota de leitura por usuário é baixa (60/min): uma aba por chamada, sem varrer célula a célula."
+
+google_drive:
+  nome: Google Drive (lista de planilhas)
+  confianca: referência pública da Drive API v3 · a validar no piloto (docs não baixadas nesta sessão)
+  base_url: "https://www.googleapis.com/drive/v3"
+  auth: {tipo: oauth2_refresh, escopos: ["https://www.googleapis.com/auth/drive.readonly"]}
+  paginacao: {tipo: cursor, param_cursor: pageToken, param_limite: pageSize, maximo: 100, cursor_resposta: nextPageToken}
+  envelope: {registros: files}
+  limite: {por_minuto: 600}
+  entidades:
+    planilhas:
+      caminho: /files
+      params_fixos: {q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false", fields: "nextPageToken,files(id,name,modifiedTime)"}
+  armadilhas:
+    - "Sem o parâmetro fields a resposta vem enxuta e sem modifiedTime."
+    - "Arquivos na lixeira aparecem se o filtro trashed=false for esquecido."

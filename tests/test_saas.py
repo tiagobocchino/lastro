@@ -11,7 +11,7 @@ from lastro.saas.simulador import RelogioVirtual, Simulador
 
 CAT = carregar_catalogo()
 TODOS = sorted(CAT)
-VARS = {"subdominio": "demo", "dominio": "demo"}
+VARS = {"subdominio": "demo", "dominio": "demo", "planilha_id": "abc123", "aba": "Vendas"}
 
 
 def credenciais(saas: str, valor: str = "segredo") -> dict[str, str]:
@@ -166,3 +166,52 @@ def test_sandbox_http_responde_como_a_api(tmp_path, monkeypatch):
     j = r.json()
     assert len(j["results"]) == 180 and j["resultSetMetadata"]["count"] == 180  # pediu 500, teto é 200, há 180
     assert c.delete("/sandbox/sienge/sales-contracts").status_code == 405
+
+
+# ---- LST-11: Google Sheets e Drive (somente leitura) ----------------------------------
+
+def test_google_pede_so_escopos_de_leitura():
+    for saas in ("google_sheets", "google_drive"):
+        escopos = CAT[saas]["auth"]["escopos"]
+        assert escopos and all(e.endswith(".readonly") for e in escopos), escopos
+
+
+def test_planilha_vira_registros_com_cabecalho_e_celulas_vazias_no_fim():
+    sim = Simulador("google_sheets", n=40)
+    lei = Leitor("google_sheets", credenciais("google_sheets"), VARS | {"planilha_id": "abc123", "aba": "Vendas"},
+                 cliente=__import__("httpx").Client(transport=sim.transporte()), relogio=sim.relogio)
+    ext = lei.extrair("valores")
+    assert len(ext.registros) == 40
+    assert set(ext.registros[0]) == {"id", "nome", "valor", "status", "atualizado_em", "observacao"}
+    # a API omite células vazias no fim da linha: o motor completa com ""
+    assert any(r["observacao"] == "" for r in ext.registros)
+    assert sim.tentativas_escrita == 0
+
+
+def test_drive_lista_planilhas_com_cursor():
+    sim = Simulador("google_drive", n=230)
+    ext = leitor("google_drive", sim).extrair("planilhas")
+    assert len(ext.registros) == 230 and ext.chamadas >= 3
+
+
+def test_planilha_ficticia_vira_fonte_com_perfil_do_explorador(tmp_path, monkeypatch):
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path / "home"))
+    from lastro.banco import Repo, conectar, criar_tenant
+    from lastro.config import carregar
+    from lastro.saas.servico import importar_como_fonte, testar
+    from lastro.servico import Plataforma
+
+    cfg = carregar()
+    con = conectar(cfg.banco)
+    criar_tenant(con, "acme", "Acme")
+    repo = Repo(con, "acme")
+    laudo = testar("google_sheets", "valores", credenciais("google_sheets"), {"planilha_id": "abc123", "aba": "Vendas"})
+    assert laudo["ok"], laudo
+    plat = Plataforma(cfg, repo)
+    destino = importar_como_fonte(plat.pasta, "acme", laudo)
+    fid = repo.adicionar_fonte("planilha_vendas", "arquivo", str(destino))
+    d = plat.abrir("ana@acme", "Qual o valor por status?", [fid])
+    perfil = next(iter(d["resultado"]["perfis"].values()))
+    papeis = {c["nome"]: c["papel"] for c in perfil["colunas"]}
+    assert papeis["valor"] == "numero" and papeis["status"] == "texto"
+    assert "id" in perfil["chaves_candidatas"]

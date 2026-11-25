@@ -44,4 +44,4 @@ Scrum (sprints de 2 semanas, DoD, releases) em `docs/agents/scrum.md`. Quatro se
 
 ## Conectores SaaS
 
-Contratos em `lastro/saas/catalogo.yaml` (11 sistemas), motor somente leitura em `lastro/saas/motor.py`, simuladores com as armadilhas reais em `lastro/saas/simulador.py`. O portal tem a aba "conectores" (teste no sandbox, importação como fonte, coleção Postman). O servidor expõe `/sandbox/<saas>/...` para o Postman/Newman. Docs baixadas em `docs/fontes-saas/_bruto/`. Ao mudar o catálogo: `uv run python -m lastro.saas.notas` regera as notas da Caixa.
+Contratos em `lastro/saas/catalogo.yaml` (13 sistemas), motor somente leitura em `lastro/saas/motor.py`, simuladores com as armadilhas reais em `lastro/saas/simulador.py`. O portal tem a aba "conectores" (teste no sandbox, importação como fonte, coleção Postman). O servidor expõe `/sandbox/<saas>/...` para o Postman/Newman. Docs baixadas em `docs/fontes-saas/_bruto/`. Ao mudar o catálogo: `uv run python -m lastro.saas.notas` regera as notas da Caixa.

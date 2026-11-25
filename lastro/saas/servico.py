@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from datetime import date
 from pathlib import Path
@@ -23,6 +24,7 @@ def resumo_catalogo() -> list[dict]:
         lim = c.get("limite", {})
         limite = f"{lim['por_segundo']}/s" if lim.get("por_segundo") else (f"{lim['por_minuto']}/min" if lim.get("por_minuto") else "—")
         lista.append({
+            "escopos": c["auth"].get("escopos", []),
             "id": k, "nome": c["nome"], "confianca": c["confianca"], "auth": c["auth"]["tipo"],
             "campos": campos_credencial(k), "paginacao": c["paginacao"]["tipo"], "maximo_pagina": c["paginacao"]["maximo"],
             "limite": limite, "incremental": (c.get("incremental") or {}).get("param"), "erro_200": bool(c.get("erro_200")),
@@ -35,7 +37,7 @@ def _variaveis(saas: str) -> list[str]:
     import string  # noqa: PLC0415
 
     c = CAT[saas]
-    textos = [c["base_url"], c["auth"].get("url_login", "")]
+    textos = [c["base_url"], c["auth"].get("url_login", "")] + [e["caminho"] for e in c["entidades"].values()]
     return sorted({f for t in textos for _, f, _, _ in string.Formatter().parse(t) if f})
 
 
@@ -132,26 +134,30 @@ def colecao_postman(saas: str, base_sandbox: str) -> dict:
         if reg:
             testes.append(f"pm.test('lista de registros em {reg}', () => {{ const j = pm.response.json(); const v = '{reg}'.split('.').reduce((o, k) => o && o[k], j); pm.expect(v).to.be.an('array'); }});")
         maximo = int(e.get("maximo", pag["maximo"]))
-        if pag["tipo"] == "offset":
+        caminho = re.sub(r"\{(\w+)\}", r"{{\1}}", e["caminho"])
+        if pag["tipo"] == "nenhuma":
+            q = []
+        elif pag["tipo"] == "offset":
             q = [{"key": pag["param_offset"], "value": "0"}, {"key": pag["param_limite"], "value": str(maximo)}]
         elif pag["tipo"] == "cursor":
             q = [{"key": pag["param_limite"], "value": str(maximo)}, {"key": pag["param_cursor"], "value": "", "disabled": True}]
         else:
             q = [{"key": pag["param_pagina"], "value": str(pag.get("primeira", 1))}, {"key": pag["param_limite"], "value": str(maximo)}]
+        q += [{"key": k, "value": str(v)} for k, v in (e.get("params_fixos") or {}).items()]
         if c.get("incremental"):
             q.append({"key": c["incremental"]["param"], "value": "2026-09-01" if c["incremental"]["formato"] != "epoch" else "1788220800", "disabled": True})
         if c.get("rpc"):
             corpo = {"call": e["call"], "param": [{q[0]["key"]: int(q[0]["value"]), q[1]["key"]: int(q[1]["value"])}]} | {k: "{{" + k + "}}" for k in a["campos"]}
-            req = {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": json.dumps(corpo, ensure_ascii=False)}, "url": "{{base_url}}" + e["caminho"]}
+            req = {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": json.dumps(corpo, ensure_ascii=False)}, "url": "{{base_url}}" + caminho}
         else:
-            req = {"method": "GET", "header": cab, "url": {"raw": "{{base_url}}" + e["caminho"], "host": ["{{base_url}}"], "path": [p for p in e["caminho"].split("/") if p], "query": q}}
+            req = {"method": "GET", "header": cab, "url": {"raw": "{{base_url}}" + caminho, "host": ["{{base_url}}"], "path": [p for p in caminho.split("/") if p], "query": q}}
         if auth:
             req["auth"] = auth
         itens.append({"name": f"{i} · {nome}", "event": [{"listen": "test", "script": {"exec": testes}}], "request": req})
     variaveis = [{"key": "base_url", "value": f"{base_sandbox}/sandbox/{saas}"}]
     if a.get("url_login"):
         variaveis.append({"key": "url_login", "value": f"{base_sandbox}/sandbox/{saas}/auth/" + a["url_login"].rstrip("/").split("/")[-1]})
-    variaveis += [{"key": k, "value": "demo"} for k in campos_credencial(saas)]
+    variaveis += [{"key": k, "value": "demo"} for k in campos_credencial(saas) + [v for v in _variaveis(saas) if v not in ("subdominio", "dominio")]]
     descricao = (
         f"{c['nome']} · contrato do catálogo Lastro ({c['confianca']}).\n\n"
         "Aponta para o sandbox do Lastro. Para a API real, troque base_url por "
