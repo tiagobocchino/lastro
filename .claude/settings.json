@@ -1,0 +1,38 @@
+{
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": ["supabase-lastro", "render"],
+  "permissions": {
+    "allow": [
+      "mcp__supabase-lastro__list_tables",
+      "mcp__supabase-lastro__list_extensions",
+      "mcp__supabase-lastro__list_migrations",
+      "mcp__supabase-lastro__execute_sql",
+      "mcp__supabase-lastro__get_logs",
+      "mcp__supabase-lastro__get_advisors",
+      "mcp__supabase-lastro__search_docs",
+      "mcp__supabase-lastro__get_project_url",
+      "mcp__render__list_workspaces",
+      "mcp__render__select_workspace",
+      "mcp__render__get_selected_workspace",
+      "mcp__render__list_services",
+      "mcp__render__get_service",
+      "mcp__render__list_deploys",
+      "mcp__render__get_deploy",
+      "mcp__render__list_events",
+      "mcp__render__list_logs",
+      "mcp__render__list_log_label_values",
+      "mcp__render__get_metrics"
+    ],
+    "ask": [
+      "mcp__render__trigger_deploy",
+      "mcp__render__update_environment_variables",
+      "mcp__render__create_web_service",
+      "mcp__render__create_static_site",
+      "mcp__render__create_cron_job",
+      "mcp__render__run_cron_job",
+      "mcp__render__create_blueprint",
+      "mcp__render__approve_blueprint",
+      "mcp__render__update_blueprint"
+    ]
+  }
+}

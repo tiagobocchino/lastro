@@ -47,3 +47,7 @@ Scrum (sprints de 2 semanas, DoD, releases) em `docs/agents/scrum.md`. Cinco se�
 ## Conectores SaaS
 
 Contratos em `lastro/saas/catalogo.yaml` (13 sistemas), motor somente leitura em `lastro/saas/motor.py`, simuladores com as armadilhas reais em `lastro/saas/simulador.py`. O portal tem a aba "conectores" (teste no sandbox, importação como fonte, coleção Postman). O servidor expõe `/sandbox/<saas>/...` para o Postman/Newman. Docs baixadas em `docs/fontes-saas/_bruto/`. Ao mudar o catálogo: `uv run python -m lastro.saas.notas` regera as notas da Caixa.
+
+## MCP (Supabase e Render)
+
+`.mcp.json` liga o MCP do Supabase (projeto do Lastro, somente leitura) e o do Render. Subagentes só leem; deploy, variáveis e criação de recursos pedem aprovação na sessão principal. Regras e setup em `docs/agents/mcp.md`. Nenhuma chave no repositório.

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "supabase-lastro": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=dghpdlhztkoyfyqmyjbx&read_only=true&features=database,docs,debugging,development"
+    },
+    "render": {
+      "type": "http",
+      "url": "https://mcp.render.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${RENDER_API_KEY}"
+      }
+    }
+  }
+}
