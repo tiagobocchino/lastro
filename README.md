@@ -5,7 +5,7 @@ Plataforma de agentes de análise de dados. O demandante faz uma pergunta; os ag
 - **Multi-empresa**: login próprio; cada empresa só vê os próprios dados.
 - **Fontes só em leitura**: a credencial do conector já é somente leitura, e toda consulta de agente passa por uma trava de SQL.
 - **Auditoria em duas camadas**: o auditor técnico checa o pipeline e gera um notebook do Google Colab para o revisor de negócio refazer as contas.
-- **Contexto indexável**: os agentes buscam na Caixa de Ferramenta (BM25 + RRF no SQLite FTS5) em vez de carregar tudo no prompt.
+- **Contexto indexável**: os agentes buscam na Caixa de Ferramenta (BM25 + RRF no SQLite FTS5) em vez de carregar tudo no prompt. Com `LASTRO_EMBEDDER=fastembed` (extra `vetores`), a busca também entende sinônimos com um modelo multilíngue local e gratuito.
 - **Custo zero**: Python, DuckDB, SQLite e FastAPI. O LLM é opcional: Ollama local, free tier de Groq ou Gemini, ou a chave do cliente.
 
 ## Rodar

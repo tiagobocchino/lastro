@@ -18,6 +18,7 @@ class Config:
     llm_modelo: str
     llm_url: str
     llm_chave: str
+    embedder: str = "nenhum"
 
     @property
     def banco(self) -> Path:
@@ -37,6 +38,7 @@ def carregar() -> Config:
         llm_modelo=os.environ.get("LASTRO_LLM_MODELO", ""),
         llm_url=os.environ.get("LASTRO_LLM_URL", ""),
         llm_chave=os.environ.get("LASTRO_LLM_CHAVE", ""),
+        embedder=os.environ.get("LASTRO_EMBEDDER", "nenhum"),
     )
 
 

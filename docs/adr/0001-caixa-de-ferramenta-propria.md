@@ -13,5 +13,5 @@ Construir a nossa Caixa em Python: SQLite FTS5 (BM25, sem acento) por escopo, fu
 ## Consequências
 
 - Zero dependência paga ou de rede; roda dentro do processo.
-- Sem embeddings, sinônimos não batem (ex.: "faturamento" × "valor_vendido"). Próximo passo: embeddings locais (fastembed ou Ollama) via `Embedder`.
+- Sem embeddings, sinônimos não batem. Resolvido no LST-5: `lastro/vetores.py` (fastembed, paraphrase-multilingual-MiniLM-L12-v2, ONNX local, vetores em cache SQLite), ligado por `LASTRO_EMBEDDER=fastembed`.
 - qmd continua útil para o time no Claude Code; não entra no produto por ser Node.

@@ -112,16 +112,20 @@ class Orquestrador(Agente):
         for q in perguntas:
             valor = (respostas.get(q["id"]) or q["sugestao"] or "").strip()
             ctx.respostas[q["id"]] = valor
-            if not q.get("persistir", True):
-                continue
             fonte, qid = q["id"].split(":", 1)
+            # Decisão da fonte (data, chave, revisor) fica em decisoes/ e não volta ao grill.
+            # Decisão da demanda (medida, recorte) fica no histórico: a busca acha, o grill pergunta de novo.
+            persistente = q.get("persistir", True)
+            pasta = ctx.pasta_tenant_caixa / "decisoes" / ("" if persistente else "historico")
+            nome = f"decisao-{fonte}-{qid}" if persistente else f"decisao-{fonte}-{qid}-demanda-{ctx.demanda_id}"
+            termos = valor.replace("_", " ")
             gravar_nota(
-                ctx.pasta_tenant_caixa / "decisoes",
-                f"decisao-{fonte}-{qid}",
-                f"Decisão do grill: {q['pergunta']}",
+                pasta,
+                nome,
+                f"Decisão do grill ({qid}): {termos} · {q['pergunta']}",
                 "decisao",
-                f"# Pergunta\n\n{q['pergunta']}\n\n# Resposta\n\n{valor}\n\n# Origem\n\nDemanda {ctx.demanda_id}: {ctx.pergunta}",
+                f"# Pergunta\n\n{q['pergunta']}\n\n# Resposta\n\n{valor}\n\n# Em palavras\n\n{termos}\n\n# Origem\n\nDemanda {ctx.demanda_id}: {ctx.pergunta}",
                 tags=[fonte, qid],
             )
         ctx.caixa.reindexar()
-        self.anotar(ctx, "gravou_decisoes", {"quantas": sum(1 for q in perguntas if q.get("persistir", True))})
+        self.anotar(ctx, "gravou_decisoes", {"fonte": sum(1 for q in perguntas if q.get("persistir", True)), "historico": sum(1 for q in perguntas if not q.get("persistir", True))})

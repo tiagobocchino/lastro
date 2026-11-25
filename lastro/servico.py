@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from . import relatorio
+from . import relatorio, vetores
 from .agents.auditor import Auditor
 from .agents.base import Contexto
 from .agents.construtores import Analista, Arquiteto, Engenheiro
@@ -42,7 +42,7 @@ class Plataforma:
         pastas = {"global": CAIXA_GLOBAL, "tenant": self.pasta / "caixa"}
         if demanda_id is not None:
             pastas["demanda"] = self.pasta_demanda(demanda_id) / "caixa"
-        return Caixa(pastas)
+        return Caixa(pastas, embedder=vetores.obter(self.cfg.home, self.cfg.embedder))
 
     def pasta_demanda(self, demanda_id: int) -> Path:
         return self.pasta / "demandas" / str(demanda_id)
