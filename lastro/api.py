@@ -548,6 +548,9 @@ def _estado_bi(bi: AcessoBI, tenant: str) -> dict:
     if not a:
         return {"disponivel": True, "ligado": False}
     return {"disponivel": True, "ligado": a["ativo"], "conexao": bi.conexao(a["nome"]),
+            "chave_ativa": a.get("chave_ativa", False),
+            "chave_criada_em": a["chave_criada_em"].isoformat() if a.get("chave_criada_em") else None,
+            "chave_usada_em": a["chave_usada_em"].isoformat() if a.get("chave_usada_em") else None,
             "senha_trocada_em": a["senha_trocada_em"].isoformat(),
             "publicado_em": a["publicado_em"].isoformat() if a["publicado_em"] else None, "tabelas": a["tabelas"]}
 
@@ -585,6 +588,68 @@ def publicar_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, 
         raise HTTPException(409, str(e)) from e
     p.repo.registrar(s.email, "publicou_bi", {"tabelas": len(r["tabelas"]), "avisos": r["avisos"]})
     return r
+
+
+@app.post("/api/bi/chave")
+def chave_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    """Chave de leitura do BI por HTTPS (LST-47). Gera ou troca; a chave volta só nesta resposta."""
+    _papel(s, {"admin"})
+    try:
+        chave = _bi().gerar_chave(s.tenant)
+    except BIIndisponivel as e:
+        raise HTTPException(409, str(e)) from e
+    p.repo.registrar(s.email, "gerou_chave_bi", {})
+    return {"chave": chave, "cabecalho": CABECALHO_CHAVE, "base": f"{_base_publica()}/bi/v1/"}
+
+
+@app.delete("/api/bi/chave")
+def revogar_chave_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    _papel(s, {"admin"})
+    _bi().revogar_chave(s.tenant)
+    p.repo.registrar(s.email, "revogou_chave_bi", {})
+    return {"chave_ativa": False}
+
+
+# ---- BI por HTTPS (LST-47): o Power BI lê as tabelas publicadas sem certificado do Supabase e sem gateway ----
+CABECALHO_CHAVE = "X-Lastro-Chave"
+
+
+def _base_publica() -> str:
+    return os.environ.get("LASTRO_URL_PUBLICA", "https://lastro-api-73zx.onrender.com").rstrip("/")
+
+
+def _pela_chave(chave: str | None) -> tuple[AcessoBI, dict]:
+    try:
+        bi = _bi()
+    except HTTPException:
+        raise HTTPException(404, "BI por HTTPS indisponível neste servidor") from None
+    dono = bi.pela_chave(chave or "")
+    if not dono:
+        raise HTTPException(401, f"chave de leitura ausente ou inválida (cabeçalho {CABECALHO_CHAVE})")
+    return bi, dono
+
+
+@app.get("/bi/v1/", response_class=Response)
+def bi_https_raiz() -> Response:
+    """Sem chave e sem dado: o Power BI Service testa a URL base ao salvar a credencial 'Anônimo'."""
+    return Response("Lastro · BI por HTTPS. Use /bi/v1/<tabela>.parquet com o cabeçalho X-Lastro-Chave.\n", media_type="text/plain")
+
+
+@app.get("/bi/v1/tabelas")
+def bi_https_tabelas(x_lastro_chave: Annotated[str | None, Header()] = None) -> dict:
+    bi, dono = _pela_chave(x_lastro_chave)
+    return {"tabelas": bi.tabelas_publicadas(dono["nome"])}
+
+
+@app.get("/bi/v1/{tabela}.parquet")
+def bi_https_tabela(tabela: str, x_lastro_chave: Annotated[str | None, Header()] = None) -> Response:
+    bi, dono = _pela_chave(x_lastro_chave)
+    try:
+        dados = bi.parquet(dono["nome"], tabela)
+    except LookupError as e:
+        raise HTTPException(404, str(e)) from e
+    return Response(dados, media_type="application/vnd.apache.parquet",
+                    headers={"Content-Disposition": f'attachment; filename="{tabela}.parquet"', "Cache-Control": "no-store"})
 
 
 @app.delete("/api/bi/credencial")
@@ -717,8 +782,10 @@ def painel_html(did: int, p: Annotated[Plataforma, Depends(plataforma)]) -> File
 
 
 @app.get("/api/demandas/{did}/painel/powerbi")
-def painel_powerbi(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> Response:
-    """Projeto aberto do Power BI (PBIP) num .zip. Aponta para o BI da empresa quando ele está ligado (LST-33)."""
+def painel_powerbi(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)],
+                   via: str = "https") -> Response:
+    """Projeto aberto do Power BI (PBIP) num .zip. Padrão: lê o BI da empresa por HTTPS com a chave de leitura
+    (LST-47, sem certificado nem gateway). via=postgres gera a conexão direta ao Postgres (LST-33)."""
     import io
     import zipfile
 
@@ -737,11 +804,14 @@ def painel_powerbi(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated
             con = {"host": c["host"], "porta": c["porta"], "banco": c["banco"], "esquema": a["nome"]}
     except BIIndisponivel:
         pass
+    if via != "postgres":
+        con = {"via": "https", "api": _base_publica() + "/"}
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         for caminho, conteudo in paineis.projeto_powerbi(spec, gold, con).items():
             z.writestr(caminho, conteudo)
-    p.repo.registrar(s.email, "baixou_powerbi", {"versao": spec["versao"], "aponta_para_bi": con["esquema"] != "SEU_SCHEMA"}, did)
+    p.repo.registrar(s.email, "baixou_powerbi", {"versao": spec["versao"], "via": con.get("via", "postgres"),
+                                                         "aponta_para_bi": con.get("via") == "https" or con["esquema"] != "SEU_SCHEMA"}, did)
     return Response(buf.getvalue(), media_type="application/zip",
                     headers={"Content-Disposition": f'attachment; filename="lastro_demanda_{did}_powerbi.zip"'})
 

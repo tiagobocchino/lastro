@@ -146,6 +146,14 @@ def test_projeto_power_bi_valida_contra_os_schemas_oficiais(demanda):
     assert f"fromColumn: d{did}_fato.vendedor_id" in rel and f"toColumn: d{did}_dim_data.data" in rel
     exp = tmdl[f"{nome}.SemanticModel/definition/expressions.tmdl"]
     assert 'expression Esquema = "bi_0123456789"' in exp and "aws-1-sa-east-1.pooler.supabase.com:5432" in exp
+    # LST-47: modo HTTPS, URL base fixa e RelativePath por tabela (o Service agenda a atualização sem gateway)
+    https = paineis.projeto_powerbi(spec, gold, {"via": "https", "api": "https://lastro.exemplo/"})
+    for t in tabelas:
+        corpo = https[f"{nome}.SemanticModel/definition/tables/{t}.tmdl"]
+        assert f'Web.Contents(Api, [RelativePath = "bi/v1/{t}.parquet", Headers = [#"X-Lastro-Chave" = ChaveLastro]])' in corpo
+        assert "Parquet.Document(Binario)" in corpo and "PostgreSQL" not in corpo
+    exp_https = https[f"{nome}.SemanticModel/definition/expressions.tmdl"]
+    assert 'expression Api = "https://lastro.exemplo/"' in exp_https and "Servidor" not in exp_https
     # cada visual aponta para uma medida que existe no modelo
     for k, doc in jsons.items():
         if k.endswith("visual.json"):
@@ -206,9 +214,14 @@ def test_painel_pelo_portal_com_rastro(api_aprovada):
     assert estado["versoes"] == [1, 2] and "estado" in estado["opcoes"]["eixos"]
     h = c.get(f"/api/demandas/{did}/painel/html", headers=ana)
     assert h.status_code == 200 and "14.030.477,92" in h.text and "versão 2" in h.text
-    z = zipfile.ZipFile(io.BytesIO(c.get(f"/api/demandas/{did}/painel/powerbi", headers=ana).content))
+    z = zipfile.ZipFile(io.BytesIO(c.get(f"/api/demandas/{did}/painel/powerbi?via=postgres", headers=ana).content))
     assert f"Lastro_demanda_{did}.pbip" in z.namelist() and 'expression Esquema = "SEU_SCHEMA"' in z.read(
         f"Lastro_demanda_{did}.SemanticModel/definition/expressions.tmdl").decode()  # sem BI ligado: parâmetro para preencher
+    # LST-47: o padrão é HTTPS com a chave de leitura (sem certificado e sem gateway)
+    z = zipfile.ZipFile(io.BytesIO(c.get(f"/api/demandas/{did}/painel/powerbi", headers=ana).content))
+    exp = z.read(f"Lastro_demanda_{did}.SemanticModel/definition/expressions.tmdl").decode()
+    assert 'expression ChaveLastro = "COLE_A_CHAVE_DE_LEITURA"' in exp and "expression Api" in exp and "Esquema" not in exp
+    assert "ChaveLastro" in z.read("LEIA-ME.txt").decode()
     acoes = [e["acao"] for e in c.get(f"/api/demandas/{did}", headers=ana).json()["eventos"]]
     assert {"criou_painel", "alterou_painel", "recusou_mudanca_painel", "baixou_powerbi"} <= set(acoes)
     # outra empresa não vê nem mexe no painel desta demanda

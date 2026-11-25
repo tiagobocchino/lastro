@@ -41,6 +41,24 @@ O portal mostra cada um com botão de copiar:
 | Usuário | `bi_xxxxxxxxxx.<ref do projeto>` |
 | SSL | obrigatório |
 
+## Power BI pela internet, sem certificado e sem gateway (recomendado, LST-47)
+
+O certificado do banco vem de uma autoridade própria do Supabase. O Power BI Desktop recusa esse certificado até ele ser importado, e o Power BI Service não aceita importar. Por isso o caminho recomendado é por HTTPS:
+
+1. No portal, em **conta → Conectar ao BI → gerar a chave de leitura**. A chave (`lst_…`) aparece uma vez; guarde como senha. Só o hash fica no banco.
+2. No painel da demanda, **baixar projeto do Power BI**. Ele já vem com os parâmetros `Api` (endereço do Lastro) e `ChaveLastro`.
+3. No Desktop, vá em **Transformar dados → Gerenciar parâmetros** e cole a chave em `ChaveLastro`. Se ele pedir credencial para o endereço, escolha **Anônimo** (quem autentica é a chave). Depois clique em **Atualizar**.
+4. No Service, depois de publicar, vá em **Configurações do modelo semântico → Credenciais da fonte de dados** e escolha **Anônimo**. Se aparecer, marque "Ignorar conexão de teste". Não precisa de gateway.
+
+Por trás:
+- `GET /bi/v1/<tabela>.parquet` com o cabeçalho `X-Lastro-Chave` lê a tabela **já publicada** no BI (do Postgres, não do disco; sobrevive a deploy).
+- Só as tabelas do schema da própria empresa são servidas; nome fora da lista dá 404.
+- `GET /bi/v1/` responde sem chave e sem dado, para o teste de conexão do Service.
+- Trocar ou revogar a chave, ou desligar o BI, corta o acesso na hora.
+- **Limite:** cada atualização baixa as tabelas inteiras pelo Render; o plano gratuito tem cota de tráfego mensal. Para volumes grandes, prefira atualização diária, não de hora em hora.
+
+Quer o Postgres direto, por exemplo para DirectQuery? Baixe o projeto com `?via=postgres` e siga a seção abaixo.
+
 ## Power BI Desktop (gratuito)
 
 1. **Página Inicial → Obter dados → Banco de dados PostgreSQL**.

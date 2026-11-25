@@ -440,10 +440,13 @@ def projeto_powerbi(spec: dict, gold: Path, conexao: dict) -> dict[str, str]:
     arqs[f"{sm}/definition/model.tmdl"] = (
         "model Model\n\tculture: pt-BR\n\tdefaultPowerBIDataSourceVersion: powerBI_V3\n\tdiscourageImplicitMeasures\n"
         "\tsourceQueryCulture: pt-BR\n\n" + "".join(f"ref table {_tmdl_nome(pbi[t])}\n" for t in tabelas))
+    https = conexao.get("via") == "https"  # LST-47: sem certificado do Supabase e sem gateway no Power BI Service
+    params = ((("Api", conexao["api"]), ("ChaveLastro", conexao.get("chave", "COLE_A_CHAVE_DE_LEITURA"))) if https else
+              (("Servidor", f"{conexao['host']}:{conexao['porta']}"), ("Banco", conexao["banco"]), ("Esquema", conexao["esquema"])))
     arqs[f"{sm}/definition/expressions.tmdl"] = "".join(
         f'expression {p} = "{v}" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]\n'
         f"\tlineageTag: {_uuid(did, 'param', p)}\n\n"
-        for p, v in (("Servidor", f"{conexao['host']}:{conexao['porta']}"), ("Banco", conexao["banco"]), ("Esquema", conexao["esquema"])))
+        for p, v in params)
     for t in tabelas:
         linhas = [f"/// Lastro · demanda {did} · {t} (gold aprovado)", f"table {_tmdl_nome(pbi[t])}", f"\tlineageTag: {_uuid(did, t)}", ""]
         if t == "fato":
@@ -460,9 +463,14 @@ def projeto_powerbi(spec: dict, gold: Path, conexao: dict) -> dict[str, str]:
             if tp == "dateTime":
                 linhas.append("\t\tformatString: dd/mm/yyyy")
             linhas.append("")
-        linhas += [f"\tpartition {_tmdl_nome(pbi[t])} = m", "\t\tmode: import", "\t\tsource =",
-                   "\t\t\t\tlet", "\t\t\t\t    Fonte = PostgreSQL.Database(Servidor, Banco),",
-                   f'\t\t\t\t    Tabela = Fonte{{[Schema = Esquema, Item = "{pbi[t]}"]}}[Data]', "\t\t\t\tin", "\t\t\t\t    Tabela", ""]
+        if https:  # URL base fixa + RelativePath: o Service consegue agendar a atualização (fonte não dinâmica)
+            fonte = [(f'\t\t\t\t    Binario = Web.Contents(Api, [RelativePath = "bi/v1/{pbi[t]}.parquet", '
+                      'Headers = [#"X-Lastro-Chave" = ChaveLastro]]),'), "\t\t\t\t    Tabela = Parquet.Document(Binario)"]
+        else:
+            fonte = ["\t\t\t\t    Fonte = PostgreSQL.Database(Servidor, Banco),",
+                     f'\t\t\t\t    Tabela = Fonte{{[Schema = Esquema, Item = "{pbi[t]}"]}}[Data]']
+        linhas += [f"\tpartition {_tmdl_nome(pbi[t])} = m", "\t\tmode: import", "\t\tsource =", "\t\t\t\tlet", *fonte,
+                   "\t\t\t\tin", "\t\t\t\t    Tabela", ""]
         arqs[f"{sm}/definition/tables/{pbi[t]}.tmdl"] = "\n".join(linhas)
     rel = [f"relationship {_uuid(did, 'rel', d)}\n\tfromColumn: {pbi['fato']}.{d}_id\n\ttoColumn: {pbi['dim_' + d]}.{d}_id\n" for d in dims]
     if usa_tempo:
@@ -519,9 +527,17 @@ def projeto_powerbi(spec: dict, gold: Path, conexao: dict) -> dict[str, str]:
     arqs["LEIA-ME.txt"] = (
         f"Projeto do Power BI gerado pelo Lastro para a demanda {did} (painel versão {spec['versao']}).\n\n"
         f"1. Descompacte e abra {nome}.pbip no Power BI Desktop (gratuito).\n"
-        "2. Na primeira abertura, informe o usuário e a senha do BI da sua empresa (portal → conta → Conectar ao BI)\n"
-        "   e clique em Atualizar para carregar os dados.\n"
-        "3. Servidor, banco e schema estão em Transformar dados → Gerenciar parâmetros.\n\n"
+        + ("2. Em Transformar dados → Gerenciar parâmetros, cole em ChaveLastro a chave de leitura do BI\n"
+           "   (portal → conta → Conectar ao BI → chave de leitura). Ela aparece uma vez só; guarde como senha.\n"
+           "3. Se o Power BI pedir credencial para o endereço do Lastro, escolha Anônimo: quem autentica é a chave.\n"
+           "   Clique em Atualizar para carregar os dados.\n"
+           "4. No Power BI Service: publique, e em Configurações do modelo semântico → Credenciais da fonte de dados\n"
+           "   escolha Anônimo e marque 'Ignorar conexão de teste' se aparecer. Não precisa de gateway.\n\n"
+           if https else
+           "2. Na primeira abertura, informe o usuário e a senha do BI da sua empresa (portal → conta → Conectar ao BI)\n"
+           "   e clique em Atualizar para carregar os dados.\n"
+           "3. Servidor, banco e schema estão em Transformar dados → Gerenciar parâmetros.\n\n")
+        +
         "As medidas e os visuais vêm do painel aprovado no Lastro. Pode editar à vontade: o Lastro não sobrescreve este arquivo.\n")
     return arqs
 

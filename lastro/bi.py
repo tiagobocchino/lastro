@@ -38,6 +38,12 @@ TIPOS = {  # DuckDB → Postgres; o que não estiver aqui vai como texto
 }
 
 
+def hash_chave(chave: str) -> str:
+    import hashlib
+
+    return hashlib.sha256(chave.encode()).hexdigest()
+
+
 class BIIndisponivel(RuntimeError):
     """O BI pela conexão SQL precisa do Postgres (produção); no modo local (SQLite) não existe."""
 
@@ -201,7 +207,8 @@ class AcessoBI:
     # ---- registro -------------------------------------------------------------------
     def acesso(self, tenant: str) -> dict | None:
         with self.banco._dono() as con:
-            r = con.execute("SELECT tenant_id, nome, ativo, criado_em, senha_trocada_em, publicado_em, tabelas "
+            r = con.execute("SELECT tenant_id, nome, ativo, criado_em, senha_trocada_em, publicado_em, tabelas, "
+                            "chave_hash IS NOT NULL AS chave_ativa, chave_criada_em, chave_usada_em "
                             "FROM interno.bi_acessos WHERE tenant_id=%s", (tenant,)).fetchone()
         return dict(r) if r else None
 
@@ -261,6 +268,69 @@ class AcessoBI:
             return {"ok": True, "detalhe": f"conexão aceita: {n} tabelas visíveis, sessão só leitura: {'sim' if so_leitura else 'não'}"}
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "detalhe": f"o BI não conseguiu entrar ({type(e).__name__}): {str(e).splitlines()[0][:160]}"}
+
+    # ---- chave de leitura por HTTPS (LST-47) ------------------------------------------
+    def gerar_chave(self, tenant: str) -> str:
+        """Liga (ou troca) a chave de leitura do BI por HTTPS. Só o hash fica no banco; a chave volta só aqui."""
+        atual = self.acesso(tenant)
+        if not atual or not atual["ativo"]:
+            raise BIIndisponivel("ligue o BI da empresa antes de gerar a chave de leitura")
+        chave = f"lst_{secrets.token_urlsafe(32)}"
+        with self.banco._dono() as con:
+            con.execute("UPDATE interno.bi_acessos SET chave_hash = %s, chave_criada_em = now(), chave_usada_em = NULL "
+                        "WHERE tenant_id = %s", (hash_chave(chave), tenant))
+        return chave
+
+    def revogar_chave(self, tenant: str) -> None:
+        with self.banco._dono() as con:
+            con.execute("UPDATE interno.bi_acessos SET chave_hash = NULL, chave_criada_em = NULL WHERE tenant_id = %s", (tenant,))
+
+    def pela_chave(self, chave: str) -> dict | None:
+        """Empresa e schema donos da chave, se ela vale (BI ligado). Busca pelo hash: a chave nunca é comparada em claro."""
+        if not chave or not chave.startswith("lst_") or len(chave) > 100:
+            return None
+        with self.banco._dono() as con:
+            r = con.execute("UPDATE interno.bi_acessos SET chave_usada_em = now() WHERE chave_hash = %s AND ativo "
+                            "RETURNING tenant_id, nome", (hash_chave(chave),)).fetchone()
+        return dict(r) if r else None
+
+    def tabelas_publicadas(self, esquema: str) -> list[str]:
+        with self.banco._dono() as con:
+            return [r["tablename"] for r in con.execute(
+                "SELECT tablename FROM pg_tables WHERE schemaname = %s ORDER BY tablename", (esquema,))]
+
+    def parquet(self, esquema: str, tabela: str) -> bytes:
+        """A tabela publicada no BI da empresa, em Parquet. Lê do Postgres (o que foi publicado), não do disco:
+        sobrevive a deploy. Só tabela que existe no schema da própria empresa; o nome nunca entra cru no SQL."""
+        import tempfile
+        from decimal import Decimal
+
+        import pandas as pd
+        from psycopg import sql
+
+        if tabela not in self.tabelas_publicadas(esquema):
+            raise LookupError("tabela não publicada no BI desta empresa")
+        with self.banco._dono() as con:
+            cur = con.execute(sql.SQL("SELECT * FROM {}.{} LIMIT %s").format(sql.Identifier(esquema), sql.Identifier(tabela)),
+                              (LIMITE_LINHAS,))
+            nomes = [d.name for d in cur.description]
+            linhas = cur.fetchall()
+        df = pd.DataFrame([[r[n] for n in nomes] for r in linhas], columns=nomes)
+        for c in df.columns:
+            vals = df[c].dropna()
+            if vals.map(lambda v: isinstance(v, Decimal)).any():  # numeric do Postgres: DOUBLE, que o Power BI lê direto
+                df[c] = df[c].astype(float)
+            elif len(vals) and vals.map(lambda v: isinstance(v, int) and not isinstance(v, bool)).all():
+                df[c] = df[c].astype("Int64")  # inteiro com vazio não vira float: as relações do modelo continuam batendo
+        with tempfile.TemporaryDirectory() as tmp:
+            destino = Path(tmp) / "t.parquet"
+            duck = duckdb.connect()
+            try:
+                duck.register("t", df)
+                duck.execute(f"COPY t TO '{destino.as_posix()}' (FORMAT parquet)")
+            finally:
+                duck.close()
+            return destino.read_bytes()
 
     def desligar(self, tenant: str) -> None:
         from psycopg import sql

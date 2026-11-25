@@ -605,3 +605,58 @@ def test_bi_publicar_depois_do_disco_zerado_mantem_o_que_ja_estava(banco_pg, url
     assert any(f"demanda {did}" in x for x in r["avisos"]) and any("fonte" in x for x in r["avisos"])
     with _entrar_como(url_pg, cred) as c:
         assert c.execute(f"SELECT count(*) FROM d{did}_fato").fetchone()[0] > 0
+
+
+def test_bi_por_https_com_chave_de_leitura(url_pg, monkeypatch, tmp_path: Path):
+    """LST-47: o Power BI lê a tabela publicada por HTTPS com a chave; sem certificado do Supabase e sem gateway."""
+    import importlib
+
+    import duckdb
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path))
+    monkeypatch.setenv("LASTRO_BANCO_URL", url_pg)
+    import lastro.api as modulo
+
+    modulo = importlib.reload(modulo)
+    c = TestClient(modulo.app)
+    empresas = {}
+    for t in (f"h{uuid.uuid4().hex[:6]}", f"h{uuid.uuid4().hex[:6]}"):
+        modulo.banco.criar_tenant(t, t)
+        modulo.banco.criar_usuario(t, f"adm@{t}", "Adm", "admin", "senha-longa-de-teste")
+        cab = {"Authorization": "Bearer " + c.post("/api/login", json={"email": f"adm@{t}", "senha": "senha-longa-de-teste"}).json()["token"]}
+        c.post("/api/fontes", headers=cab, files={"arquivo": ("orcamentos.csv", EXEMPLO.read_bytes(), "text/csv")})
+        assert c.post("/api/bi/chave", headers=cab).status_code == 409  # sem BI ligado não há chave
+        c.post("/api/bi/credencial", headers=cab)
+        r = c.post("/api/bi/chave", headers=cab).json()
+        assert r["chave"].startswith("lst_") and r["cabecalho"] == "X-Lastro-Chave" and r["base"].endswith("/bi/v1/")
+        estado = c.get("/api/bi", headers=cab).json()
+        assert estado["chave_ativa"] and r["chave"] not in str(estado)  # a chave não volta de novo
+        empresas[t] = (cab, r["chave"])
+    (_, (cab1, chave1)), (t2, (_, chave2)) = empresas.items()
+
+    assert c.get("/bi/v1/").status_code == 200  # a URL base responde sem chave (teste de conexão do Service)
+    assert c.get("/bi/v1/tabelas").status_code == 401
+    assert c.get("/bi/v1/fonte_orcamentos.parquet", headers={"X-Lastro-Chave": "lst_inventada"}).status_code == 401
+    assert c.get("/bi/v1/tabelas", headers={"X-Lastro-Chave": chave1}).json() == {"tabelas": ["fonte_orcamentos"]}
+    resp = c.get("/bi/v1/fonte_orcamentos.parquet", headers={"X-Lastro-Chave": chave1})
+    assert resp.status_code == 200 and resp.headers["content-type"] == "application/vnd.apache.parquet"
+    arq = tmp_path / "baixado.parquet"
+    arq.write_bytes(resp.content)
+    linhas_csv = len(EXEMPLO.read_text(encoding="utf-8").splitlines()) - 1
+    assert duckdb.sql(f"SELECT count(*) FROM '{arq}'").fetchall()[0][0] == linhas_csv
+    # nome malicioso ou de tabela inexistente não vira SQL
+    for nome in ("pg_shadow", "x;drop table y", "..%2Fsenha"):
+        assert c.get(f"/bi/v1/{nome}.parquet", headers={"X-Lastro-Chave": chave1}).status_code in (404, 422)
+    # cada chave só enxerga a própria empresa: as duas têm 'fonte_orcamentos', cada uma no seu schema
+    assert c.get("/bi/v1/fonte_orcamentos.parquet", headers={"X-Lastro-Chave": chave2}).status_code == 200
+    assert c.get("/api/bi", headers=cab1).json()["chave_usada_em"]
+    # trocar a chave invalida a anterior; revogar corta o acesso
+    nova = c.post("/api/bi/chave", headers=cab1).json()["chave"]
+    assert c.get("/bi/v1/tabelas", headers={"X-Lastro-Chave": chave1}).status_code == 401
+    assert c.delete("/api/bi/chave", headers=cab1).json() == {"chave_ativa": False}
+    assert c.get("/bi/v1/tabelas", headers={"X-Lastro-Chave": nova}).status_code == 401
+    # desligar o BI também corta a chave
+    assert c.delete("/api/bi/credencial", headers=empresas[t2][0]).status_code == 200
+    assert c.get("/bi/v1/tabelas", headers={"X-Lastro-Chave": chave2}).status_code == 401
+    modulo.banco.fechar()

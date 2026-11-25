@@ -400,7 +400,7 @@ async function telaExportar(alvo) {
 
 const quandoBI = (iso) => iso ? new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "ainda não";
 
-async function telaBI(nova = null, teste = null) {
+async function telaBI(nova = null, teste = null, chave = null) {
   const alvo = $("#bi");
   const e = await (await api("/api/bi")).json();
   let html = `<div class="bloco"><h2>Conectar ao BI</h2>`;
@@ -422,6 +422,12 @@ async function telaBI(nova = null, teste = null) {
         : `<p class="quem">Nada publicado ainda. Envie uma fonte ou aprove uma demanda e clique em publicar.</p>`}
       <p class="erro-msg" id="bi-msg" role="status"></p>
       <div class="linha-btn"><button class="btn" id="bi-publicar">publicar agora</button><button class="btn sec" id="bi-trocar">trocar a senha</button><button class="btn sec" id="bi-desligar">desligar</button></div>
+      <h2 style="margin:6px 0 0">Power BI sem certificado e sem gateway (recomendado)</h2>
+      <p class="quem">O projeto do Power BI baixado no painel da demanda lê estas tabelas pela internet, com uma <b>chave de leitura</b>: não precisa do certificado do banco nem de gateway, e a atualização agendada funciona no Power BI Service. Chave ${e.chave_ativa ? `ativa desde ${esc(quandoBI(e.chave_criada_em))}, último uso ${esc(quandoBI(e.chave_usada_em))}` : "ainda não gerada"}.</p>
+      ${chave ? `<div class="bloco" style="background:var(--sup-2)"><p><b>Chave de leitura</b> (aparece só agora; cole no parâmetro <code>ChaveLastro</code> do projeto e guarde como senha):</p>
+        <div class="linha-btn" style="align-items:center"><code id="bi-chave" style="overflow-wrap:anywhere">${esc(chave.chave)}</code><button class="btn sec" id="bi-copiar-chave" type="button">copiar</button></div>
+        <p class="quem">Endereço: <code>${esc(chave.base)}</code> · cabeçalho <code>${esc(chave.cabecalho)}</code></p></div>` : ""}
+      <div class="linha-btn"><button class="btn sec" id="bi-chave-gerar">${e.chave_ativa ? "trocar a chave" : "gerar a chave de leitura"}</button>${e.chave_ativa ? `<button class="btn sec" id="bi-chave-revogar">revogar a chave</button>` : ""}</div>
       <details><summary>Como conectar (Power BI, Looker Studio, Metabase)</summary><ul class="quem">
         <li><b>Power BI Desktop</b> (gratuito): Obter dados → Banco de dados PostgreSQL → servidor <code>${esc(c.host)}:${esc(c.porta)}</code>, banco <code>${esc(c.banco)}</code> → usuário e senha acima. As tabelas <code>d…_fato</code> e <code>d…_dim_…</code> já formam um esquema estrela.</li>
         <li><b>Looker Studio</b>: Adicionar dados → PostgreSQL → preencha os campos acima e marque "Ativar SSL".</li>
@@ -436,6 +442,13 @@ async function telaBI(nova = null, teste = null) {
   if (nova) $("#bi-copiar-senha").onclick = (ev) => copiar(ev.target, nova.senha, $("#bi-senha"));
   $("#bi-publicar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/publicar", { method: "POST" })).json(); await telaBI(); if (r.avisos.length) $("#bi-msg").textContent = r.avisos.join(" · "); });
   $("#bi-trocar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/credencial", { method: "POST" })).json(); await telaBI(r.credencial, r.teste); });
+  if (chave) $("#bi-copiar-chave").onclick = (ev) => copiar(ev.target, chave.chave, $("#bi-chave"));
+  $("#bi-chave-gerar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/chave", { method: "POST" })).json(); await telaBI(null, null, r); });
+  if ($("#bi-chave-revogar")) $("#bi-chave-revogar").onclick = (ev) => {
+    const b = ev.target;
+    if (b.dataset.confirmar !== "1") { b.dataset.confirmar = "1"; b.textContent = "confirmar: o Power BI para de atualizar"; return; }
+    acao(b, async () => { await api("/api/bi/chave", { method: "DELETE" }); await telaBI(); });
+  };
   $("#bi-desligar").onclick = (ev) => {
     const b = ev.target;
     if (b.dataset.confirmar !== "1") { b.dataset.confirmar = "1"; b.textContent = "confirmar: o BI perde o acesso"; return; }
