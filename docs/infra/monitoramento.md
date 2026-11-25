@@ -61,6 +61,7 @@ Use o mesmo usuário `painel_leitor`, que só enxerga as views do schema `painel
 - `cargas`
 - `uso_gratuito`
 - `alertas`
+- `demo_funil_dia`: funil da demonstração do site (subiram, painéis, clicaram, recusas, desistências), sem IP nem dado de visitante (LST-44)
 
 Ele não grava nada e não lê senhas, segredos nem as tabelas internas.
 
