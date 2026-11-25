@@ -867,3 +867,75 @@ def demo_clicou_contato(dados: CliqueDemo) -> dict:
     """O visitante clicou para conversar depois do painel. Só o formato do painel, de lista fechada."""
     _demos().evento("clicou_contato", visual=dados.visual)
     return {"ok": True}
+
+
+# ---- Conversa com os dados da demanda (LST-35) ----------------------------------------------------
+
+def _conversa_arq(p: Plataforma, did: int) -> Path:
+    return p.pasta_demanda(did) / "conversa.json"
+
+
+def _ler_conversa(p: Plataforma, did: int) -> list[dict]:
+    arq = _conversa_arq(p, did)
+    return json.loads(arq.read_text(encoding="utf-8")) if arq.exists() else []
+
+
+class PerguntaConversa(BaseModel):
+    pergunta: str
+
+
+@app.get("/api/demandas/{did}/conversa")
+def ver_conversa(did: int, p: Annotated[Plataforma, Depends(plataforma)]) -> list[dict]:
+    if not p.repo.demanda(did):
+        raise HTTPException(404, "demanda não encontrada")
+    return _ler_conversa(p, did)
+
+
+@app.post("/api/demandas/{did}/conversa")
+def conversar(did: int, dados: PerguntaConversa, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    """O Intérprete responde com insights provados (camada 1); o turno espera o revisor (camada 2)."""
+    from .agents.interprete import Interprete
+
+    d = p.repo.demanda(did)
+    if not d:
+        raise HTTPException(404, "demanda não encontrada")
+    if d["status"] != "aprovada":
+        raise HTTPException(409, "a conversa usa o resultado aprovado: aprove a demanda antes")
+    pergunta = dados.pergunta.strip()[:300]
+    if not pergunta:
+        raise HTTPException(400, "escreva uma pergunta")
+    agente = Interprete(d, p.pasta_demanda(did))
+    try:
+        resposta = agente.responder(pergunta)
+    finally:
+        agente.fechar()
+    conversa = _ler_conversa(p, did)
+    turno = {"n": len(conversa) + 1, "autor": s.email, "em": time.time(), **resposta,
+             "camada2": "aguardando revisor", "revisao": None}
+    conversa.append(turno)
+    _conversa_arq(p, did).write_text(json.dumps(conversa, ensure_ascii=False, default=str), encoding="utf-8")
+    p.repo.registrar("interprete", "interpretou", {"pergunta": pergunta, "insights": len(resposta["insights"]),
+                                                   "recusados": len(resposta["recusados"]), "autor": s.email}, did)
+    for r in resposta["recusados"]:
+        p.repo.registrar("auditor", "recusou_insight", r, did)
+    return turno
+
+
+class RevisaoConversa(BaseModel):
+    aprovado: bool
+    parecer: str = ""
+
+
+@app.post("/api/demandas/{did}/conversa/{n}/revisao")
+def revisar_conversa(did: int, n: int, dados: RevisaoConversa, s: Annotated[Sessao, Depends(sessao)],
+                     p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    _papel(s, PAPEIS_QUE_REVISAM)
+    conversa = _ler_conversa(p, did)
+    turno = next((t for t in conversa if t["n"] == n), None)
+    if not p.repo.demanda(did) or not turno:
+        raise HTTPException(404, "turno não encontrado")
+    turno["camada2"] = "aprovado" if dados.aprovado else "reprovado"
+    turno["revisao"] = {"revisor": s.email, "aprovado": dados.aprovado, "parecer": dados.parecer[:500], "em": time.time()}
+    _conversa_arq(p, did).write_text(json.dumps(conversa, ensure_ascii=False, default=str), encoding="utf-8")
+    p.repo.registrar(s.email, "revisou_insights", {"turno": n, "aprovado": dados.aprovado, "parecer": dados.parecer[:500]}, did)
+    return turno

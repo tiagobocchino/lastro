@@ -121,7 +121,7 @@ async function abrirDemanda(id) {
   if (d.status === "grill") html += grillHtml(d);
   if (d.status === "pronta") html += `<div class="bloco"><p>Grill respondido. Os agentes vão modelar, construir o pipeline no sandbox, responder e auditar.</p><div class="linha-btn"><button class="btn ouro" id="b-exec">rodar agentes</button></div><p class="erro-msg" id="msg"></p></div>`;
   if (d.resposta) html += resultadoHtml(d);
-  if (d.status === "aprovada") html += `<div id="painel-dem"></div>`;
+  if (d.status === "aprovada") html += `<div id="painel-dem"></div><div id="conversa-dem"></div>`;
   if (d.eventos?.length) html += `<h2>Rastro dos agentes</h2><div class="bloco rastro">${d.eventos.map((e) => `<div><b>${esc(e.ator.split("@")[0])}</b><span>${esc(e.acao)} · ${esc(e.detalhe.slice(0, 220))}</span></div>`).join("")}</div>`;
   p.innerHTML = html;
   if ($("#f-grill")) $("#f-grill").onsubmit = (e) => enviarGrill(e, d);
@@ -129,6 +129,7 @@ async function abrirDemanda(id) {
   document.querySelectorAll("[data-baixar]").forEach((b) => (b.onclick = () => baixar(d.id, b.dataset.baixar)));
   if ($("#f-rev")) $("#f-rev").onsubmit = (e) => revisar(e, d.id);
   if ($("#painel-dem")) await telaPainel(d.id);
+  if ($("#conversa-dem")) await telaConversa(d.id);
 }
 
 function grillHtml(d) {
@@ -491,4 +492,54 @@ async function telaPainel(did, aviso = "") {
   $("#p-visual").onsubmit = (ev) => { ev.preventDefault(); const op = { op: "adicionar_visual", tipo: $("#p-tipo").value, medida: $("#p-med").value }; if ($("#p-eixo").value) op.eixo = $("#p-eixo").value; mudar({ op }); };
   $("#p-medida").onsubmit = (ev) => { ev.preventDefault(); mudar({ op: { op: "adicionar_medida", coluna: $("#p-col").value, agregacao: $("#p-agg").value } }); };
   document.querySelectorAll("[data-rem]").forEach((b) => (b.onclick = () => mudar({ op: { op: "remover_visual", id: b.dataset.rem } })));
+}
+
+// ---- Conversar com os dados (LST-35) --------------------------------------------------------
+const CAMADA2 = { "aguardando revisor": "aguardando revisor", aprovado: "aprovado pelo revisor", reprovado: "reprovado pelo revisor" };
+
+function insightHtml(i) {
+  const cols = i.linhas?.[0]?.length || 0;
+  return `<div class="insight" style="display:grid;gap:6px;padding:10px 0;border-bottom:1px dashed var(--linha)">
+    <p style="margin:0">${esc(i.texto)}</p>
+    <details><summary class="quem">ver a consulta e o resultado (conferido pelo auditor)</summary>
+      <pre>${esc(i.sql)}</pre>
+      <div class="tabela"><table><tbody>${(i.linhas || []).map((l) => `<tr>${l.map((v) => `<td class="${typeof v === "number" ? "n" : ""}">${num(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    </details></div>`;
+}
+
+async function telaConversa(did, aviso = "") {
+  const alvo = $("#conversa-dem");
+  const turnos = await (await api(`/api/demandas/${did}/conversa`)).json();
+  const revisa = ["revisor", "admin"].includes(sessao.papel);
+  const ultimo = turnos[turnos.length - 1];
+  const sugestoes = ultimo?.sugestoes || ["Quanto foi o total?", "Quem lidera?", "Está concentrado em poucos?", "Como evoluiu no último mês?"];
+  alvo.innerHTML = `<h2>Conversar com os dados</h2>
+    <div class="bloco">
+      <p class="quem">Pergunte sobre o resultado aprovado. Cada resposta traz a consulta que a prova: o auditor refaz a conta (camada 1) e o revisor aprova antes de você levar adiante (camada 2). Nada é alterado na fonte.</p>
+      ${turnos.map((t) => `<div style="display:grid;gap:4px">
+        <p class="rot" style="margin:0">${esc(t.autor.split("@")[0])} perguntou · <span class="status ${t.camada2 === "aprovado" ? "aprovada" : t.camada2 === "reprovado" ? "reprovada" : "em_revisao"}">${esc(CAMADA2[t.camada2] || t.camada2)}</span></p>
+        <p style="margin:0"><b>${esc(t.pergunta)}</b></p>
+        ${t.insights.map(insightHtml).join("") || `<p class="quem">Nenhum insight com prova para essa pergunta.</p>`}
+        ${t.recusados?.length ? `<p class="quem">${t.recusados.length} insight(s) recusado(s) pelo auditor por falta de prova.</p>` : ""}
+        ${t.revisao ? `<p class="quem">${esc(t.revisao.revisor)}: ${esc(t.revisao.parecer || "(sem parecer)")}</p>` : ""}
+        ${revisa && t.camada2 === "aguardando revisor" ? `<div class="linha-btn"><button class="btn ouro" data-rev="${t.n}" data-ok="1">aprovar insights</button><button class="btn sec" data-rev="${t.n}" data-ok="0">reprovar</button></div>` : ""}
+      </div>`).join(`<hr style="border:0;border-top:1px solid var(--linha);width:100%">`)}
+      <form id="c-perguntar" style="display:grid;gap:8px">
+        <label for="c-texto">Sua pergunta<input id="c-texto" type="text" required maxlength="300" placeholder="Ex.: quem lidera em valor vendido por estado?"></label>
+        <div class="linha-btn">${sugestoes.map((x) => `<button type="button" class="btn sec" data-sug="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+        <div class="linha-btn"><button class="btn" type="submit" id="c-enviar">perguntar</button></div>
+      </form>
+      <p class="${aviso.startsWith("ok:") ? "ok" : "erro-msg"}" id="c-msg" role="status">${esc(aviso.replace(/^ok:/, ""))}</p>
+    </div>`;
+  document.querySelectorAll("[data-sug]").forEach((b) => (b.onclick = () => { $("#c-texto").value = b.dataset.sug; $("#c-texto").focus(); }));
+  $("#c-perguntar").onsubmit = async (ev) => {
+    ev.preventDefault();
+    const b = $("#c-enviar"); b.disabled = true; b.textContent = "interpretando e conferindo…";
+    try { await api(`/api/demandas/${did}/conversa`, { method: "POST", json: { pergunta: $("#c-texto").value } }); await telaConversa(did); }
+    catch (err) { $("#c-msg").textContent = err.message; b.disabled = false; b.textContent = "perguntar"; }
+  };
+  document.querySelectorAll("[data-rev]").forEach((b) => (b.onclick = async () => {
+    try { await api(`/api/demandas/${did}/conversa/${b.dataset.rev}/revisao`, { method: "POST", json: { aprovado: b.dataset.ok === "1", parecer: "" } }); await telaConversa(did, "ok:Revisão registrada no rastro."); }
+    catch (err) { $("#c-msg").textContent = err.message; }
+  }));
 }
