@@ -5,7 +5,7 @@ description: "Regras do fluxo de cards do projeto no Jira (Atlassian): estados, 
 
 # Onde está o fluxo
 
-- Jira: site `adelecrm.atlassian.net` (cloudId `4e6687a8-3f5c-45fc-afeb-f40ff38b3244`), projeto `LST` (Scrum gerenciado pela equipe). Épicos de seção: NUC `LST-1`, INT `LST-2`, MKT `LST-3`, CON `LST-4`. Card novo sempre com `parent` = épico da seção. Ferramentas: MCP `Atlassian_MCP` (`createJiraIssue`, `searchJiraIssuesUsingJql`, `transitionJiraIssue`, `addOrEditJiraIssueComment`, `editJiraIssue`).
+- Jira: site `adelecrm.atlassian.net` (cloudId `4e6687a8-3f5c-45fc-afeb-f40ff38b3244`), projeto `LST` (Scrum gerenciado pela equipe). Épicos de seção: NUC `LST-1`, INT `LST-2`, MKT `LST-3`, CON `LST-4`, OPS `LST-18`. Card novo sempre com `parent` = épico da seção. Ferramentas: MCP `Atlassian_MCP` (`createJiraIssue`, `searchJiraIssuesUsingJql`, `transitionJiraIssue`, `addOrEditJiraIssueComment`, `editJiraIssue`).
 - Seções em `docs/agents/secoes.yaml`. Cada seção é um épico com rótulo `secao-<CHAVE>` (NUC, INT, MKT, CON).
 - Sem acesso ao Jira (projeto ainda não criado, sessão sem o conector): use o espelho `shared-docs/board/<coluna>/LST-n-slug/card.md`, com o mesmo modelo. Ao voltar o acesso, o gerente sobe os cards e anota a chave do Jira no `card.md`.
 

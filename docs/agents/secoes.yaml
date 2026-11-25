@@ -32,3 +32,11 @@ CON:
   caminhos: [caixa/global/, CONTEXT.md, docs/adr/, docs/memory/]
   especialistas: [pesquisador-de-apis, engenheiro-de-dados]
   verificacao: ["uv run lastro buscar \"<assunto>\" acha a nota nova entre as 3 primeiras", "frontmatter válido"]
+
+OPS:
+  epico: LST-18
+  nome: Infra na nuvem e atendimento
+  escopo: container, Cloud Run, Firebase Hosting, Cloud Storage, Secret Manager, deploy, monitoramento, funil de atendimento Google
+  caminhos: [Dockerfile, firebase.json, .github/workflows/, docs/infra/, atendimento/]
+  especialistas: [engenheiro-backend, engenheiro-frontend, engenheiro-de-dados]
+  verificacao: ["deploy pelo GitHub Actions sem passo manual", "curl https://<api>/saude = 200", "custo do mês R$ 0 no faturamento"]
