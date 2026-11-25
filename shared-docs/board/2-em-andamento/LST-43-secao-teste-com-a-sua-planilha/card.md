@@ -2,7 +2,7 @@
 chave: LST-43
 jira: https://adelecrm.atlassian.net/browse/LST-43
 secao: MKT
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-frontend
 ---
 
