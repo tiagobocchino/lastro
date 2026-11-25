@@ -2,7 +2,7 @@
 chave: LST-22
 jira: https://adelecrm.atlassian.net/browse/LST-22
 secao: OPS
-status: bloqueado
+status: feito
 especialista: engenheiro-backend
 ---
 
@@ -14,7 +14,7 @@ especialista: engenheiro-backend
 
 - [x] Serviço web gratuito no Render a partir do Dockerfile (LST-20); `/saude` = 200
 - [x] Variáveis só no painel do Render: LASTRO_AMBIENTE=producao, LASTRO_SEGREDO, LASTRO_BANCO_URL, LASTRO_TAREFA_SEGREDO, LASTRO_URL_PUBLICA e as do Storage (LST-30)
-- [ ] GitHub Actions agendado no minuto 17 de cada hora chamando POST /tarefas/cargas; o mesmo job mantém o Supabase acordado
+- [x] Disparo de hora em hora de POST /tarefas/cargas (pelo Supabase pg_cron, plano C; o workflow do GitHub ficou de reserva)
 - [x] Migrações 0001 a 0003 no projeto Supabase de produção
 
 ## Verificação
@@ -49,3 +49,9 @@ Passos do Tiago: conta no Render, Blueprint com os 4 valores, os 2 segredos no G
   - `pg_net` fica no schema `extensions`.
 - Teste: o banco chamou o Render e recebeu 200 `{"estado":"ok","banco":"ok"}`. Verificador de segurança sem avisos novos.
 - Falta: o Tiago gravar `lastro_tarefa_segredo` no Vault pelo SQL Editor (o valor vem do painel do Render).
+
+## QA (25/11)
+
+- `lastro_tarefa_segredo` gravado no Vault pelo Tiago, pelo SQL Editor, sem passar pela conversa.
+- `interno.disparar_cargas()` chamou o Render e recebeu 200 `{"executadas":0,"por_status":{"ok":0,"cota":0,"falhou":0}}`. Nenhuma carga agendada ainda; o disparo e o segredo estão validados de ponta a ponta.
+- Jobs `lastro-acordar` (minuto 12) e `lastro-cargas` (minuto 17) ativos.
