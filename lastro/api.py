@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import hmac
-import logging
 import html
 import json
+import logging
 import os
 import re
 import time
@@ -18,16 +18,23 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from .banco import PAPEIS_QUE_DEMANDAM, PAPEIS_QUE_REVISAM, abrir_banco, emitir_token, ler_token
+from . import cargas
+from .banco import (
+    PAPEIS_QUE_DEMANDAM,
+    PAPEIS_QUE_REVISAM,
+    SenhaInvalida,
+    abrir_banco,
+    emitir_token,
+    ler_token,
+)
 from .cofre import abrir_cofre
-from .espelho import abrir_espelho
-from .config import carregar
 from .conectores import EXTENSOES
+from .config import carregar
+from .espelho import abrir_espelho
 from .politica import PermissaoNegada
+from .saas import oauth
 from .servico import Plataforma
 from .somente_leitura import EscritaBloqueada
-from . import cargas
-from .saas import oauth
 
 cfg = carregar()
 log = logging.getLogger("lastro")
@@ -42,15 +49,23 @@ class Sessao(BaseModel):
     email: str
     tenant: str
     papel: str
+    trocar_senha: bool = False
 
 
-def sessao(authorization: Annotated[str | None, Header()] = None) -> Sessao:
+def sessao_para_troca(authorization: Annotated[str | None, Header()] = None) -> Sessao:
+    """Aceita também quem está com senha provisória: só para trocar a senha e ver quem é."""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401, "faça login")
     carga = ler_token(cfg.segredo, authorization[7:])
     if not carga:
         raise HTTPException(401, "sessão expirada")
-    return Sessao(email=carga["e"], tenant=carga["t"], papel=carga["p"])
+    return Sessao(email=carga["e"], tenant=carga["t"], papel=carga["p"], trocar_senha=bool(carga.get("m")))
+
+
+def sessao(s: Annotated[Sessao, Depends(sessao_para_troca)]) -> Sessao:
+    if s.trocar_senha:  # senha provisória: nada além da troca (LST-32)
+        raise HTTPException(403, "troque a senha provisória antes de continuar")
+    return s
 
 
 def plataforma(s: Annotated[Sessao, Depends(sessao)]):  # noqa: ANN201
@@ -90,11 +105,59 @@ def login(dados: Login) -> dict:
     u = banco.autenticar(dados.email, dados.senha)
     if not u:
         raise HTTPException(401, "e-mail ou senha inválidos")
-    return {"token": emitir_token(cfg.segredo, u["email"], u["tenant_id"], u["papel"]), "nome": u["nome"], "papel": u["papel"], "tenant": u["tenant_id"]}
+    trocar = bool(u.get("trocar_senha"))
+    return {"token": emitir_token(cfg.segredo, u["email"], u["tenant_id"], u["papel"], trocar_senha=trocar),
+            "nome": u["nome"], "papel": u["papel"], "tenant": u["tenant_id"], "trocar_senha": trocar}
+
+
+# ---- Conta e equipe (LST-32) -------------------------------------------------------------
+
+class TrocaSenha(BaseModel):
+    atual: str
+    nova: str
+
+
+@app.post("/api/conta/senha")
+def trocar_senha(dados: TrocaSenha, s: Annotated[Sessao, Depends(sessao_para_troca)]) -> dict:
+    try:
+        ok = banco.trocar_senha(s.email, dados.atual, dados.nova)
+    except SenhaInvalida as e:
+        raise HTTPException(400, str(e)) from e
+    if not ok:
+        raise HTTPException(403, "senha atual incorreta")
+    banco.repo(s.tenant, s.email, s.papel).registrar(s.email, "trocou_senha", {})
+    return {"token": emitir_token(cfg.segredo, s.email, s.tenant, s.papel), "trocar_senha": False}
+
+
+class Convite(BaseModel):
+    email: str
+    nome: str
+    papel: str = "demandante"
+
+
+@app.get("/api/usuarios")
+def listar_usuarios(s: Annotated[Sessao, Depends(sessao)]) -> list[dict]:
+    _papel(s, {"admin"})
+    return banco.usuarios(s.tenant)
+
+
+@app.post("/api/usuarios")
+def convidar(dados: Convite, s: Annotated[Sessao, Depends(sessao)]) -> dict:
+    """Cria o usuário (ou gera nova senha provisória) na empresa do admin. A senha volta uma única vez."""
+    _papel(s, {"admin"})
+    email = dados.email.strip().lower()
+    if dados.papel not in {"admin", "demandante", "revisor", "leitor"} or "@" not in email or not dados.nome.strip():
+        raise HTTPException(400, "e-mail, nome ou papel inválidos")
+    try:
+        senha = banco.senha_provisoria(s.tenant, email, dados.nome.strip(), dados.papel)
+    except PermissionError as e:
+        raise HTTPException(409, "este e-mail já está em uso") from e  # não diz em qual empresa
+    banco.repo(s.tenant, s.email, s.papel).registrar(s.email, "gerou_senha_provisoria", {"usuario": email, "papel": dados.papel})
+    return {"email": email, "papel": dados.papel, "senha_provisoria": senha}
 
 
 @app.get("/api/eu")
-def eu(s: Annotated[Sessao, Depends(sessao)]) -> Sessao:
+def eu(s: Annotated[Sessao, Depends(sessao_para_troca)]) -> Sessao:
     return s
 
 
@@ -230,6 +293,7 @@ app.mount("/web", StaticFiles(directory=WEB), name="web")
 # ---- Conectores SaaS: catálogo, teste de conexão, importação, Postman e sandbox -------------
 
 from datetime import date as _date  # noqa: E402
+
 from fastapi import Request  # noqa: E402
 from fastapi.responses import JSONResponse, Response  # noqa: E402
 

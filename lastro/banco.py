@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS tenants (id TEXT PRIMARY KEY, nome TEXT NOT NULL, cri
 CREATE TABLE IF NOT EXISTS usuarios (
   email TEXT PRIMARY KEY, tenant_id TEXT NOT NULL REFERENCES tenants(id), nome TEXT NOT NULL,
   papel TEXT NOT NULL CHECK (papel IN ('admin','demandante','revisor','leitor')),
-  senha_hash TEXT NOT NULL);
+  senha_hash TEXT NOT NULL, trocar_senha INTEGER NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS fontes (
   id INTEGER PRIMARY KEY, tenant_id TEXT NOT NULL REFERENCES tenants(id), nome TEXT NOT NULL,
   tipo TEXT NOT NULL, caminho TEXT NOT NULL, criado_em REAL NOT NULL);
@@ -53,7 +53,31 @@ def conectar(caminho: Path) -> sqlite3.Connection:
     con = sqlite3.connect(caminho, check_same_thread=False)
     con.row_factory = sqlite3.Row
     con.executescript(ESQUEMA)
+    colunas = {r["name"] for r in con.execute("PRAGMA table_info(usuarios)")}
+    if "trocar_senha" not in colunas:  # banco local criado antes do LST-32
+        con.execute("ALTER TABLE usuarios ADD COLUMN trocar_senha INTEGER NOT NULL DEFAULT 0")
+        con.commit()
     return con
+
+
+SENHA_MINIMA = 12
+
+
+class SenhaInvalida(ValueError):
+    pass
+
+
+def validar_nova_senha(atual: str, nova: str) -> None:
+    if len(nova) < SENHA_MINIMA:
+        raise SenhaInvalida(f"a nova senha precisa de pelo menos {SENHA_MINIMA} caracteres")
+    if nova == atual:
+        raise SenhaInvalida("a nova senha precisa ser diferente da atual")
+
+
+def gerar_senha_provisoria() -> str:
+    import secrets  # noqa: PLC0415
+
+    return secrets.token_urlsafe(12)  # 16 caracteres; trocada no primeiro login
 
 
 def hash_senha(senha: str, sal: bytes | None = None) -> str:
@@ -67,8 +91,11 @@ def confere_senha(senha: str, guardado: str) -> bool:
     return hmac.compare_digest(hash_senha(senha, bytes.fromhex(sal)), guardado)
 
 
-def emitir_token(segredo: str, email: str, tenant: str, papel: str, validade_s: int = 8 * 3600) -> str:
-    carga = json.dumps({"e": email, "t": tenant, "p": papel, "x": int(time.time()) + validade_s}).encode()
+def emitir_token(segredo: str, email: str, tenant: str, papel: str, validade_s: int = 8 * 3600, trocar_senha: bool = False) -> str:
+    dados = {"e": email, "t": tenant, "p": papel, "x": int(time.time()) + validade_s}
+    if trocar_senha:  # senha provisória: o servidor só aceita a troca até ela acontecer (LST-32)
+        dados["m"] = 1
+    carga = json.dumps(dados).encode()
     b = urlsafe_b64encode(carga).decode().rstrip("=")
     assinatura = hmac.new(segredo.encode(), b.encode(), hashlib.sha256).hexdigest()
     return f"{b}.{assinatura}"
@@ -94,8 +121,14 @@ def criar_tenant(con: sqlite3.Connection, tenant_id: str, nome: str) -> None:
 
 
 def criar_usuario(con: sqlite3.Connection, tenant_id: str, email: str, nome: str, papel: str, senha: str) -> None:
+    # Só para a demo e a criação do primeiro admin (CLI). Convite pela tela usa senha_provisoria().
+    # Nenhum dos dois move um e-mail de uma empresa para outra.
+    dono = con.execute("SELECT tenant_id FROM usuarios WHERE email=?", (email.lower(),)).fetchone()
+    if dono and dono["tenant_id"] != tenant_id:
+        raise PermissionError("este e-mail já pertence a outra empresa")
     con.execute(
-        "INSERT OR REPLACE INTO usuarios VALUES (?,?,?,?,?)", (email.lower(), tenant_id, nome, papel, hash_senha(senha))
+        "INSERT OR REPLACE INTO usuarios (email, tenant_id, nome, papel, senha_hash) VALUES (?,?,?,?,?)",
+        (email.lower(), tenant_id, nome, papel, hash_senha(senha)),
     )
     con.commit()
 
@@ -231,6 +264,35 @@ class BancoSqlite:
         u = autenticar(self.con, email, senha)
         return dict(u) if u else None
 
+    # ---- contas (LST-32) -----------------------------------------------------------------
+    def senha_provisoria(self, tenant: str, email: str, nome: str, papel: str) -> str:
+        email = email.lower()
+        dono = self.con.execute("SELECT tenant_id FROM usuarios WHERE email=?", (email,)).fetchone()
+        if dono and dono["tenant_id"] != tenant:
+            raise PermissionError("este e-mail já pertence a outra empresa")
+        senha = gerar_senha_provisoria()
+        if dono:
+            self.con.execute("UPDATE usuarios SET nome=?, papel=?, senha_hash=?, trocar_senha=1 WHERE email=? AND tenant_id=?",
+                             (nome, papel, hash_senha(senha), email, tenant))
+        else:
+            self.con.execute("INSERT INTO usuarios (email, tenant_id, nome, papel, senha_hash, trocar_senha) VALUES (?,?,?,?,?,1)",
+                             (email, tenant, nome, papel, hash_senha(senha)))
+        self.con.commit()
+        return senha
+
+    def trocar_senha(self, email: str, atual: str, nova: str) -> bool:
+        u = autenticar(self.con, email, atual)
+        if not u:
+            return False
+        validar_nova_senha(atual, nova)
+        self.con.execute("UPDATE usuarios SET senha_hash=?, trocar_senha=0 WHERE email=?", (hash_senha(nova), email.lower()))
+        self.con.commit()
+        return True
+
+    def usuarios(self, tenant: str) -> list[dict]:
+        rows = self.con.execute("SELECT email, nome, papel, trocar_senha FROM usuarios WHERE tenant_id=? ORDER BY email", (tenant,))
+        return [dict(r) | {"trocar_senha": bool(r["trocar_senha"])} for r in rows]
+
     def repo(self, tenant: str, email: str = "sistema@lastro", papel: str = "admin") -> Repo:  # noqa: ARG002
         return Repo(self.con, tenant)
 
@@ -245,7 +307,9 @@ class BancoSqlite:
 def abrir_banco(cfg):  # noqa: ANN001, ANN201  (Config; evita import circular)
     """Postgres do Supabase quando LASTRO_BANCO_URL existe; senão, SQLite em LASTRO_HOME."""
     if cfg.banco_url:
-        from .banco_postgres import BancoPostgres  # noqa: PLC0415  (psycopg só com o extra postgres)
+        from .banco_postgres import (
+            BancoPostgres,  # noqa: PLC0415  (psycopg só com o extra postgres)
+        )
 
         return BancoPostgres(cfg.banco_url)
     return BancoSqlite(cfg.banco)

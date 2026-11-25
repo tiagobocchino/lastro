@@ -16,7 +16,13 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 from psycopg_pool import ConnectionPool
 
-from .banco import CAMPOS_CARGA_ATUALIZAVEIS, confere_senha, hash_senha
+from .banco import (
+    CAMPOS_CARGA_ATUALIZAVEIS,
+    confere_senha,
+    gerar_senha_provisoria,
+    hash_senha,
+    validar_nova_senha,
+)
 
 
 def claims(tenant: str, email: str, papel: str) -> str:
@@ -54,11 +60,15 @@ class BancoPostgres:
 
     def criar_usuario(self, tenant_id: str, email: str, nome: str, papel: str, senha: str) -> None:
         with self._dono() as con:
-            con.execute(
-                "INSERT INTO usuarios VALUES (%s,%s,%s,%s,%s) ON CONFLICT (email) DO UPDATE SET "
-                "tenant_id=excluded.tenant_id, nome=excluded.nome, papel=excluded.papel, senha_hash=excluded.senha_hash",
+            r = con.execute(
+                # Só demo e primeiro admin. Nunca move um e-mail de empresa: conflito com outra empresa falha.
+                "INSERT INTO usuarios (email, tenant_id, nome, papel, senha_hash) VALUES (%s,%s,%s,%s,%s) "
+                "ON CONFLICT (email) DO UPDATE SET nome=excluded.nome, papel=excluded.papel, senha_hash=excluded.senha_hash "
+                "WHERE usuarios.tenant_id = excluded.tenant_id RETURNING email",
                 (email.lower(), tenant_id, nome, papel, hash_senha(senha)),
-            )
+            ).fetchone()
+            if r is None:
+                raise PermissionError("este e-mail já pertence a outra empresa")
 
     def autenticar(self, email: str, senha: str) -> dict | None:
         with self._dono() as con:
@@ -66,6 +76,35 @@ class BancoPostgres:
         if u and confere_senha(senha, u["senha_hash"]):
             return u
         return None
+
+    # ---- contas (LST-32): conexão de dono, sempre filtrando pela empresa ---------------------
+    def senha_provisoria(self, tenant: str, email: str, nome: str, papel: str) -> str:
+        email = email.lower()
+        senha = gerar_senha_provisoria()
+        with self._dono() as con:
+            dono = con.execute("SELECT tenant_id FROM usuarios WHERE email=%s FOR UPDATE", (email,)).fetchone()
+            if dono and dono["tenant_id"] != tenant:
+                raise PermissionError("este e-mail já pertence a outra empresa")
+            if dono:
+                con.execute("UPDATE usuarios SET nome=%s, papel=%s, senha_hash=%s, trocar_senha=true WHERE email=%s AND tenant_id=%s",
+                            (nome, papel, hash_senha(senha), email, tenant))
+            else:
+                con.execute("INSERT INTO usuarios (email, tenant_id, nome, papel, senha_hash, trocar_senha) VALUES (%s,%s,%s,%s,%s,true)",
+                            (email, tenant, nome, papel, hash_senha(senha)))
+        return senha
+
+    def trocar_senha(self, email: str, atual: str, nova: str) -> bool:
+        if not self.autenticar(email, atual):
+            return False
+        validar_nova_senha(atual, nova)
+        with self._dono() as con:
+            con.execute("UPDATE usuarios SET senha_hash=%s, trocar_senha=false WHERE email=%s", (hash_senha(nova), email.lower()))
+        return True
+
+    def usuarios(self, tenant: str) -> list[dict]:
+        with self._dono() as con:
+            return [dict(r) for r in con.execute(
+                "SELECT email, nome, papel, trocar_senha FROM usuarios WHERE tenant_id=%s ORDER BY email", (tenant,))]
 
     def repo(self, tenant: str, email: str = "sistema@lastro", papel: str = "admin") -> RepoPostgres:
         return RepoPostgres(self, tenant, email, papel)

@@ -21,6 +21,8 @@ async function api(caminho, opcoes = {}) {
   return r;
 }
 
+function guardar() { try { sessionStorage.setItem("lastro", JSON.stringify(sessao)); } catch {} }
+
 function sair() { sessao = null; try { sessionStorage.removeItem("lastro"); } catch {} telaLogin(); }
 
 function logo() { return `<span class="logo"><svg width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="8" y="8" width="32" height="32" rx="3" stroke="var(--tinta)" stroke-width="6"/><rect x="24" y="24" width="32" height="32" rx="3" stroke="var(--prata)" stroke-width="6"/><rect x="27" y="27" width="10" height="10" fill="var(--ouro)"/></svg>lastro</span>`; }
@@ -40,8 +42,8 @@ function telaLogin(msg = "") {
     try {
       const r = await api("/api/login", { method: "POST", json: { email: $("#email").value, senha: $("#senha").value } });
       sessao = await r.json();
-      try { sessionStorage.setItem("lastro", JSON.stringify(sessao)); } catch {}
-      telaPrincipal();
+      guardar();
+      sessao.trocar_senha ? telaTrocaObrigatoria() : telaPrincipal();
     } catch (err) { $("#msg").textContent = err.message; }
   };
 }
@@ -50,12 +52,13 @@ async function telaPrincipal() {
   $("#app").innerHTML = `<header>${logo()}<div class="linha-btn" style="align-items:center">
       <span class="quem"><b>${esc(sessao.nome)}</b> · ${esc(sessao.papel)} · ${esc(sessao.tenant)}</span>
       <button class="btn sec" id="sair">sair</button></div></header>
-    <div class="grade"><aside><div class="abas"><button class="aba ativa" id="aba-dem">demandas</button><button class="aba" id="aba-con">conectores</button></div><div id="lado"><button class="btn" id="nova">nova demanda</button>
+    <div class="grade"><aside><div class="abas"><button class="aba ativa" id="aba-dem">demandas</button><button class="aba" id="aba-con">conectores</button><button class="aba" id="aba-conta">conta</button></div><div id="lado"><button class="btn" id="nova">nova demanda</button>
       <p class="rot" style="margin:12px 0 0">demandas</p><div id="lista"></div></div></aside>
     <main id="painel"></main></div>`;
   $("#sair").onclick = sair;
   $("#aba-dem").onclick = () => telaPrincipal();
   $("#aba-con").onclick = () => telaConectores();
+  $("#aba-conta").onclick = () => telaConta();
   $("#nova").onclick = () => { atual = null; telaNova(); marcarLista(); };
   await carregarLista();
   const autorizado = new URLSearchParams(location.search).get("autorizado");
@@ -185,7 +188,7 @@ async function baixar(id, tipo) {
   document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-sessao ? telaPrincipal() : telaLogin();
+!sessao ? telaLogin() : sessao.trocar_senha ? telaTrocaObrigatoria() : telaPrincipal();
 
 // ---- Conectores: catálogo, teste no sandbox, Postman, importação -------------------------
 let catalogo = [];
@@ -292,4 +295,73 @@ function laudoHtml(l) {
     <p class="quem">truncamento ${esc(l.truncamento)} · ${plural((l.renovacoes_token || 0) + l.relogins, "renovação", "renovações")} de token · ${l.tentativas_escrita_bloqueadas ?? 0} tentativas de escrita bloqueadas${l.avisos.length ? " · " + esc(l.avisos.join("; ")) : ""}</p>
     ${l.fonte_id ? `<p class="ok"><b>Importado como fonte.</b> Já aparece em "nova demanda".</p>` : ""}
     <div class="tabela"><table><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${l.amostra.map((r) => `<tr>${cols.map((c) => `<td>${esc(typeof r[c] === "object" ? JSON.stringify(r[c]) : r[c])}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
+}
+
+// ---- Conta: trocar a própria senha; admin cadastra a equipe (LST-32) -------------------
+const PAPEIS = { demandante: "demandante", revisor: "revisor de negócio", leitor: "leitor", admin: "admin" };
+
+function formSenha(titulo, atualRotulo) {
+  return `<form class="bloco" id="f-senha"><h2>${titulo}</h2>
+    <label for="s-atual">${atualRotulo}<input id="s-atual" type="password" required autocomplete="current-password"></label>
+    <label for="s-nova">Nova senha <small>no mínimo 12 caracteres</small><input id="s-nova" type="password" required minlength="12" autocomplete="new-password"></label>
+    <label for="s-conf">Repita a nova senha<input id="s-conf" type="password" required minlength="12" autocomplete="new-password"></label>
+    <button class="btn" type="submit">trocar senha</button><p class="erro-msg" id="s-msg" role="status"></p></form>`;
+}
+
+function ligarFormSenha(depois) {
+  $("#f-senha").onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = $("#s-msg");
+    if ($("#s-nova").value !== $("#s-conf").value) { msg.textContent = "As duas senhas novas não batem."; return; }
+    try {
+      const r = await (await api("/api/conta/senha", { method: "POST", json: { atual: $("#s-atual").value, nova: $("#s-nova").value } })).json();
+      sessao = { ...sessao, token: r.token, trocar_senha: false };
+      guardar();
+      depois();
+    } catch (err) { msg.textContent = err.message; }
+  };
+}
+
+function telaTrocaObrigatoria() {
+  $("#app").innerHTML = `<div class="login"><div style="display:grid;gap:12px;width:min(420px,100%)">${logo()}
+    <p class="quem">Olá, ${esc(sessao.nome)}. Você entrou com uma senha provisória. Escolha a sua para continuar.</p>
+    ${formSenha("Crie sua senha", "Senha provisória")}<button class="btn sec" id="sair">sair</button></div></div>`;
+  $("#sair").onclick = sair;
+  ligarFormSenha(() => telaPrincipal());
+}
+
+async function telaConta() {
+  document.querySelectorAll(".aba").forEach((a) => a.classList.toggle("ativa", a.id === "aba-conta"));
+  const admin = sessao.papel === "admin";
+  $("#lado").innerHTML = `<p class="quem"><b>${esc(sessao.nome)}</b><br>${esc(sessao.papel)} · ${esc(sessao.tenant)}</p>`;
+  $("#painel").innerHTML = formSenha("Trocar minha senha", "Senha atual") + (admin ? `<div id="equipe"></div>` : "");
+  ligarFormSenha(() => { $("#s-msg").className = "ok"; $("#s-msg").textContent = "Senha trocada."; $("#f-senha").reset(); });
+  if (admin) await telaEquipe();
+}
+
+async function telaEquipe(nova = null) {
+  const us = await (await api("/api/usuarios")).json();
+  $("#equipe").innerHTML = `<div class="bloco"><h2>Equipe</h2>
+    <p class="quem">Cadastre quem vai usar o Lastro na sua empresa. A pessoa recebe uma senha provisória e escolhe a dela no primeiro acesso. Esqueceu a senha? Cadastre o mesmo e-mail de novo para gerar outra.</p>
+    <div class="tabela"><table><thead><tr><th>nome</th><th>e-mail</th><th>papel</th><th>senha</th></tr></thead><tbody>
+    ${us.map((u) => `<tr><td>${esc(u.nome)}</td><td>${esc(u.email)}</td><td>${esc(PAPEIS[u.papel] || u.papel)}</td><td class="${u.trocar_senha ? "aviso" : "quem"}">${u.trocar_senha ? "provisória" : "definida"}</td></tr>`).join("")}
+    </tbody></table></div>
+    ${nova ? `<div class="bloco" style="background:var(--sup-2)"><p><b>Senha provisória de ${esc(nova.email)}</b> (aparece só agora; passe por um canal privado):</p>
+      <div class="linha-btn" style="align-items:center"><code id="prov">${esc(nova.senha_provisoria)}</code><button class="btn sec" id="copiar" type="button">copiar</button></div></div>` : ""}
+    <form id="f-conv" class="duas-col" style="align-items:end">
+      <label for="c-nome">Nome<input id="c-nome" type="text" required></label>
+      <label for="c-email">E-mail<input id="c-email" type="email" required></label>
+      <label for="c-papel">Papel<select id="c-papel">${Object.entries(PAPEIS).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>
+      <button class="btn" type="submit">cadastrar</button></form><p class="erro-msg" id="c-msg" role="status"></p></div>`;
+  if (nova) $("#copiar").onclick = async () => {
+    try { await navigator.clipboard.writeText(nova.senha_provisoria); $("#copiar").textContent = "copiada"; }
+    catch { const r = document.createRange(); r.selectNodeContents($("#prov")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+  };
+  $("#f-conv").onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const r = await (await api("/api/usuarios", { method: "POST", json: { nome: $("#c-nome").value, email: $("#c-email").value, papel: $("#c-papel").value } })).json();
+      await telaEquipe(r);
+    } catch (err) { $("#c-msg").textContent = err.message; }
+  };
 }

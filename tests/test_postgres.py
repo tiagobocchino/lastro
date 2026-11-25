@@ -30,7 +30,10 @@ def url_pg():
         adm.execute(f"CREATE DATABASE {nome}")
     url = PG.rsplit("/", 1)[0] + f"/{nome}"
     with psycopg.connect(url, autocommit=True) as con:
+        tem_cron = con.execute("SELECT 1 FROM pg_available_extensions WHERE name='pg_cron'").fetchone()
         for arq in MIGRACOES:
+            if "pg_cron" in arq.read_text() and not tem_cron:
+                continue  # agenda do Supabase (plano C): o Postgres local não tem a extensão
             con.execute(arq.read_text())
     yield url
     with psycopg.connect(PG, autocommit=True) as adm:
@@ -264,3 +267,25 @@ def test_rls_carga_so_admin_cria_e_ninguem_mexe_na_de_outro(dois_tokens, banco_p
     fid_a = banco_pg.repo(a, f"adm@{a}", "admin").fontes()[0]["id"]
     with pytest.raises(psycopg.errors.InsufficientPrivilege):
         dem.execute("INSERT INTO cargas (tenant_id, fonte_id, saas, entidade) VALUES (%s,%s,'sienge','clientes')", (a, fid_a))
+
+
+def test_contas_nos_dois_bancos(banco):
+    """LST-32: senha provisória obriga a troca; um admin não toma o e-mail de outra empresa."""
+    from lastro.banco import SenhaInvalida
+
+    b, a, o = banco
+    b.criar_usuario(a, f"ana@{a}", "Ana", "demandante", "senha-da-ana-forte")
+    prov = b.senha_provisoria(a, f"rui@{a}", "Rui", "revisor")
+    assert bool(b.autenticar(f"rui@{a}", prov)["trocar_senha"]) is True
+    assert b.trocar_senha(f"rui@{a}", "errada-qualquer-coisa", "nova-senha-bem-longa") is False
+    with pytest.raises(SenhaInvalida):
+        b.trocar_senha(f"rui@{a}", prov, "curta")
+    assert b.trocar_senha(f"rui@{a}", prov, "nova-senha-bem-longa") is True
+    assert bool(b.autenticar(f"rui@{a}", "nova-senha-bem-longa")["trocar_senha"]) is False
+    with pytest.raises(PermissionError):
+        b.senha_provisoria(o, f"ana@{a}", "Ana", "admin")
+    with pytest.raises(PermissionError):
+        b.criar_usuario(o, f"ana@{a}", "Ana", "admin", "outra-senha-longa")
+    assert b.autenticar(f"ana@{a}", "senha-da-ana-forte")["tenant_id"] == a
+    assert [u["email"] for u in b.usuarios(o)] == []
+    assert [u["email"] for u in b.usuarios(a)] == [f"ana@{a}", f"rui@{a}"]
