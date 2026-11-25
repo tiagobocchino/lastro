@@ -19,6 +19,7 @@ import random
 import re
 import unicodedata
 from datetime import date, datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -66,7 +67,7 @@ def _data_sazonal(rnd: random.Random) -> datetime:
         d = INICIO + timedelta(days=rnd.randint(0, (FIM - INICIO).days))
         peso = {1: .55, 2: .65, 3: .8, 4: .9, 5: 1, 6: 1, 7: 1.05, 8: 1.15, 9: 1.2, 10: 1.25, 11: 1.15, 12: .8}[d.month]
         if rnd.random() < peso / 1.25:
-            return datetime(d.year, d.month, d.day, rnd.randint(7, 19), rnd.randint(0, 59), rnd.randint(0, 59))
+            return datetime(d.year, d.month, d.day, rnd.randint(7, 19), rnd.randint(0, 59), rnd.randint(0, 59))  # noqa: DTZ001 (o IApp grava hora local, sem fuso)
 
 
 def _empresa(chave: str, eid: int, rnd: random.Random, contratos_n: int) -> dict[str, list[dict]]:
@@ -146,7 +147,7 @@ def _empresa(chave: str, eid: int, rnd: random.Random, contratos_n: int) -> dict
                  "ativo": f["ativo"]} for i, f in enumerate(funcionarios[:30], start=1)]
     tarefas = []
     for i, c in enumerate(rnd.sample(contratos[:contratos_n], k=contratos_n // 3), start=1):
-        criada = datetime.strptime(c["data_criacao"], "%Y-%m-%d %H:%M:%S") + timedelta(days=rnd.randint(0, 10))
+        criada = datetime.strptime(c["data_criacao"], "%Y-%m-%d %H:%M:%S") + timedelta(days=rnd.randint(0, 10))  # noqa: DTZ007
         feita = rnd.random() < .7
         tarefas.append({"id": base * 10 + 500_000 + i, "contrato_id": c["id"], "titulo": rnd.choice(["Visita técnica", "Medição", "Revisar orçamento", "Enviar proposta", "Follow-up"]),
                         "responsavel": {"id": u["id"], "nome": u["nome"]} if (u := rnd.choice(usuarios)) else None,
@@ -253,7 +254,6 @@ def gabarito(base: dict) -> dict[str, Any]:
 def exportar(base: dict, destino: Path) -> dict[str, int]:
     """Bruto como a API entrega (JSON por empresa e entidade) e o contrato achatado como o conector importa."""
     import json
-    from pathlib import Path
 
     destino = Path(destino)
     contagem = {}
