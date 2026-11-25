@@ -1,0 +1,17 @@
+/* Lastro · tokens da marca. Camadas do medalhão viram a paleta: bronze, prata, ouro. */
+:root {
+  --chao: #EEF1F3; --sup: #FFFFFF; --sup-2: #F6F8F9; --tinta: #111820; --quieta: #56606B; --linha: #D6DCE2;
+  --ouro: #B58324; --ouro-tx: #8A6214; --ouro-f: #F4EAD3; --bronze: #A4602F; --prata: #8E98A3;
+  --ok: #2E6B4E; --erro: #A3392B; --aviso: #8D6210;
+  --f-disp: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --f-texto: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --f-dado: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --chao: #0D1116; --sup: #151B22; --sup-2: #1B222B; --tinta: #E7ECF1; --quieta: #98A3AE; --linha: #26303A;
+  --ouro: #E1B24F; --ouro-tx: #E8C06A; --ouro-f: #2E2716; --bronze: #C98552; --prata: #AEB7C0;
+  --ok: #7CC4A0; --erro: #F08A7C; --aviso: #E7C06B; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --chao: #0D1116; --sup: #151B22; --sup-2: #1B222B; --tinta: #E7ECF1; --quieta: #98A3AE; --linha: #26303A;
+  --ouro: #E1B24F; --ouro-tx: #E8C06A; --ouro-f: #2E2716; --bronze: #C98552; --prata: #AEB7C0;
+  --ok: #7CC4A0; --erro: #F08A7C; --aviso: #E7C06B; color-scheme: dark; }

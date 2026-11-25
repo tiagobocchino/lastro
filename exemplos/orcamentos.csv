@@ -1,0 +1,613 @@
+contrato_id,empresa,vendedor,estado,segmento,status,data_orcamento,valor_orcado,valor_vendido
+C00001,alfa,Felipe Nunes,SC,industrial,Fechado,2025-03-31,72857.52,64368.28
+C00002,alfa,Eva Martins,RJ,industrial,Fechado,2026-03-06,68068.56,60233.81
+C00003,alfa,Gabi Torres,GO,residencial,Perdido,2026-03-09,23526.53,0.0
+C00004,gama,Ana Souza,SP,comercial,Perdido,2025-04-10,46184.18,0.0
+C00005,filial,Eva Martins,SP,comercial,Fechado,2025-03-22,44577.73,38181.61
+C00006,gama,Eva Martins,RJ,industrial,Em Aberto,2025-03-13,91004.26,0.0
+C00007,beta,Gabi Torres,SP,comercial,Fechado,2025-10-12,26707.4,23020.95
+C00008,gama,Felipe Nunes,SC,industrial,Fechado,2027-03-01,40723.41,36785.07
+C00009,beta,Diego Rocha,PR,comercial,Em Aberto,2025-08-13,71732.43,0.0
+C00010,beta,Gabi Torres,SP,comercial,Perdido,2026-02-15,300226.56,0.0
+C00011,gama,Bruno Lima,SC,comercial,Perdido,2026-02-10,39974.89,0.0
+C00012,gama,Felipe Nunes,BA,comercial,Fechado,2026-02-13,262559.17,228674.48
+C00013,alfa,Bruno Lima,SC,residencial,Perdido,2026-03-09,22471.12,0.0
+C00014,filial,Eva Martins,MG,industrial,Em Aberto,2025-01-12,74240.36,0.0
+C00015,gama,Gabi Torres,SC,comercial,Perdido,2025-04-25,79176.49,0.0
+C00016,gama,Eva Martins,GO,residencial,Fechado,2026-06-04,42759.7,40977.21
+C00017,beta,Carla Dias,GO,residencial,Em Aberto,2025-01-01,27829.45,0.0
+C00018,gama,Bruno Lima,SP,residencial,Fechado,2025-03-22,78083.68,70622.56
+C00019,beta,Bruno Lima,SC,comercial,Fechado,2025-06-19,19804.83,19093.64
+C00020,beta,Felipe Nunes,MG,comercial,Em Aberto,2026-01-18,52374.09,0.0
+C00021,gama,Ana Souza,BA,industrial,Fechado,2025-08-24,50206.73,44367.92
+C00022,alfa,Bruno Lima,SP,residencial,Em Aberto,2025-12-05,67660.4,0.0
+C00023,beta,Eva Martins,RJ,industrial,Em Aberto,2026-04-30,27641.55,0.0
+C00024,alfa,Ana Souza,SC,comercial,Em Aberto,2025-12-29,30660.9,0.0
+C00025,alfa,Ana Souza,PR,industrial,Em Aberto,2025-12-14,49178.58,0.0
+C00026,beta,Diego Rocha,RJ,comercial,Fechado,2026-04-19,95144.07,88526.12
+C00027,alfa,Felipe Nunes,BA,residencial,Em Aberto,2025-04-06,34101.11,0.0
+C00028,alfa,Bruno Lima,PR,residencial,Fechado,2026-02-04,24578.93,22370.66
+C00029,filial,Felipe Nunes,SC,industrial,Em Aberto,2026-05-14,13462.43,0.0
+C00030,alfa,Felipe Nunes,MG,residencial,Perdido,2025-02-21,30526.85,0.0
+C00031,beta,Ana Souza,BA,residencial,Perdido,2025-07-10,75537.1,0.0
+C00032,beta,Eva Martins,BA,residencial,Perdido,2025-03-25,137703.12,0.0
+C00033,gama,Bruno Lima,SC,industrial,Em Aberto,2025-11-18,45877.28,0.0
+C00034,gama,Diego Rocha,MG,residencial,Em Aberto,2025-01-10,33072.15,0.0
+C00035,alfa,Bruno Lima,MG,comercial,Perdido,2025-06-11,35039.94,0.0
+C00036,alfa,Felipe Nunes,GO,industrial,Fechado,2025-11-03,49725.48,49605.04
+C00037,beta,Carla Dias,MG,industrial,Perdido,2025-08-04,121241.72,0.0
+C00038,gama,Eva Martins,PR,comercial,Em Aberto,2025-02-22,87116.89,0.0
+C00039,beta,Felipe Nunes,MG,residencial,Fechado,2026-03-29,22681.25,19291.13
+C00040,beta,Eva Martins,SP,comercial,Fechado,2025-06-01,67773.81,58372.67
+C00041,alfa,Carla Dias,RJ,industrial,Em Aberto,2025-09-13,54145.55,0.0
+C00042,filial,Eva Martins,SC,residencial,Em Aberto,2025-08-31,85346.31,0.0
+C00043,alfa,Diego Rocha,GO,residencial,Perdido,2026-04-27,107116.57,0.0
+C00044,gama,Gabi Torres,GO,residencial,Em Aberto,2025-08-17,7503.03,0.0
+C00045,gama,Carla Dias,SC,industrial,Perdido,2026-02-14,10534.64,0.0
+C00046,gama,Bruno Lima,BA,comercial,Fechado,2025-02-09,289497.46,247271.38
+C00047,gama,Diego Rocha,BA,industrial,Em Aberto,2025-04-29,23144.63,0.0
+C00048,alfa,Eva Martins,GO,industrial,Fechado,2025-07-21,41269.51,39466.77
+C00049,gama,Eva Martins,MG,industrial,Em Aberto,2025-05-08,49002.87,0.0
+C00050,filial,Felipe Nunes,MG,industrial,Fechado,2025-05-11,92138.61,83962.13
+C00051,beta,Eva Martins,BA,comercial,Em Aberto,2026-02-20,,0.0
+C00052,gama,Diego Rocha,PR,comercial,Em Aberto,2025-08-07,35847.9,0.0
+C00053,beta,Felipe Nunes,SP,comercial,Perdido,2026-06-12,64495.35,0.0
+C00054,beta,Felipe Nunes,MG,residencial,Fechado,2025-07-23,108080.51,107302.32
+C00055,beta,Felipe Nunes,SC,comercial,Perdido,2026-05-22,117786.4,0.0
+C00056,alfa,Gabi Torres,PR,residencial,Em Aberto,2025-06-30,50941.83,0.0
+C00057,beta,Gabi Torres,SP,comercial,Em Aberto,2025-05-17,236220.24,0.0
+C00058,gama,Gabi Torres,PR,industrial,Perdido,2026-06-01,207817.12,0.0
+C00059,beta,Felipe Nunes,GO,comercial,Em Aberto,2026-04-06,20344.84,0.0
+C00060,filial,Felipe Nunes,RJ,comercial,Em Aberto,2026-03-27,38598.22,0.0
+C00061,alfa,Bruno Lima,RJ,residencial,Fechado,2026-01-28,26586.65,23873.65
+C00062,filial,Diego Rocha,SP,residencial,Fechado,2026-03-07,148252.21,135078.5
+C00063,alfa,Gabi Torres,GO,industrial,Perdido,2026-01-25,30979.7,0.0
+C00064,filial,Eva Martins,SC,industrial,Fechado,2025-08-14,34483.23,31327.95
+C00065,filial,Carla Dias,SC,industrial,Em Aberto,2026-02-19,58558.51,0.0
+C00066,alfa,Diego Rocha,BA,industrial,Perdido,2025-01-28,412109.11,0.0
+C00067,beta,Ana Souza,MG,comercial,Perdido,2025-12-02,22041.41,0.0
+C00068,filial,Carla Dias,GO,comercial,Perdido,2025-09-16,33260.8,0.0
+C00069,alfa,Carla Dias,RJ,industrial,Em Aberto,2025-03-12,142592.49,0.0
+C00070,beta,Bruno Lima,GO,residencial,Perdido,2025-06-06,181376.31,0.0
+C00071,filial,Felipe Nunes,MG,comercial,Fechado,2025-06-21,30284.42,30047.1
+C00072,alfa,Carla Dias,BA,industrial,Fechado,2026-01-20,230645.69,206809.8
+C00073,beta,Ana Souza,SC,comercial,Fechado,2025-05-04,36399.56,34710.34
+C00074,gama,Ana Souza,BA,industrial,Fechado,2025-12-16,152756.87,142050.41
+C00075,filial,Carla Dias,SC,comercial,Em Aberto,2025-06-06,18895.87,0.0
+C00076,gama,Eva Martins,GO,industrial,Perdido,2026-05-11,42933.3,0.0
+C00077,gama,Gabi Torres,RJ,residencial,Em Aberto,2025-10-13,45404.4,0.0
+C00078,filial,Carla Dias,SP,comercial,Em Aberto,2025-11-29,119692.11,0.0
+C00079,gama,Carla Dias,BA,industrial,Perdido,2025-10-10,34399.29,0.0
+C00080,filial,Diego Rocha,BA,residencial,Fechado,2026-05-03,70151.0,62168.06
+C00081,alfa,Carla Dias,RJ,comercial,Perdido,2025-09-07,88721.86,0.0
+C00082,gama,Diego Rocha,SC,industrial,Em Aberto,2025-12-05,31710.11,0.0
+C00083,beta,Carla Dias,SP,industrial,Fechado,2025-07-09,41261.52,36499.14
+C00084,gama,Ana Souza,GO,residencial,Fechado,2025-10-31,11854.66,11124.86
+C00085,gama,Ana Souza,SP,industrial,Fechado,2025-10-27,,35304.35
+C00086,filial,Ana Souza,GO,residencial,Perdido,2025-10-19,81642.01,0.0
+C00087,filial,Ana Souza,GO,residencial,Fechado,2026-02-15,55544.32,47640.72
+C00088,beta,Bruno Lima,GO,industrial,Em Aberto,2025-11-08,58292.02,0.0
+C00089,filial,Eva Martins,BA,industrial,Em Aberto,2025-08-20,28078.25,0.0
+C00090,gama,Gabi Torres,BA,comercial,Perdido,2025-11-09,110265.15,0.0
+C00091,alfa,Gabi Torres,RJ,industrial,Perdido,2025-08-05,66186.06,0.0
+C00092,beta,Ana Souza,PR,comercial,Fechado,2026-04-27,42127.41,39296.4
+C00093,filial,Ana Souza,SC,residencial,Em Aberto,2025-09-28,41242.84,0.0
+C00094,beta,Diego Rocha,SP,industrial,Em Aberto,2025-08-19,171708.55,0.0
+C00095,alfa,Ana Souza,RJ,comercial,Perdido,2025-10-23,547027.47,0.0
+C00096,gama,Eva Martins,BA,comercial,Fechado,2026-03-25,51165.74,46580.08
+C00097,alfa,Gabi Torres,SC,comercial,Fechado,2025-02-11,52174.32,45062.91
+C00098,filial,Carla Dias,RJ,industrial,Em Aberto,2026-03-23,92762.16,0.0
+C00099,gama,Carla Dias,SC,residencial,Fechado,2025-06-14,86158.2,77731.42
+C00100,alfa,Diego Rocha,SP,comercial,Fechado,2025-09-16,27930.53,27700.91
+C00101,filial,Diego Rocha,SP,residencial,Perdido,2026-06-15,45664.03,0.0
+C00102,alfa,Bruno Lima,MG,industrial,Em Aberto,2025-05-15,27477.93,0.0
+C00103,alfa,Ana Souza,SC,industrial,Em Aberto,2025-09-03,170179.07,0.0
+C00104,beta,Gabi Torres,SP,comercial,Fechado,2025-05-01,90918.24,82844.57
+C00105,gama,Eva Martins,SC,comercial,Perdido,2026-03-02,76085.55,0.0
+C00106,beta,Gabi Torres,SP,comercial,Em Aberto,2026-03-01,27343.12,0.0
+C00107,gama,Gabi Torres,BA,industrial,Fechado,2026-05-17,21264.24,18082.79
+C00108,gama,Eva Martins,GO,industrial,Em Aberto,2026-01-22,148116.4,0.0
+C00109,filial,Bruno Lima,GO,comercial,Fechado,2025-02-14,54701.0,52218.93
+C00110,filial,Diego Rocha,SC,industrial,Perdido,2025-06-05,37291.22,0.0
+C00111,gama,Gabi Torres,SP,comercial,Em Aberto,2025-04-13,59476.85,0.0
+C00112,filial,Gabi Torres,SC,residencial,Em Aberto,2025-03-18,63932.44,0.0
+C00113,alfa,Gabi Torres,MG,industrial,Fechado,2026-01-25,15372.98,14664.37
+C00114,alfa,Bruno Lima,SC,industrial,Em Aberto,2025-10-22,169130.79,0.0
+C00115,alfa,Diego Rocha,RJ,industrial,Em Aberto,2025-11-03,54148.53,0.0
+C00116,beta,Bruno Lima,BA,comercial,Em Aberto,2025-07-04,106422.29,0.0
+C00117,beta,Bruno Lima,PR,industrial,Fechado,2025-09-18,228277.69,225292.81
+C00118,filial,Carla Dias,SC,industrial,Perdido,2025-06-11,50688.48,0.0
+C00119,filial,Ana Souza,RJ,comercial,Perdido,2026-01-03,55001.45,0.0
+C00120,alfa,Eva Martins,SC,comercial,Em Aberto,2025-10-21,80766.21,0.0
+C00121,beta,Felipe Nunes,RJ,industrial,Perdido,2025-09-14,97884.85,0.0
+C00122,beta,Felipe Nunes,SP,industrial,Em Aberto,2025-02-10,143517.53,0.0
+C00123,beta,Ana Souza,MG,comercial,Em Aberto,2026-03-02,37460.87,0.0
+C00124,gama,Eva Martins,BA,comercial,Em Aberto,2025-06-18,35848.24,0.0
+C00125,gama,Felipe Nunes,GO,comercial,Em Aberto,2025-04-28,8932.32,0.0
+C00126,beta,Gabi Torres,SC,industrial,Perdido,2026-02-11,57125.05,0.0
+C00127,filial,Carla Dias,SC,industrial,Fechado,2025-09-26,24833.18,23106.92
+C00128,alfa,Felipe Nunes,RJ,comercial,Perdido,2025-01-26,115094.69,0.0
+C00129,filial,Felipe Nunes,MG,industrial,Em Aberto,2026-02-23,32683.35,0.0
+C00130,filial,Diego Rocha,MG,industrial,Em Aberto,2026-03-06,30076.34,0.0
+C00131,alfa,Gabi Torres,PR,industrial,Perdido,2026-02-22,92821.4,0.0
+C00132,beta,Diego Rocha,PR,residencial,Em Aberto,2026-01-07,138219.12,0.0
+C00133,filial,Carla Dias,RJ,residencial,Em Aberto,2026-04-11,940523.92,0.0
+C00134,alfa,Ana Souza,GO,comercial,Em Aberto,2025-09-07,29399.75,0.0
+C00135,beta,Carla Dias,GO,residencial,Perdido,2025-01-03,71672.82,0.0
+C00136,beta,Ana Souza,MG,residencial,Perdido,2025-11-28,94872.05,0.0
+C00137,filial,Gabi Torres,MG,industrial,Fechado,2025-04-22,24719.66,21247.38
+C00138,gama,Diego Rocha,SC,residencial,Em Aberto,2025-03-04,55016.29,0.0
+C00139,filial,Ana Souza,SP,comercial,Em Aberto,2025-06-01,53453.65,0.0
+C00140,gama,Diego Rocha,BA,industrial,Em Aberto,2025-10-29,26313.04,0.0
+C00141,beta,Diego Rocha,PR,residencial,Fechado,2026-02-28,50970.94,48690.85
+C00142,alfa,Carla Dias,PR,comercial,Em Aberto,2025-09-19,39955.07,0.0
+C00143,alfa,Ana Souza,GO,residencial,Perdido,2025-04-06,48845.26,0.0
+C00144,beta,Eva Martins,SP,industrial,Em Aberto,2025-12-04,41520.65,0.0
+C00145,filial,Gabi Torres,SC,residencial,Perdido,2025-10-22,88966.69,0.0
+C00146,beta,Bruno Lima,SC,comercial,Em Aberto,2025-08-18,74053.72,0.0
+C00147,alfa,Gabi Torres,MG,industrial,Em Aberto,2025-08-20,124663.23,0.0
+C00148,gama,Ana Souza,RJ,comercial,Fechado,2025-11-13,92618.52,91633.3
+C00149,filial,Ana Souza,RJ,industrial,Fechado,2025-02-01,146012.25,127247.88
+C00150,filial,Carla Dias,RJ,comercial,Em Aberto,2025-11-16,18154.75,0.0
+C00151,alfa,Ana Souza,RJ,residencial,Em Aberto,2025-02-20,233929.89,0.0
+C00152,filial,Eva Martins,PR,comercial,Em Aberto,2025-10-07,83117.57,0.0
+C00153,filial,Eva Martins,SC,comercial,Fechado,2025-02-16,26890.14,23303.9
+C00154,filial,Bruno Lima,RJ,comercial,Fechado,2025-08-24,99730.1,92211.23
+C00155,alfa,Diego Rocha,GO,industrial,Perdido,2025-02-13,60003.64,0.0
+C00156,filial,Eva Martins,PR,industrial,Fechado,2026-03-04,50918.13,45671.48
+C00157,beta,Gabi Torres,BA,comercial,Perdido,2026-01-06,36844.85,0.0
+C00158,filial,Gabi Torres,MG,industrial,Em Aberto,2025-12-14,25416.25,0.0
+C00159,beta,Gabi Torres,MG,comercial,Fechado,2025-06-01,10615.01,10031.01
+C00160,alfa,Bruno Lima,GO,industrial,Fechado,2026-05-21,39181.1,36844.33
+C00161,gama,Gabi Torres,SC,comercial,Em Aberto,2025-06-04,53455.34,0.0
+C00162,gama,Eva Martins,SP,comercial,Em Aberto,2026-06-04,51242.99,0.0
+C00163,gama,Ana Souza,SC,residencial,Fechado,2026-06-04,20217.27,18302.91
+C00164,alfa,Diego Rocha,GO,industrial,Perdido,2025-07-12,41037.04,0.0
+C00165,alfa,Gabi Torres,GO,comercial,Fechado,2025-03-28,37529.66,32248.53
+C00166,filial,Eva Martins,BA,industrial,Fechado,2025-06-12,60327.61,55239.81
+C00167,gama,Felipe Nunes,BA,residencial,Em Aberto,2025-12-09,6147.71,0.0
+C00168,beta,Carla Dias,SP,industrial,Em Aberto,2025-05-25,84287.27,0.0
+C00169,filial,Bruno Lima,BA,industrial,Em Aberto,2025-03-28,137199.94,0.0
+C00170,beta,Felipe Nunes,SC,industrial,Perdido,2026-06-24,39369.2,0.0
+C00171,gama,Gabi Torres,PR,residencial,Fechado,2025-08-20,60588.85,60145.06
+C00172,alfa,Felipe Nunes,MG,industrial,Em Aberto,2025-05-15,15950.92,0.0
+C00173,beta,Felipe Nunes,PR,residencial,Fechado,2026-02-25,70108.9,66878.76
+C00174,gama,Gabi Torres,SC,comercial,Perdido,2025-08-28,30817.72,0.0
+C00175,filial,Gabi Torres,RJ,comercial,Perdido,2026-03-28,64061.36,0.0
+C00176,filial,Bruno Lima,GO,residencial,Em Aberto,2025-05-22,55646.61,0.0
+C00177,alfa,Carla Dias,SP,residencial,Perdido,2025-10-07,57390.63,0.0
+C00178,alfa,Bruno Lima,GO,comercial,Perdido,2025-12-24,51899.9,0.0
+C00179,gama,Bruno Lima,PR,residencial,Em Aberto,2026-01-19,164344.18,0.0
+C00180,gama,Gabi Torres,RJ,residencial,Fechado,2025-02-09,34376.16,32905.05
+C00181,beta,Gabi Torres,SC,comercial,Em Aberto,2026-04-05,10741.52,0.0
+C00182,beta,Eva Martins,SC,industrial,Fechado,2026-06-25,321760.4,283904.71
+C00183,beta,Diego Rocha,SC,industrial,Fechado,2026-04-14,37400.08,32473.64
+C00184,beta,Felipe Nunes,RJ,comercial,Em Aberto,2026-03-16,59843.9,0.0
+C00185,gama,Ana Souza,BA,industrial,Em Aberto,2026-06-04,67462.91,0.0
+C00186,alfa,Felipe Nunes,PR,comercial,Fechado,2025-09-17,133029.74,130502.14
+C00187,alfa,Gabi Torres,BA,industrial,Fechado,2025-12-07,101513.88,89958.44
+C00188,filial,Felipe Nunes,PR,industrial,Fechado,2025-07-06,27535.37,26060.01
+C00189,beta,Ana Souza,MG,comercial,Fechado,2026-06-12,120444.07,103168.89
+C00190,alfa,Gabi Torres,SC,residencial,Em Aberto,2025-10-20,28094.09,0.0
+C00191,gama,Carla Dias,SP,comercial,Perdido,2026-03-24,24448.85,0.0
+C00192,filial,Felipe Nunes,PR,comercial,Perdido,2026-06-16,144788.17,0.0
+C00193,filial,Eva Martins,GO,residencial,Em Aberto,2025-10-28,42235.31,0.0
+C00194,gama,Diego Rocha,BA,industrial,Em Aberto,2026-03-13,45856.39,0.0
+C00195,gama,Eva Martins,PR,comercial,Em Aberto,2025-02-28,26299.01,0.0
+C00196,beta,Ana Souza,RJ,industrial,Em Aberto,2026-03-25,11980.71,0.0
+C00197,alfa,Eva Martins,RJ,industrial,Em Aberto,2026-04-06,109449.2,0.0
+C00198,beta,Eva Martins,MG,comercial,Perdido,2025-11-18,159671.43,0.0
+C00199,filial,Eva Martins,PR,industrial,Fechado,2025-05-01,78711.06,75590.26
+C00200,gama,Felipe Nunes,PR,residencial,Em Aberto,2025-05-06,38484.55,0.0
+C00201,gama,Felipe Nunes,MG,industrial,Perdido,2025-03-08,12489.41,0.0
+C00202,beta,Gabi Torres,MG,industrial,Fechado,2025-08-18,65952.71,57617.99
+C00203,alfa,Carla Dias,BA,industrial,Fechado,2026-01-13,31245.79,30263.3
+C00204,alfa,Carla Dias,PR,industrial,Fechado,2026-05-06,4301.84,4227.15
+C00205,alfa,Bruno Lima,MG,industrial,Perdido,2025-03-17,69756.96,0.0
+C00206,beta,Gabi Torres,RJ,comercial,Fechado,2026-05-30,48309.16,47424.81
+C00207,beta,Carla Dias,BA,comercial,Fechado,2025-03-22,32565.37,29256.7
+C00208,beta,Felipe Nunes,MG,industrial,Em Aberto,2025-04-06,23438.0,0.0
+C00209,beta,Bruno Lima,SC,industrial,Perdido,2025-12-12,60129.01,0.0
+C00210,alfa,Ana Souza,SP,industrial,Perdido,2025-09-29,175827.31,0.0
+C00211,alfa,Diego Rocha,SC,industrial,Em Aberto,2025-10-24,145806.08,0.0
+C00212,filial,Carla Dias,PR,residencial,Fechado,2025-03-03,79146.73,76859.58
+C00213,gama,Eva Martins,RJ,comercial,Em Aberto,2025-11-23,26822.49,0.0
+C00214,gama,Diego Rocha,RJ,residencial,Fechado,2025-04-10,39921.71,36726.81
+C00215,beta,Gabi Torres,MG,industrial,Perdido,2025-11-17,141342.13,0.0
+C00216,filial,Diego Rocha,MG,comercial,Perdido,2025-01-24,36085.13,0.0
+C00217,beta,Bruno Lima,BA,comercial,Em Aberto,2025-02-19,23688.25,0.0
+C00218,filial,Carla Dias,BA,residencial,Perdido,2025-04-21,17654.99,0.0
+C00219,filial,Carla Dias,SP,comercial,Em Aberto,2025-02-22,26729.61,0.0
+C00220,alfa,Diego Rocha,BA,comercial,Em Aberto,2025-10-14,67492.38,0.0
+C00221,beta,Ana Souza,PR,comercial,Em Aberto,2025-12-14,195832.56,0.0
+C00222,filial,Eva Martins,SP,residencial,Fechado,2025-02-09,67853.83,63807.67
+C00223,filial,Bruno Lima,BA,industrial,Em Aberto,2025-05-24,28370.89,0.0
+C00224,gama,Eva Martins,MG,industrial,Fechado,2026-06-06,32526.36,32480.57
+C00225,gama,Carla Dias,SC,residencial,Fechado,2026-03-03,69729.99,67802.82
+C00226,alfa,Eva Martins,PR,comercial,Em Aberto,2025-08-22,105366.76,0.0
+C00227,filial,Bruno Lima,GO,industrial,Fechado,2025-09-06,124191.9,117281.09
+C00228,filial,Eva Martins,GO,industrial,Em Aberto,2026-04-28,44297.25,0.0
+C00229,filial,Carla Dias,RJ,comercial,Em Aberto,2025-12-17,33021.63,0.0
+C00230,gama,Eva Martins,PR,residencial,Perdido,2025-09-10,72833.25,0.0
+C00231,gama,Gabi Torres,MG,industrial,Perdido,2025-08-01,38857.11,0.0
+C00232,gama,Carla Dias,SP,industrial,Em Aberto,2026-01-24,99801.79,0.0
+C00233,beta,Carla Dias,SP,comercial,Fechado,2025-03-22,146836.66,141838.29
+C00234,beta,Gabi Torres,BA,comercial,Fechado,2025-10-06,41022.27,37816.87
+C00235,beta,Ana Souza,SC,industrial,Em Aberto,2025-08-20,16394.43,0.0
+C00236,filial,Ana Souza,SC,residencial,Em Aberto,2025-01-06,73116.27,0.0
+C00237,filial,Diego Rocha,SC,residencial,Perdido,2025-10-22,15483.62,0.0
+C00238,alfa,Felipe Nunes,BA,residencial,Perdido,2025-02-08,29938.04,0.0
+C00239,beta,Ana Souza,GO,comercial,Perdido,2026-05-23,119071.45,0.0
+C00240,gama,Ana Souza,SP,comercial,Perdido,2025-04-20,10772.88,0.0
+C00241,filial,Bruno Lima,GO,industrial,Em Aberto,2026-04-25,144972.31,0.0
+C00242,gama,Felipe Nunes,RJ,residencial,Fechado,2025-12-12,11723.14,11250.32
+C00243,beta,Eva Martins,GO,industrial,Perdido,2026-02-20,150734.18,0.0
+C00244,beta,Bruno Lima,PR,comercial,Fechado,2025-09-12,151120.2,143622.88
+C00245,gama,Carla Dias,MG,industrial,Em Aberto,2025-01-12,19970.21,0.0
+C00246,filial,Carla Dias,RJ,comercial,Fechado,2026-05-30,35919.29,34129.36
+C00247,gama,Carla Dias,BA,residencial,Em Aberto,2025-08-13,197946.45,0.0
+C00248,gama,Diego Rocha,SC,industrial,Em Aberto,2026-04-28,199365.24,0.0
+C00249,beta,Felipe Nunes,GO,industrial,Perdido,2025-03-25,356382.84,0.0
+C00250,alfa,Ana Souza,GO,industrial,Em Aberto,2026-06-02,64485.28,0.0
+C00251,filial,Ana Souza,SC,residencial,Fechado,2026-05-16,24779.75,24238.88
+C00252,filial,Bruno Lima,BA,comercial,Perdido,2026-04-13,19023.03,0.0
+C00253,gama,Felipe Nunes,SP,comercial,Em Aberto,2025-09-18,73043.07,0.0
+C00254,alfa,Diego Rocha,MG,industrial,Em Aberto,2025-03-07,330564.35,0.0
+C00255,filial,Ana Souza,MG,comercial,Perdido,2025-07-04,63583.93,0.0
+C00256,filial,Carla Dias,PR,comercial,Perdido,2026-01-22,289634.29,0.0
+C00257,beta,Felipe Nunes,GO,comercial,Em Aberto,2025-05-02,34964.08,0.0
+C00258,beta,Gabi Torres,SP,residencial,Em Aberto,2025-11-02,23072.59,0.0
+C00259,filial,Gabi Torres,RJ,residencial,Em Aberto,2026-04-17,49973.5,0.0
+C00260,alfa,Ana Souza,GO,industrial,Perdido,2026-03-06,44735.37,0.0
+C00261,beta,Bruno Lima,SP,residencial,Perdido,2025-02-04,710426.31,0.0
+C00262,beta,Felipe Nunes,SP,comercial,Perdido,2026-03-26,47852.65,0.0
+C00263,alfa,Bruno Lima,BA,comercial,Perdido,2025-08-28,37578.85,0.0
+C00264,gama,Bruno Lima,MG,residencial,Fechado,2026-06-18,300808.25,282665.8
+C00265,beta,Felipe Nunes,SC,comercial,Fechado,2026-05-23,34637.21,34369.74
+C00266,filial,Gabi Torres,BA,comercial,Em Aberto,2026-03-03,23189.0,0.0
+C00267,beta,Gabi Torres,RJ,comercial,Fechado,2025-05-28,50019.15,46552.28
+C00268,beta,Diego Rocha,RJ,comercial,Em Aberto,2025-07-28,854149.86,0.0
+C00269,gama,Ana Souza,BA,industrial,Em Aberto,2025-07-15,46492.59,0.0
+C00270,alfa,Gabi Torres,SP,residencial,Em Aberto,2025-08-11,22287.97,0.0
+C00271,alfa,Bruno Lima,RJ,industrial,Fechado,2025-05-01,48210.86,47900.04
+C00272,beta,Diego Rocha,RJ,industrial,Perdido,2025-11-26,237799.15,0.0
+C00273,gama,Carla Dias,MG,comercial,Em Aberto,2026-06-10,110252.1,0.0
+C00274,filial,Gabi Torres,GO,comercial,Perdido,2025-07-28,160149.73,0.0
+C00275,beta,Felipe Nunes,RJ,residencial,Em Aberto,2025-09-25,44232.93,0.0
+C00276,gama,Bruno Lima,RJ,comercial,Em Aberto,2025-08-24,71388.58,0.0
+C00277,gama,Carla Dias,GO,comercial,Em Aberto,2026-05-18,22255.89,0.0
+C00278,beta,Felipe Nunes,BA,comercial,Em Aberto,2025-07-08,48963.31,0.0
+C00279,alfa,Eva Martins,SP,residencial,Em Aberto,2025-02-19,208905.1,0.0
+C00280,beta,Ana Souza,SC,residencial,Perdido,2025-01-10,111011.85,0.0
+C00281,filial,Felipe Nunes,PR,residencial,Fechado,2025-01-07,29447.48,27847.28
+C00282,gama,Ana Souza,BA,industrial,Fechado,2026-03-17,64543.91,61854.29
+C00283,gama,Carla Dias,GO,comercial,Em Aberto,2025-03-22,32981.02,0.0
+C00284,beta,Carla Dias,SC,residencial,Em Aberto,2025-02-02,44652.93,0.0
+C00285,alfa,Felipe Nunes,SP,industrial,Em Aberto,2025-06-25,24373.36,0.0
+C00286,alfa,Eva Martins,SP,residencial,Perdido,2025-08-05,80611.03,0.0
+C00287,gama,Eva Martins,BA,industrial,Perdido,2025-02-03,67896.85,0.0
+C00288,filial,Felipe Nunes,BA,comercial,Em Aberto,2026-01-29,31832.18,0.0
+C00289,alfa,Eva Martins,SC,comercial,Perdido,2025-02-24,90029.08,0.0
+C00290,filial,Gabi Torres,MG,residencial,Fechado,2025-10-07,29170.89,27443.25
+C00291,filial,Diego Rocha,RJ,industrial,Fechado,2026-01-25,121570.53,113419.91
+C00292,alfa,Ana Souza,MG,residencial,Perdido,2026-01-25,13481.96,0.0
+C00293,gama,Carla Dias,SP,residencial,Em Aberto,2025-01-06,132392.92,0.0
+C00294,alfa,Bruno Lima,SP,residencial,Perdido,2026-03-18,178947.1,0.0
+C00295,alfa,Ana Souza,MG,industrial,Em Aberto,2025-04-06,51139.95,0.0
+C00296,alfa,Carla Dias,PR,comercial,Perdido,2025-03-28,110978.67,0.0
+C00297,beta,Eva Martins,BA,residencial,Perdido,2026-01-25,120641.89,0.0
+C00298,beta,Diego Rocha,MG,comercial,Fechado,2025-11-03,32195.18,28070.66
+C00299,filial,Eva Martins,BA,residencial,Fechado,2026-04-14,58486.74,51877.07
+C00300,gama,Gabi Torres,BA,comercial,Perdido,2025-12-04,27564.03,0.0
+C00301,beta,Carla Dias,MG,industrial,Perdido,2025-07-25,51839.9,0.0
+C00302,gama,Carla Dias,SC,industrial,Em Aberto,2026-05-18,57813.05,0.0
+C00303,gama,Ana Souza,BA,residencial,Perdido,2025-07-04,42957.91,0.0
+C00304,filial,Felipe Nunes,RJ,comercial,Perdido,2025-10-26,104225.73,0.0
+C00305,beta,Felipe Nunes,PR,comercial,Fechado,2025-03-17,78887.76,70044.62
+C00306,filial,Eva Martins,SP,comercial,Em Aberto,2025-03-29,50319.26,0.0
+C00307,beta,Felipe Nunes,BA,residencial,Em Aberto,2026-02-14,29344.74,0.0
+C00308,alfa,Ana Souza,SP,comercial,Perdido,2025-08-16,156138.1,0.0
+C00309,beta,Diego Rocha,MG,comercial,Em Aberto,2026-04-20,61725.31,0.0
+C00310,gama,Ana Souza,PR,residencial,Em Aberto,2025-10-30,148524.63,0.0
+C00311,beta,Eva Martins,PR,comercial,Em Aberto,2026-05-03,29299.56,0.0
+C00312,alfa,Gabi Torres,MG,industrial,Fechado,2025-04-22,55828.39,53406.38
+C00313,beta,Eva Martins,RJ,industrial,Perdido,2025-06-13,80091.47,0.0
+C00314,filial,Felipe Nunes,RJ,residencial,Em Aberto,2026-03-19,39960.21,0.0
+C00315,filial,Eva Martins,PR,comercial,Perdido,2025-01-05,34693.51,0.0
+C00316,alfa,Eva Martins,SP,industrial,Perdido,2025-07-11,85287.89,0.0
+C00317,filial,Eva Martins,SC,comercial,Fechado,2026-02-02,47600.72,45249.49
+C00318,beta,Gabi Torres,SC,industrial,Fechado,2025-11-01,86672.19,84663.79
+C00319,gama,Ana Souza,RJ,comercial,Em Aberto,2025-04-30,243302.74,0.0
+C00320,filial,Eva Martins,RJ,industrial,Em Aberto,2026-01-28,14487.69,0.0
+C00321,beta,Eva Martins,RJ,comercial,Em Aberto,2025-10-23,48739.2,0.0
+C00322,alfa,Gabi Torres,MG,residencial,Em Aberto,2026-05-12,29136.96,0.0
+C00323,filial,Diego Rocha,SC,comercial,Em Aberto,2026-05-16,216888.28,0.0
+C00324,beta,Carla Dias,SP,comercial,Perdido,2025-08-19,20936.01,0.0
+C00325,filial,Eva Martins,BA,residencial,Em Aberto,2025-04-27,63707.19,0.0
+C00326,alfa,Gabi Torres,SC,comercial,Perdido,2025-08-12,29815.46,0.0
+C00327,filial,Carla Dias,MG,residencial,Fechado,2026-03-26,370196.93,370158.76
+C00328,gama,Gabi Torres,SC,industrial,Em Aberto,2026-03-15,102923.72,0.0
+C00329,alfa,Eva Martins,MG,industrial,Fechado,2025-10-15,35151.9,30970.28
+C00330,gama,Carla Dias,BA,comercial,Perdido,2026-06-11,70251.98,0.0
+C00331,filial,Diego Rocha,RJ,industrial,Perdido,2025-10-03,18208.15,0.0
+C00332,alfa,Diego Rocha,BA,industrial,Fechado,2025-10-12,79279.78,76837.15
+C00333,filial,Carla Dias,BA,residencial,Em Aberto,2025-04-06,528661.75,0.0
+C00334,gama,Gabi Torres,SP,industrial,Em Aberto,2026-02-12,107499.14,0.0
+C00335,gama,Carla Dias,BA,industrial,Fechado,2025-05-14,30364.45,27032.88
+C00336,alfa,Ana Souza,SP,industrial,Fechado,2026-04-16,71423.17,68022.2
+C00337,filial,Bruno Lima,SC,residencial,Perdido,2025-11-06,25243.56,0.0
+C00338,beta,Ana Souza,PR,industrial,Fechado,2025-11-09,24394.52,22095.98
+C00339,alfa,Felipe Nunes,SP,residencial,Em Aberto,2025-08-07,212590.91,0.0
+C00340,alfa,Ana Souza,SC,comercial,Fechado,2025-05-04,57716.52,54945.98
+C00341,filial,Ana Souza,SC,residencial,Fechado,2025-04-16,190941.23,164328.65
+C00342,beta,Felipe Nunes,SC,residencial,Fechado,2025-03-12,6957.59,6721.16
+C00343,filial,Carla Dias,SC,residencial,Em Aberto,2025-06-05,62456.66,0.0
+C00344,beta,Ana Souza,SP,residencial,Em Aberto,2025-05-07,268607.24,0.0
+C00345,gama,Gabi Torres,RJ,residencial,Perdido,2025-10-11,,0.0
+C00346,gama,Gabi Torres,SC,residencial,Em Aberto,2025-11-05,77963.45,0.0
+C00347,alfa,Gabi Torres,GO,residencial,Fechado,2026-05-22,21408.82,19455.54
+C00348,alfa,Eva Martins,SP,comercial,Em Aberto,2025-11-21,48709.84,0.0
+C00349,filial,Gabi Torres,SP,residencial,Em Aberto,2025-03-11,69416.94,0.0
+C00350,filial,Diego Rocha,SC,comercial,Em Aberto,2025-03-26,49205.35,0.0
+C00351,alfa,Eva Martins,RJ,residencial,Fechado,2025-12-01,90868.66,78377.81
+C00352,alfa,Carla Dias,SC,comercial,Perdido,2025-09-02,39732.97,0.0
+C00353,gama,Felipe Nunes,SC,industrial,Em Aberto,2025-06-29,50792.68,0.0
+C00354,gama,Bruno Lima,MG,residencial,Perdido,2025-10-03,83343.53,0.0
+C00355,gama,Gabi Torres,PR,comercial,Perdido,2026-06-21,86032.42,0.0
+C00356,gama,Ana Souza,PR,industrial,Em Aberto,2025-06-20,67102.94,0.0
+C00357,alfa,Bruno Lima,SC,industrial,Fechado,2025-01-03,46920.94,43922.07
+C00358,beta,Bruno Lima,GO,residencial,Em Aberto,2026-03-06,30832.13,0.0
+C00359,gama,Carla Dias,GO,residencial,Perdido,2026-01-17,36208.76,0.0
+C00360,alfa,Diego Rocha,SP,comercial,Fechado,2025-10-17,12100.83,10690.81
+C00361,gama,Bruno Lima,MG,industrial,Fechado,2025-11-08,103218.33,94807.27
+C00362,filial,Gabi Torres,GO,residencial,Em Aberto,2025-09-09,92420.75,0.0
+C00363,filial,Gabi Torres,SC,industrial,Fechado,2025-11-11,110043.62,99067.06
+C00364,alfa,Bruno Lima,SC,comercial,Fechado,2025-04-06,18844.36,17408.5
+C00365,filial,Felipe Nunes,MG,comercial,Perdido,2025-03-28,26516.05,0.0
+C00366,filial,Ana Souza,BA,industrial,Em Aberto,2025-03-05,74916.99,0.0
+C00367,gama,Gabi Torres,PR,industrial,Fechado,2025-12-01,4945.55,4397.33
+C00368,alfa,Bruno Lima,SP,residencial,Fechado,2026-04-06,42490.0,37408.49
+C00369,beta,Diego Rocha,MG,comercial,Em Aberto,2025-09-29,55353.96,0.0
+C00370,alfa,Bruno Lima,GO,comercial,Em Aberto,2025-06-01,109834.37,0.0
+C00371,alfa,Felipe Nunes,MG,comercial,Em Aberto,2025-06-28,28388.36,0.0
+C00372,beta,Ana Souza,PR,residencial,Em Aberto,2025-05-24,20322.86,0.0
+C00373,alfa,Eva Martins,BA,comercial,Fechado,2025-03-18,98302.82,89464.15
+C00374,gama,Ana Souza,SP,comercial,Fechado,2025-02-21,161538.74,159238.7
+C00375,filial,Diego Rocha,SP,comercial,Perdido,2026-03-13,20551.08,0.0
+C00376,beta,Ana Souza,BA,industrial,Fechado,2025-09-09,33798.54,30147.56
+C00377,filial,Ana Souza,SP,comercial,Perdido,2026-01-28,89622.54,0.0
+C00378,beta,Felipe Nunes,GO,industrial,Perdido,2025-01-20,32147.49,0.0
+C00379,gama,Diego Rocha,MG,residencial,Em Aberto,2025-01-27,39163.01,0.0
+C00380,gama,Ana Souza,GO,comercial,Perdido,2026-01-02,43552.05,0.0
+C00381,alfa,Gabi Torres,RJ,industrial,Perdido,2026-02-02,80299.08,0.0
+C00382,beta,Bruno Lima,BA,comercial,Perdido,2026-01-03,17336.88,0.0
+C00383,filial,Eva Martins,MG,residencial,Fechado,2026-05-18,73116.51,72984.97
+C00384,gama,Eva Martins,RJ,residencial,Em Aberto,2025-12-15,69034.47,0.0
+C00385,beta,Gabi Torres,SP,industrial,Fechado,2026-01-09,120396.32,112930.71
+C00386,filial,Eva Martins,SP,comercial,Perdido,2025-11-06,164235.15,0.0
+C00387,filial,Felipe Nunes,MG,residencial,Em Aberto,2026-01-01,105479.4,0.0
+C00388,gama,Bruno Lima,RJ,industrial,Fechado,2025-01-02,23764.27,21293.34
+C00389,beta,Felipe Nunes,BA,residencial,Perdido,2026-05-24,354903.49,0.0
+C00390,gama,Bruno Lima,RJ,industrial,Em Aberto,2025-03-11,322637.13,0.0
+C00391,alfa,Diego Rocha,PR,industrial,Em Aberto,2026-03-06,22845.63,0.0
+C00392,alfa,Gabi Torres,PR,industrial,Em Aberto,2025-08-19,58966.11,0.0
+C00393,alfa,Carla Dias,RJ,comercial,Fechado,2025-06-14,117360.77,116509.82
+C00394,alfa,Carla Dias,BA,industrial,Perdido,2026-05-10,120921.96,0.0
+C00395,filial,Bruno Lima,SP,residencial,Em Aberto,2025-12-06,98080.47,0.0
+C00396,gama,Felipe Nunes,MG,comercial,Em Aberto,2025-09-01,36355.82,0.0
+C00397,filial,Bruno Lima,SP,comercial,Em Aberto,2025-01-04,24016.98,0.0
+C00398,filial,Bruno Lima,SP,residencial,Em Aberto,2025-07-31,52008.41,0.0
+C00399,gama,Gabi Torres,PR,comercial,Fechado,2026-05-16,31637.38,30895.97
+C00400,filial,Bruno Lima,MG,comercial,Em Aberto,2026-01-14,125158.46,0.0
+C00401,alfa,Bruno Lima,GO,industrial,Perdido,2025-04-10,53515.42,0.0
+C00402,beta,Eva Martins,SP,comercial,Em Aberto,2026-06-20,25173.09,0.0
+C00403,filial,Eva Martins,RJ,comercial,Perdido,2025-11-03,47078.94,0.0
+C00404,beta,Ana Souza,GO,comercial,Perdido,2025-06-27,108089.9,0.0
+C00405,filial,Bruno Lima,GO,industrial,Fechado,2025-06-01,36687.56,31615.7
+C00406,alfa,Ana Souza,PR,industrial,Perdido,2026-02-11,111066.05,0.0
+C00407,alfa,Gabi Torres,SC,industrial,Em Aberto,2026-06-20,98545.46,0.0
+C00408,alfa,Ana Souza,BA,residencial,Fechado,2025-10-20,92559.36,86541.99
+C00409,filial,Ana Souza,RJ,comercial,Em Aberto,2026-02-17,121150.7,0.0
+C00410,alfa,Diego Rocha,MG,industrial,Em Aberto,2025-09-01,17171.61,0.0
+C00411,gama,Gabi Torres,GO,comercial,Fechado,2025-11-15,18421.89,16687.77
+C00412,alfa,Gabi Torres,RJ,residencial,Em Aberto,2025-11-04,33091.27,0.0
+C00413,gama,Felipe Nunes,PR,industrial,Perdido,2025-04-02,192660.87,0.0
+C00414,filial,Gabi Torres,BA,comercial,Perdido,2025-02-27,34783.99,0.0
+C00415,beta,Gabi Torres,GO,industrial,Fechado,2025-01-30,61384.81,56843.52
+C00416,filial,Eva Martins,PR,industrial,Em Aberto,2025-05-07,47133.34,0.0
+C00417,filial,Bruno Lima,GO,comercial,Em Aberto,2025-12-25,83117.0,0.0
+C00418,alfa,Carla Dias,SP,comercial,Fechado,2025-02-20,16047.88,15640.75
+C00419,beta,Felipe Nunes,RJ,industrial,Perdido,2025-07-31,20301.07,0.0
+C00420,alfa,Diego Rocha,RJ,industrial,Fechado,2025-06-27,35007.04,33853.4
+C00421,gama,Felipe Nunes,SC,industrial,Fechado,2025-10-09,68871.27,66857.67
+C00422,filial,Carla Dias,SC,industrial,Fechado,2026-02-11,50629.68,44949.02
+C00423,gama,Eva Martins,SC,industrial,Perdido,2025-10-17,67292.92,0.0
+C00424,gama,Gabi Torres,MG,comercial,Fechado,2025-11-02,43910.15,43833.49
+C00425,filial,Felipe Nunes,MG,industrial,Fechado,2025-05-24,24685.0,21192.47
+C00426,gama,Diego Rocha,PR,comercial,Perdido,2025-02-06,144537.7,0.0
+C00427,filial,Felipe Nunes,MG,industrial,Em Aberto,2025-11-04,115878.58,0.0
+C00428,gama,Felipe Nunes,GO,industrial,Fechado,2025-07-07,112533.7,97813.35
+C00429,filial,Gabi Torres,MG,comercial,Fechado,2025-09-24,78630.7,77114.29
+C00430,alfa,Diego Rocha,RJ,industrial,Fechado,2025-05-03,74533.58,63953.65
+C00431,beta,Bruno Lima,RJ,comercial,Fechado,2026-02-24,135358.66,116152.52
+C00432,beta,Carla Dias,SC,residencial,Fechado,2025-01-05,109841.92,98846.13
+C00433,beta,Diego Rocha,GO,residencial,Perdido,2025-05-13,55092.55,0.0
+C00434,filial,Diego Rocha,SP,residencial,Em Aberto,2025-07-24,91920.05,0.0
+C00435,beta,Felipe Nunes,MG,comercial,Fechado,2025-05-13,62527.92,60029.33
+C00436,alfa,Carla Dias,MG,comercial,Fechado,2026-06-17,19973.67,17173.22
+C00437,beta,Carla Dias,PR,comercial,Perdido,2025-07-12,73111.37,0.0
+C00438,alfa,Diego Rocha,SC,comercial,Em Aberto,2025-02-19,60309.95,0.0
+C00439,alfa,Felipe Nunes,SP,comercial,Fechado,2026-03-31,68555.38,66870.15
+C00440,beta,Bruno Lima,SC,industrial,Em Aberto,2025-01-10,41647.1,0.0
+C00441,gama,Eva Martins,BA,industrial,Em Aberto,2025-05-21,26722.19,0.0
+C00442,alfa,Carla Dias,SP,residencial,Em Aberto,2026-05-25,19952.11,0.0
+C00443,beta,Carla Dias,SC,comercial,Fechado,2025-10-30,35709.85,33155.59
+C00444,filial,Carla Dias,RJ,residencial,Perdido,2025-01-14,21342.69,0.0
+C00445,alfa,Felipe Nunes,SC,residencial,Fechado,2025-09-20,240400.63,207588.93
+C00446,gama,Diego Rocha,SP,residencial,Perdido,2025-06-28,86218.62,0.0
+C00447,alfa,Ana Souza,GO,residencial,Em Aberto,2025-01-10,33073.35,0.0
+C00448,filial,Eva Martins,MG,industrial,Fechado,2025-04-06,251454.13,227221.27
+C00449,filial,Carla Dias,GO,comercial,Fechado,2026-05-05,45891.25,41762.76
+C00450,alfa,Bruno Lima,SC,industrial,Perdido,2025-03-02,193320.22,0.0
+C00451,filial,Gabi Torres,MG,industrial,Em Aberto,2025-01-30,56660.87,0.0
+C00452,filial,Ana Souza,SP,comercial,Perdido,2025-11-18,57218.58,0.0
+C00453,beta,Felipe Nunes,GO,comercial,Em Aberto,2026-06-16,68381.27,0.0
+C00454,beta,Diego Rocha,MG,industrial,Fechado,2026-01-30,66562.45,63184.87
+C00455,filial,Gabi Torres,PR,residencial,Fechado,2025-03-18,240401.17,238034.59
+C00456,beta,Eva Martins,SC,comercial,Fechado,2026-02-17,99501.36,88727.71
+C00457,gama,Ana Souza,PR,industrial,Fechado,2025-01-19,50041.23,46276.55
+C00458,alfa,Gabi Torres,SP,industrial,Em Aberto,2025-11-08,23671.21,0.0
+C00459,filial,Carla Dias,MG,residencial,Em Aberto,2025-08-17,203474.53,0.0
+C00460,filial,Felipe Nunes,SC,comercial,Perdido,2026-04-09,121464.77,0.0
+C00461,gama,Eva Martins,BA,comercial,Perdido,2025-04-19,33530.17,0.0
+C00462,alfa,Carla Dias,BA,residencial,Em Aberto,2025-07-12,10480.03,0.0
+C00463,alfa,Felipe Nunes,GO,industrial,Perdido,2025-05-07,31526.67,0.0
+C00464,beta,Diego Rocha,SP,industrial,Em Aberto,2025-02-19,118150.09,0.0
+C00465,beta,Felipe Nunes,BA,residencial,Em Aberto,2025-05-12,68103.99,0.0
+C00466,gama,Eva Martins,PR,comercial,Em Aberto,2025-09-12,12225.89,0.0
+C00467,gama,Gabi Torres,SC,industrial,Fechado,2025-11-18,194878.19,177711.73
+C00468,gama,Felipe Nunes,MG,industrial,Em Aberto,2025-05-16,75184.73,0.0
+C00469,gama,Felipe Nunes,SP,comercial,Em Aberto,2026-05-07,212757.41,0.0
+C00470,gama,Gabi Torres,PR,residencial,Em Aberto,2026-06-20,434705.74,0.0
+C00471,gama,Gabi Torres,GO,residencial,Fechado,2025-10-21,25025.85,21484.46
+C00472,beta,Gabi Torres,BA,residencial,Fechado,2026-01-03,80407.74,77806.84
+C00473,beta,Felipe Nunes,SC,industrial,Perdido,2026-02-03,96779.07,0.0
+C00474,gama,Felipe Nunes,SC,residencial,Perdido,2026-01-26,11275.17,0.0
+C00475,alfa,Felipe Nunes,MG,residencial,Em Aberto,2026-03-30,154828.62,0.0
+C00476,beta,Gabi Torres,SC,residencial,Perdido,2025-10-29,132853.38,0.0
+C00477,gama,Bruno Lima,RJ,industrial,Fechado,2025-09-19,86366.41,77027.34
+C00478,gama,Diego Rocha,GO,industrial,Perdido,2026-01-02,257626.52,0.0
+C00479,beta,Diego Rocha,BA,industrial,Em Aberto,2026-02-18,134631.64,0.0
+C00480,gama,Carla Dias,RJ,industrial,Fechado,2026-05-02,29170.62,26247.21
+C00481,beta,Ana Souza,SC,comercial,Perdido,2026-01-26,90967.67,0.0
+C00482,gama,Eva Martins,GO,industrial,Fechado,2026-04-02,42588.18,42021.77
+C00483,gama,Eva Martins,SP,residencial,Em Aberto,2025-06-21,58352.67,0.0
+C00484,beta,Gabi Torres,SC,comercial,Fechado,2025-04-17,67653.62,63893.92
+C00485,alfa,Diego Rocha,SC,comercial,Fechado,2025-02-08,36862.93,35126.93
+C00486,beta,Carla Dias,PR,comercial,Em Aberto,2026-04-07,149300.92,0.0
+C00487,alfa,Felipe Nunes,SC,industrial,Fechado,2025-03-06,82059.88,78038.52
+C00488,alfa,Carla Dias,BA,residencial,Em Aberto,2025-10-24,,0.0
+C00489,filial,Diego Rocha,PR,industrial,Fechado,2025-02-01,105194.74,101490.95
+C00490,gama,Felipe Nunes,RJ,comercial,Fechado,2026-01-18,55463.38,50396.74
+C00491,filial,Eva Martins,BA,residencial,Fechado,2025-11-09,108991.47,102005.97
+C00492,beta,Diego Rocha,SC,industrial,Em Aberto,2025-05-26,12849.16,0.0
+C00493,beta,Ana Souza,RJ,industrial,Perdido,2025-02-25,32953.1,0.0
+C00494,filial,Carla Dias,MG,residencial,Fechado,2025-08-29,65912.9,56996.89
+C00495,gama,Diego Rocha,PR,comercial,Perdido,2025-11-10,14148.25,0.0
+C00496,gama,Diego Rocha,RJ,residencial,Em Aberto,2025-11-17,81899.07,0.0
+C00497,filial,Carla Dias,GO,comercial,Em Aberto,2025-05-18,38273.61,0.0
+C00498,filial,Carla Dias,GO,comercial,Em Aberto,2026-05-14,86570.17,0.0
+C00499,gama,Gabi Torres,GO,residencial,Em Aberto,2025-07-21,65253.74,0.0
+C00500,filial,Gabi Torres,BA,residencial,Fechado,2025-02-07,15669.47,14686.74
+C00501,filial,Felipe Nunes,GO,residencial,Perdido,2026-01-10,69919.64,0.0
+C00502,gama,Bruno Lima,PR,industrial,Em Aberto,2026-06-07,15382.54,0.0
+C00503,beta,Gabi Torres,BA,residencial,Fechado,2026-04-02,24751.58,21925.74
+C00504,beta,Felipe Nunes,SC,comercial,Em Aberto,2026-01-03,20363.18,0.0
+C00505,gama,Diego Rocha,PR,comercial,Fechado,2025-02-17,36299.17,34494.66
+C00506,beta,Diego Rocha,SC,comercial,Em Aberto,2026-01-10,77058.34,0.0
+C00507,beta,Eva Martins,PR,comercial,Fechado,2025-12-20,195312.47,173386.29
+C00508,beta,Diego Rocha,RJ,residencial,Em Aberto,2025-03-20,57825.36,0.0
+C00509,alfa,Felipe Nunes,RJ,comercial,Fechado,2025-12-05,61558.85,53778.03
+C00510,beta,Eva Martins,RJ,industrial,Em Aberto,2026-02-25,107260.46,0.0
+C00511,alfa,Eva Martins,RJ,residencial,Em Aberto,2025-06-20,67523.2,0.0
+C00512,alfa,Felipe Nunes,SC,industrial,Perdido,2025-10-18,39950.01,0.0
+C00513,filial,Gabi Torres,PR,residencial,Em Aberto,2025-08-13,131075.42,0.0
+C00514,beta,Eva Martins,SC,industrial,Perdido,2025-09-28,186442.37,0.0
+C00515,alfa,Bruno Lima,PR,comercial,Perdido,2025-05-16,14038.74,0.0
+C00516,filial,Gabi Torres,RJ,industrial,Perdido,2025-04-09,30531.49,0.0
+C00517,alfa,Ana Souza,PR,industrial,Em Aberto,2025-05-14,183610.06,0.0
+C00518,filial,Eva Martins,PR,comercial,Fechado,2025-02-14,198287.54,196435.58
+C00519,filial,Gabi Torres,GO,comercial,Perdido,2025-12-25,96279.08,0.0
+C00520,alfa,Diego Rocha,RJ,comercial,Perdido,2026-05-04,96045.6,0.0
+C00521,gama,Bruno Lima,SP,industrial,Em Aberto,2025-01-08,14445.31,0.0
+C00522,gama,Diego Rocha,MG,residencial,Fechado,2025-06-08,67597.56,64094.78
+C00523,gama,Eva Martins,MG,industrial,Fechado,2026-02-11,46877.7,43615.75
+C00524,filial,Bruno Lima,MG,industrial,Perdido,2026-05-11,108701.75,0.0
+C00525,beta,Gabi Torres,GO,industrial,Fechado,2025-05-02,36776.84,35152.19
+C00526,beta,Ana Souza,RJ,industrial,Em Aberto,2026-02-15,110698.89,0.0
+C00527,alfa,Bruno Lima,PR,industrial,Em Aberto,2025-01-06,429998.19,0.0
+C00528,gama,Ana Souza,BA,residencial,Fechado,2026-01-29,54324.68,48319.84
+C00529,gama,Felipe Nunes,BA,residencial,Em Aberto,2025-06-29,160523.56,0.0
+C00530,gama,Bruno Lima,SP,industrial,Fechado,2026-06-07,84388.76,80045.49
+C00531,beta,Felipe Nunes,SP,residencial,Fechado,2025-03-30,61589.52,52684.24
+C00532,alfa,Felipe Nunes,SC,residencial,Em Aberto,2025-04-03,42905.11,0.0
+C00533,gama,Carla Dias,GO,comercial,Em Aberto,2025-08-20,76766.8,0.0
+C00534,alfa,Carla Dias,RJ,comercial,Perdido,2026-06-03,71770.52,0.0
+C00535,filial,Gabi Torres,RJ,comercial,Perdido,2026-04-15,83793.67,0.0
+C00536,filial,Ana Souza,MG,residencial,Perdido,2026-01-27,665651.26,0.0
+C00537,alfa,Felipe Nunes,GO,comercial,Fechado,2025-09-12,82067.32,81518.85
+C00538,gama,Ana Souza,BA,residencial,Em Aberto,2026-05-03,36839.21,0.0
+C00539,beta,Felipe Nunes,SC,residencial,Em Aberto,2026-05-26,43178.9,0.0
+C00540,beta,Bruno Lima,GO,residencial,Fechado,2025-12-31,91610.95,81516.41
+C00541,filial,Eva Martins,SP,industrial,Perdido,2025-02-13,35294.94,0.0
+C00542,gama,Diego Rocha,RJ,industrial,Fechado,2025-10-14,127971.85,126016.21
+C00543,filial,Diego Rocha,BA,residencial,Fechado,2026-05-30,34166.81,31736.19
+C00544,filial,Ana Souza,SC,industrial,Perdido,2026-04-17,13342.11,0.0
+C00545,gama,Bruno Lima,BA,comercial,Fechado,2025-08-31,87995.11,79568.73
+C00546,filial,Felipe Nunes,GO,comercial,Em Aberto,2026-01-09,45987.89,0.0
+C00547,beta,Gabi Torres,SP,industrial,Fechado,2025-10-04,117600.49,102273.72
+C00548,beta,Bruno Lima,GO,industrial,Perdido,2025-06-03,153054.93,0.0
+C00549,beta,Gabi Torres,SC,industrial,Em Aberto,2025-11-20,57674.02,0.0
+C00550,alfa,Diego Rocha,SP,industrial,Em Aberto,2025-06-17,104762.59,0.0
+C00551,gama,Carla Dias,MG,comercial,Em Aberto,2025-09-21,54885.87,0.0
+C00552,beta,Eva Martins,BA,industrial,Em Aberto,2025-06-28,41621.13,0.0
+C00553,filial,Ana Souza,PR,industrial,Fechado,2025-10-21,150187.51,139158.74
+C00554,gama,Diego Rocha,SC,industrial,Perdido,2026-02-19,19032.29,0.0
+C00555,gama,Eva Martins,SC,comercial,Fechado,2025-10-05,32825.15,29335.95
+C00556,beta,Felipe Nunes,RJ,industrial,Fechado,2025-09-15,63086.91,61707.31
+C00557,alfa,Ana Souza,MG,industrial,Fechado,2025-06-09,189271.19,172151.97
+C00558,filial,Felipe Nunes,RJ,residencial,Em Aberto,2026-06-24,49208.89,0.0
+C00559,gama,Eva Martins,PR,residencial,Fechado,2025-07-01,298793.99,275315.72
+C00560,filial,Eva Martins,SC,industrial,Em Aberto,2025-11-14,75310.93,0.0
+C00561,gama,Carla Dias,PR,comercial,Fechado,2025-06-09,176786.67,152643.46
+C00562,filial,Carla Dias,SP,comercial,Fechado,2025-10-27,39988.8,39521.46
+C00563,beta,Diego Rocha,BA,comercial,Em Aberto,2026-02-09,115273.48,0.0
+C00564,filial,Bruno Lima,MG,residencial,Em Aberto,2026-03-09,17959.65,0.0
+C00565,gama,Carla Dias,SC,industrial,Perdido,2025-10-03,85460.73,0.0
+C00566,filial,Eva Martins,PR,comercial,Fechado,2026-05-19,26480.86,23659.04
+C00567,gama,Bruno Lima,SC,comercial,Fechado,2025-01-09,15848.77,13714.59
+C00568,gama,Diego Rocha,MG,comercial,Em Aberto,2026-01-16,38880.37,0.0
+C00569,beta,Ana Souza,MG,comercial,Fechado,2025-03-15,47147.88,46041.41
+C00570,gama,Gabi Torres,PR,residencial,Perdido,2025-05-05,64371.83,0.0
+C00571,beta,Diego Rocha,PR,industrial,Fechado,2025-11-16,12583.82,11953.39
+C00572,alfa,Carla Dias,PR,industrial,Em Aberto,2025-11-02,204241.33,0.0
+C00573,gama,Ana Souza,RJ,comercial,Fechado,2025-05-03,113329.2,107088.88
+C00574,filial,Felipe Nunes,BA,residencial,Perdido,2026-01-16,49567.01,0.0
+C00575,gama,Gabi Torres,SC,residencial,Em Aberto,2025-03-03,98192.75,0.0
+C00576,alfa,Bruno Lima,PR,residencial,Em Aberto,2025-11-21,47364.88,0.0
+C00577,beta,Ana Souza,SC,comercial,Em Aberto,2026-01-02,366419.44,0.0
+C00578,gama,Eva Martins,SC,comercial,Fechado,2025-07-14,90310.47,86336.26
+C00579,beta,Ana Souza,BA,residencial,Fechado,2026-04-06,73173.25,67338.36
+C00580,alfa,Gabi Torres,SC,industrial,Em Aberto,2026-01-24,40918.05,0.0
+C00581,gama,Felipe Nunes,SP,industrial,Em Aberto,2026-02-01,77528.85,0.0
+C00582,beta,Eva Martins,MG,comercial,Perdido,2026-02-24,15620.95,0.0
+C00583,alfa,Ana Souza,GO,residencial,Em Aberto,2025-07-02,74413.59,0.0
+C00584,alfa,Ana Souza,BA,industrial,Em Aberto,2026-02-02,113823.78,0.0
+C00585,gama,Ana Souza,MG,residencial,Em Aberto,2025-03-14,94567.94,0.0
+C00586,gama,Eva Martins,SC,comercial,Em Aberto,2026-01-13,,0.0
+C00587,gama,Ana Souza,RJ,industrial,Em Aberto,2025-04-10,84182.38,0.0
+C00588,beta,Eva Martins,SC,residencial,Em Aberto,2025-07-03,29386.66,0.0
+C00589,gama,Felipe Nunes,PR,industrial,Em Aberto,2026-03-14,71787.43,0.0
+C00590,gama,Felipe Nunes,RJ,industrial,Fechado,2026-03-30,112485.92,102388.46
+C00591,gama,Eva Martins,RJ,industrial,Em Aberto,2025-08-08,133970.81,0.0
+C00592,gama,Diego Rocha,PR,comercial,Em Aberto,2025-01-01,40894.95,0.0
+C00593,gama,Ana Souza,MG,residencial,Perdido,2025-08-08,78625.34,0.0
+C00594,beta,Ana Souza,SP,comercial,Fechado,2025-12-31,248697.44,232047.02
+C00595,beta,Bruno Lima,MG,comercial,Perdido,2025-04-05,31504.3,0.0
+C00596,gama,Gabi Torres,PR,residencial,Fechado,2026-05-15,74943.09,64569.49
+C00597,alfa,Eva Martins,SC,comercial,Em Aberto,2025-02-08,252728.5,0.0
+C00598,gama,Carla Dias,GO,comercial,Fechado,2026-03-03,126440.8,108535.32
+C00599,alfa,Felipe Nunes,GO,industrial,Perdido,2026-01-27,260589.4,0.0
+C00600,gama,Eva Martins,SC,residencial,Fechado,2025-06-06,16537.86,15458.55
+C00052,gama,Diego Rocha,PR,comercial,Em Aberto,2025-08-07,35847.9,0.0
+C00403,filial,Eva Martins,RJ,comercial,Perdido,2025-11-03,47078.94,0.0
+C00457,gama,Ana Souza,PR,industrial,Fechado,2025-01-19,50041.23,46276.55
+C00590,gama,Felipe Nunes,RJ,industrial,Fechado,2026-03-30,112485.92,102388.46
+C00517,alfa,Ana Souza,PR,industrial,Em Aberto,2025-05-14,183610.06,0.0
+C00093,filial,Ana Souza,SC,residencial,Em Aberto,2025-09-28,41242.84,0.0
+C00228,filial,Eva Martins,GO,industrial,Em Aberto,2026-04-28,44297.25,0.0
+C00443,beta,Carla Dias,SC,comercial,Fechado,2025-10-30,35709.85,33155.59
+C00297,beta,Eva Martins,BA,residencial,Perdido,2026-01-25,120641.89,0.0
+C00404,beta,Ana Souza,GO,comercial,Perdido,2025-06-27,108089.9,0.0
+C00152,filial,Eva Martins,PR,comercial,Em Aberto,2025-10-07,83117.57,0.0
+C00136,beta,Ana Souza,MG,residencial,Perdido,2025-11-28,94872.05,0.0

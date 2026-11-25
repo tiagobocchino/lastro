@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lastro · Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/web/marca.css">
+<style>
+* { box-sizing: border-box }
+body { margin: 0; background: var(--chao); color: var(--tinta); font: 15px/1.55 var(--f-texto) }
+button, input, textarea, select { font: inherit; color: inherit }
+.logo { display: inline-flex; align-items: center; gap: 10px; font: 700 20px var(--f-disp); letter-spacing: -.01em }
+.logo i { display: grid; gap: 2px; width: 18px } .logo i b { height: 4px; border-radius: 1px; display: block }
+.logo i b:nth-child(1) { background: var(--ouro) } .logo i b:nth-child(2) { background: var(--prata) } .logo i b:nth-child(3) { background: var(--bronze) }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--linha); background: var(--sup) }
+.quem { color: var(--quieta); font-size: 13px } .quem b { color: var(--tinta); font-weight: 600 }
+.grade { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 60px) }
+aside { border-right: 1px solid var(--linha); padding: 16px; display: flex; flex-direction: column; gap: 8px; background: var(--sup-2) }
+main { padding: 24px max(16px, env(safe-area-inset-right, 0px)) 64px max(16px, env(safe-area-inset-left, 0px)); min-width: 0; max-width: 980px }
+h1 { font: 700 28px/1.15 var(--f-disp); margin: 0 0 6px; text-wrap: balance } h2 { font: 600 17px var(--f-disp); margin: 28px 0 10px }
+.rot { font: 500 11px var(--f-dado); text-transform: uppercase; letter-spacing: .08em; color: var(--quieta) }
+.item { text-align: left; border: 1px solid transparent; background: none; padding: 10px 12px; border-radius: 8px; cursor: pointer; display: grid; gap: 4px }
+.item:hover { background: var(--sup) } .item.ativo { background: var(--sup); border-color: var(--linha) }
+.item span:first-child { font-size: 14px; line-height: 1.35 }
+.status { font: 500 11px var(--f-dado); padding: 2px 8px; border-radius: 99px; justify-self: start; background: var(--linha); color: var(--tinta) }
+.status.grill { background: var(--ouro-f); color: var(--ouro-tx) } .status.em_revisao { background: var(--ouro-f); color: var(--ouro-tx) }
+.status.aprovada { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok) } .status.reprovada { background: color-mix(in srgb, var(--erro) 18%, transparent); color: var(--erro) }
+.bloco { background: var(--sup); border: 1px solid var(--linha); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0 }
+label { display: grid; gap: 6px; font-weight: 500 } label small { color: var(--quieta); font-weight: 400 }
+input[type=text], input[type=email], input[type=password], textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--linha); border-radius: 8px; background: var(--sup-2) }
+textarea { min-height: 84px; resize: vertical }
+:focus-visible { outline: 2px solid var(--ouro); outline-offset: 2px }
+.btn { border: 0; border-radius: 8px; padding: 10px 16px; font-weight: 600; cursor: pointer; background: var(--tinta); color: var(--chao) }
+.btn.sec { background: transparent; color: var(--tinta); border: 1px solid var(--linha) } .btn.ouro { background: var(--ouro); color: #1a1408 }
+.btn:disabled { opacity: .5; cursor: progress }
+.linha-btn { display: flex; gap: 8px; flex-wrap: wrap }
+.fontes { display: flex; gap: 8px; flex-wrap: wrap } .fontes label { display: flex; align-items: center; gap: 6px; font: 400 14px var(--f-dado); border: 1px solid var(--linha); padding: 6px 10px; border-radius: 8px }
+.tabela { overflow-x: auto } table { border-collapse: collapse; width: 100%; font-size: 14px }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--linha); white-space: nowrap } th { color: var(--quieta); font-weight: 600 }
+td.n { text-align: right; font: 14px var(--f-dado); font-variant-numeric: tabular-nums }
+.barra { height: 8px; background: var(--ouro); border-radius: 2px; min-width: 2px }
+.ok { color: var(--ok) } .erro { color: var(--erro) } .aviso { color: var(--aviso) }
+.chk td:first-child { font: 600 12px var(--f-dado) }
+.total { font: 700 34px var(--f-disp); font-variant-numeric: tabular-nums }
+.rastro { display: grid; gap: 0; font-size: 13px } .rastro div { display: grid; grid-template-columns: 110px 1fr; gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--linha) }
+.rastro b { font: 500 12px var(--f-dado); color: var(--ouro-tx) } .rastro span { color: var(--quieta); overflow-wrap: anywhere }
+code, pre { font: 13px var(--f-dado) } pre { white-space: pre-wrap; margin: 0; background: var(--sup-2); padding: 12px; border-radius: 8px; overflow-x: auto }
+.erro-msg { color: var(--erro); font-size: 14px }
+.login { min-height: 100vh; display: grid; place-items: center; padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)) }
+.login .bloco { width: min(420px, 100%) }
+.dica { font: 13px var(--f-dado); color: var(--quieta); background: var(--sup-2); padding: 10px 12px; border-radius: 8px }
+.grill-q { display: grid; gap: 6px; padding-bottom: 14px; border-bottom: 1px solid var(--linha) } .grill-q:last-of-type { border-bottom: 0 }
+@media (max-width: 760px) { .grade { grid-template-columns: 1fr } aside { border-right: 0; border-bottom: 1px solid var(--linha) } }
+@media (prefers-reduced-motion: no-preference) { .bloco { animation: sobe .25s ease-out } @keyframes sobe { from { transform: translateY(4px) } to { transform: none } } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="/web/app.js"></script>
+</body>
+</html>
