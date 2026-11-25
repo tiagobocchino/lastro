@@ -334,9 +334,10 @@ async function telaConta() {
   document.querySelectorAll(".aba").forEach((a) => a.classList.toggle("ativa", a.id === "aba-conta"));
   const admin = sessao.papel === "admin";
   $("#lado").innerHTML = `<p class="quem"><b>${esc(sessao.nome)}</b><br>${esc(sessao.papel)} · ${esc(sessao.tenant)}</p>`;
-  $("#painel").innerHTML = formSenha("Trocar minha senha", "Senha atual") + (admin ? `<div id="equipe"></div>` : "");
+  const exporta = admin || sessao.papel === "demandante";
+  $("#painel").innerHTML = formSenha("Trocar minha senha", "Senha atual") + (admin ? `<div id="bi"></div><div id="equipe"></div>` : "") + (exporta && !admin ? `<div id="exportar"></div>` : "");
   ligarFormSenha(() => { $("#s-msg").className = "ok"; $("#s-msg").textContent = "Senha trocada."; $("#f-senha").reset(); });
-  if (admin) await telaEquipe();
+  if (admin) { await telaBI(); await telaEquipe(); } else if (exporta) await telaExportar($("#exportar"));
 }
 
 async function telaEquipe(nova = null) {
@@ -363,5 +364,78 @@ async function telaEquipe(nova = null) {
       const r = await (await api("/api/usuarios", { method: "POST", json: { nome: $("#c-nome").value, email: $("#c-email").value, papel: $("#c-papel").value } })).json();
       await telaEquipe(r);
     } catch (err) { $("#c-msg").textContent = err.message; }
+  };
+}
+
+// ---- Levar os dados para o BI (LST-33) ---------------------------------------------------
+async function copiar(botao, texto, alvo) {
+  try { await navigator.clipboard.writeText(texto); botao.textContent = "copiado"; }
+  catch { const r = document.createRange(); r.selectNodeContents(alvo); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+}
+
+async function baixar(caminho, botao) {
+  const antes = botao.textContent; botao.disabled = true; botao.textContent = "gerando…";
+  try {
+    const r = await api(caminho);
+    const nome = (r.headers.get("content-disposition") || "").match(/filename="([^"]+)"/)?.[1] || "fonte";
+    const url = URL.createObjectURL(await r.blob());
+    const a = document.createElement("a"); a.href = url; a.download = nome; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch (err) { alert(err.message); }
+  finally { botao.disabled = false; botao.textContent = antes; }
+}
+
+async function telaExportar(alvo) {
+  const fs = (await (await api("/api/fontes")).json()).filter((f) => f.tipo === "arquivo");
+  alvo.innerHTML = `<div class="bloco"><h2>Exportar fontes</h2>
+    <p class="quem">Uma cópia de cada fonte em CSV (Excel, Looker Studio por upload, Google Sheets) ou Parquet (Power BI, Python). A fonte original não é alterada.</p>
+    ${fs.length ? `<div class="tabela"><table><tbody>${fs.map((f) => `<tr><td>${esc(f.nome)}</td><td style="text-align:right"><div class="linha-btn" style="justify-content:flex-end">
+      <button class="btn sec" data-exp="${f.id}" data-fmt="csv">csv</button><button class="btn sec" data-exp="${f.id}" data-fmt="parquet">parquet</button></div></td></tr>`).join("")}</tbody></table></div>`
+      : `<p class="quem">Nenhuma fonte de arquivo ainda.</p>`}</div>`;
+  alvo.querySelectorAll("[data-exp]").forEach((b) => (b.onclick = () => baixar(`/api/fontes/${b.dataset.exp}/exportar?formato=${b.dataset.fmt}`, b)));
+}
+
+const quandoBI = (iso) => iso ? new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "ainda não";
+
+async function telaBI(nova = null, teste = null) {
+  const alvo = $("#bi");
+  const e = await (await api("/api/bi")).json();
+  let html = `<div class="bloco"><h2>Conectar ao BI</h2>`;
+  if (!e.disponivel) {
+    html += `<p class="quem">${esc(e.motivo)}. Enquanto isso, exporte as fontes em CSV ou Parquet abaixo.</p>`;
+  } else if (!e.ligado) {
+    html += `<p class="quem">Liga um acesso só de leitura ao banco do Lastro, com as suas fontes e o resultado das demandas aprovadas, para usar no Power BI, no Looker Studio, no Metabase ou em qualquer BI que conecte em PostgreSQL. Só a sua empresa aparece nesse acesso, e ele não altera nada.</p>
+      <div class="linha-btn"><button class="btn" id="bi-ligar">ligar o BI</button></div>`;
+  } else {
+    const c = e.conexao;
+    const linhas = [["Servidor", c.host], ["Porta", c.porta], ["Banco", c.banco], ["Usuário", c.usuario], ["SSL", c.ssl]];
+    html += `<p class="quem">Use estes dados no conector <b>PostgreSQL</b> do seu BI. Atualizado ${esc(quandoBI(e.publicado_em))}; o Lastro atualiza sozinho depois de cada carga e de cada demanda aprovada.</p>
+      ${teste ? `<p class="${teste.ok ? "ok" : "erro"}"><b>${teste.ok ? "Testado:" : "Atenção:"}</b> ${esc(teste.detalhe)}</p>` : ""}
+      ${nova ? `<div class="bloco" style="background:var(--sup-2)"><p><b>Senha do BI</b> (aparece só agora; guarde no gerenciador de senhas ou cole direto no BI):</p>
+        <div class="linha-btn" style="align-items:center"><code id="bi-senha" style="overflow-wrap:anywhere">${esc(nova.senha)}</code><button class="btn sec" id="bi-copiar-senha" type="button">copiar</button></div></div>` : ""}
+      <div class="tabela"><table class="contrato"><tbody>${linhas.map(([k, v], i) => `<tr><th>${k}</th><td><code id="bi-v${i}">${esc(v)}</code></td><td style="text-align:right"><button class="btn sec" data-copia="${i}">copiar</button></td></tr>`).join("")}</tbody></table></div>
+      <h2 style="margin:6px 0 0">Tabelas no BI</h2>
+      ${e.tabelas.length ? `<div class="tabela"><table><thead><tr><th>tabela</th><th>de onde vem</th><th>linhas</th></tr></thead><tbody>${e.tabelas.map((t) => `<tr><td><code>${esc(t.tabela)}</code></td><td>${esc(t.origem)}</td><td class="n">${num(t.linhas)}</td></tr>`).join("")}</tbody></table></div>`
+        : `<p class="quem">Nada publicado ainda. Envie uma fonte ou aprove uma demanda e clique em publicar.</p>`}
+      <p class="erro-msg" id="bi-msg" role="status"></p>
+      <div class="linha-btn"><button class="btn" id="bi-publicar">publicar agora</button><button class="btn sec" id="bi-trocar">trocar a senha</button><button class="btn sec" id="bi-desligar">desligar</button></div>
+      <details><summary>Como conectar (Power BI, Looker Studio, Metabase)</summary><ul class="quem">
+        <li><b>Power BI Desktop</b> (gratuito): Obter dados → Banco de dados PostgreSQL → servidor <code>${esc(c.host)}:${esc(c.porta)}</code>, banco <code>${esc(c.banco)}</code> → usuário e senha acima. As tabelas <code>d…_fato</code> e <code>d…_dim_…</code> já formam um esquema estrela.</li>
+        <li><b>Looker Studio</b>: Adicionar dados → PostgreSQL → preencha os campos acima e marque "Ativar SSL".</li>
+        <li><b>Metabase</b>: Admin → Bancos de dados → Adicionar → PostgreSQL, com os mesmos dados e SSL.</li></ul></details>`;
+  }
+  alvo.innerHTML = html + `</div><div id="exportar"></div>`;
+  await telaExportar($("#exportar"));
+  const acao = async (botao, fazer) => { botao.disabled = true; try { await fazer(); } catch (err) { $("#bi-msg") ? ($("#bi-msg").textContent = err.message) : alert(err.message); botao.disabled = false; } };
+  if ($("#bi-ligar")) $("#bi-ligar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/credencial", { method: "POST" })).json(); await telaBI(r.credencial, r.teste); });
+  if (!e.ligado) return;
+  document.querySelectorAll("[data-copia]").forEach((b) => (b.onclick = () => copiar(b, $(`#bi-v${b.dataset.copia}`).textContent, $(`#bi-v${b.dataset.copia}`))));
+  if (nova) $("#bi-copiar-senha").onclick = (ev) => copiar(ev.target, nova.senha, $("#bi-senha"));
+  $("#bi-publicar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/publicar", { method: "POST" })).json(); await telaBI(); if (r.avisos.length) $("#bi-msg").textContent = r.avisos.join(" · "); });
+  $("#bi-trocar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/credencial", { method: "POST" })).json(); await telaBI(r.credencial, r.teste); });
+  $("#bi-desligar").onclick = (ev) => {
+    const b = ev.target;
+    if (b.dataset.confirmar !== "1") { b.dataset.confirmar = "1"; b.textContent = "confirmar: o BI perde o acesso"; return; }
+    acao(b, async () => { await api("/api/bi/credencial", { method: "DELETE" }); await telaBI(); });
   };
 }

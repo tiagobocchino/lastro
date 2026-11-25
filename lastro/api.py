@@ -27,6 +27,7 @@ from .banco import (
     emitir_token,
     ler_token,
 )
+from .bi import AcessoBI, BIIndisponivel
 from .cofre import abrir_cofre
 from .conectores import EXTENSOES
 from .config import carregar
@@ -280,9 +281,12 @@ class Revisao(BaseModel):
 def revisar(did: int, dados: Revisao, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
     _papel(s, PAPEIS_QUE_REVISAM)
     try:
-        return _resumo(p.revisar(did, s.email, dados.aprovado, dados.parecer))
+        d = p.revisar(did, s.email, dados.aprovado, dados.parecer)
     except Exception as e:  # noqa: BLE001
         raise _erro(e) from e
+    if dados.aprovado:  # o gold aprovado entra no BI da empresa (LST-33)
+        _republicar(s.tenant, p.repo, p.pasta)
+    return _resumo(d)
 
 
 ARQUIVOS = {"relatorio": "relatorio.html", "notebook": "auditoria_colab.ipynb", "pipeline": "pipeline.py",
@@ -488,6 +492,8 @@ def tarefa_cargas(x_lastro_tarefa: Annotated[str | None, Header()] = None) -> di
     if not x_lastro_tarefa or not hmac.compare_digest(x_lastro_tarefa, esperado):
         raise HTTPException(401, "tarefa não autorizada")
     feitas = cargas.executar_devidas(banco, cofre, cfg, cliente=_cliente_oauth, espelho=espelho)
+    for tenant in sorted({f["tenant"] for f in feitas if f["status"] == "ok"}):  # fonte nova chega ao BI (LST-33)
+        _republicar(tenant, banco.repo(tenant, "agendador@lastro", "admin"), cfg.pasta_tenant(tenant))
     return {"executadas": len(feitas), "por_status": {st: sum(f["status"] == st for f in feitas) for st in ("ok", "cota", "falhou")}}
 
 
@@ -507,3 +513,105 @@ async def sandbox(saas: str, caminho: str, request: Request) -> Response:
     if resp is None:
         return Response(status_code=st, headers=cab)
     return JSONResponse(resp, status_code=st, headers=cab)
+
+
+# ---- BI self-service por empresa (LST-33) -------------------------------------------------
+
+def _bi() -> AcessoBI:
+    try:
+        return AcessoBI(banco, os.environ.get("LASTRO_BANCO_URL", ""))
+    except BIIndisponivel as e:
+        raise HTTPException(409, str(e)) from e
+
+
+def _republicar(tenant: str, repo: object, pasta: Path) -> None:
+    """Atualiza o BI da empresa se ele estiver ligado. Falha vira log: nunca derruba a aprovação ou a carga."""
+    try:
+        bi = AcessoBI(banco, os.environ.get("LASTRO_BANCO_URL", ""))
+        acesso = bi.acesso(tenant)
+        if acesso and acesso["ativo"]:
+            bi.publicar(tenant, repo, pasta)
+    except BIIndisponivel:
+        return
+    except Exception as e:  # noqa: BLE001
+        log.error("bi: falha ao republicar %s: %s", tenant, type(e).__name__)
+
+
+def _estado_bi(bi: AcessoBI, tenant: str) -> dict:
+    a = bi.acesso(tenant)
+    if not a:
+        return {"disponivel": True, "ligado": False}
+    return {"disponivel": True, "ligado": a["ativo"], "conexao": bi.conexao(a["nome"]),
+            "senha_trocada_em": a["senha_trocada_em"].isoformat(),
+            "publicado_em": a["publicado_em"].isoformat() if a["publicado_em"] else None, "tabelas": a["tabelas"]}
+
+
+@app.get("/api/bi")
+def estado_bi(s: Annotated[Sessao, Depends(sessao)]) -> dict:
+    _papel(s, {"admin"})
+    try:
+        bi = AcessoBI(banco, os.environ.get("LASTRO_BANCO_URL", ""))
+    except BIIndisponivel as e:
+        return {"disponivel": False, "motivo": str(e)}
+    return _estado_bi(bi, s.tenant)
+
+
+@app.post("/api/bi/credencial")
+def credencial_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    """Liga o BI ou troca a senha. A senha volta só nesta resposta."""
+    _papel(s, {"admin"})
+    bi = _bi()
+    primeira = bi.acesso(s.tenant) is None
+    cred = bi.gerar_credencial(s.tenant)
+    p.repo.registrar(s.email, "gerou_credencial_bi" if primeira else "trocou_senha_bi", {"usuario": cred["usuario"]})
+    publicado = bi.publicar(s.tenant, p.repo, p.pasta) if primeira else None
+    teste = bi.testar(cred)  # entra como o BI entraria: confirma pooler, senha e só leitura
+    p.repo.registrar(s.email, "testou_credencial_bi", {"ok": teste["ok"], "detalhe": teste["detalhe"]})
+    return {"credencial": cred, "publicado": publicado, "teste": teste}
+
+
+@app.post("/api/bi/publicar")
+def publicar_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    _papel(s, {"admin"})
+    try:
+        r = _bi().publicar(s.tenant, p.repo, p.pasta)
+    except BIIndisponivel as e:
+        raise HTTPException(409, str(e)) from e
+    p.repo.registrar(s.email, "publicou_bi", {"tabelas": len(r["tabelas"]), "avisos": r["avisos"]})
+    return r
+
+
+@app.delete("/api/bi/credencial")
+def desligar_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    _papel(s, {"admin"})
+    _bi().desligar(s.tenant)
+    p.repo.registrar(s.email, "desligou_bi", {})
+    return {"ligado": False}
+
+
+@app.get("/api/fontes/{fid}/exportar")
+def exportar_fonte(fid: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)],
+                   formato: str = "csv") -> FileResponse:
+    """Cópia da fonte em CSV ou Parquet, para BI sem conector de banco. A fonte original não é tocada."""
+    import tempfile
+
+    import duckdb
+
+    from .bi import _rel_arquivo, ident
+
+    _papel(s, {"admin", "demandante"})
+    if formato not in {"csv", "parquet"}:
+        raise HTTPException(400, "formato deve ser csv ou parquet")
+    fonte = p.repo.fontes([fid])
+    if not fonte or fonte[0]["tipo"] != "arquivo" or not Path(fonte[0]["caminho"]).exists():
+        raise HTTPException(404, "fonte não encontrada (só fontes de arquivo exportam)")
+    destino = Path(tempfile.mkdtemp(prefix="lastro-exp-")) / f"{ident(fonte[0]['nome'], 'fonte')}.{formato}"
+    con = duckdb.connect()
+    try:
+        rel = _rel_arquivo(Path(fonte[0]["caminho"]))(con)
+        rel.write_csv(str(destino), header=True) if formato == "csv" else rel.write_parquet(str(destino))
+    finally:
+        con.close()
+    p.repo.registrar(s.email, "exportou_fonte", {"fonte": fid, "formato": formato})
+    tipo = "text/csv" if formato == "csv" else "application/vnd.apache.parquet"
+    return FileResponse(destino, media_type=tipo, filename=destino.name)

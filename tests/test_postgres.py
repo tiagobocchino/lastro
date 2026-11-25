@@ -387,3 +387,176 @@ def test_painel_html_a_partir_do_banco(monitor, url_pg, banco_pg):
     banco_pg.registrar_metrica(200, 120)
     h = gerar(url_pg)
     assert "Operação do Lastro" in h and "storage" in h and "banco" in h
+
+
+# --- BI self-service por empresa (LST-33) ---------------------------------------------------
+
+def _empresa_com_gold(banco_pg, cfg, aprovar: bool = True):
+    t = f"b{uuid.uuid4().hex[:6]}"
+    banco_pg.criar_tenant(t, t)
+    destino = cfg.pasta_tenant(t) / "fontes" / "orçamentos 2025.csv"
+    destino.parent.mkdir(parents=True)
+    shutil.copy(EXEMPLO, destino)
+    adm = banco_pg.repo(t, f"adm@{t}", "admin")
+    fid = adm.adicionar_fonte("Orçamentos 2025", "arquivo", str(destino))
+    plat = Plataforma(cfg, adm)
+    d = plat.abrir(f"adm@{t}", "Quanto cada vendedor vendeu, em valor vendido, nos contratos fechados?", [fid])
+    d = plat.executar(plat.responder_grill(d["id"], f"adm@{t}", {"geral:revisor": "Rui"})["id"], f"adm@{t}")
+    if aprovar:
+        plat.revisar(d["id"], f"adm@{t}", True, "ok")
+    return t, adm, plat, d["id"]
+
+
+def _entrar_como(url_pg: str, cred: dict, senha: str | None = None):
+    import psycopg
+
+    base = psycopg.conninfo.conninfo_to_dict(url_pg)
+    return psycopg.connect(host="127.0.0.1", port=base.get("port", 5432), dbname=base["dbname"],
+                           user=cred["usuario"], password=cred["senha"] if senha is None else senha, autocommit=True)
+
+
+def test_bi_publica_fontes_e_gold_e_isola_as_empresas(banco_pg, url_pg, monkeypatch, tmp_path: Path):
+    import psycopg
+
+    from lastro.bi import AcessoBI
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path))
+    cfg = carregar()
+    a, repo_a, plat_a, did = _empresa_com_gold(banco_pg, cfg)
+    o, repo_o, plat_o, _ = _empresa_com_gold(banco_pg, cfg, aprovar=False)
+    bi = AcessoBI(banco_pg, url_pg)
+    cred_a, cred_o = bi.gerar_credencial(a), bi.gerar_credencial(o)
+    assert a not in cred_a["usuario"] and cred_a["usuario"].startswith("bi_")  # nome opaco: não revela a empresa
+    pub = bi.publicar(a, repo_a, plat_a.pasta)
+    bi.publicar(o, repo_o, plat_o.pasta)
+    nomes = {t["tabela"]: t["linhas"] for t in pub["tabelas"]}
+    linhas_csv = len(EXEMPLO.read_text(encoding="utf-8").splitlines()) - 1
+    assert nomes["fonte_orcamentos_2025"] == linhas_csv and pub["avisos"] == []
+    assert {f"d{did}_fato", f"d{did}_silver"} <= set(nomes) and any(n.startswith(f"d{did}_dim_") for n in nomes)
+
+    with _entrar_como(url_pg, cred_a) as c:
+        # o BI enxerga só o próprio schema, já no search_path
+        assert c.execute("SELECT count(*) FROM fonte_orcamentos_2025").fetchone()[0] == linhas_csv
+        assert c.execute(f"SELECT sum(valor_vendido) FROM d{did}_fato").fetchone()[0] is not None
+        visiveis = {r[0] for r in c.execute(
+            "SELECT table_schema FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog','information_schema')")}
+        assert visiveis == {cred_a["usuario"]}
+        proibidos = [
+            f"SELECT * FROM {cred_o['usuario']}.fonte_orcamentos_2025",  # outra empresa
+            "SELECT * FROM public.usuarios", "SELECT * FROM public.demandas", "SELECT * FROM interno.bi_acessos",
+            "SELECT * FROM vault.decrypted_secrets", "SELECT interno.monitorar()",
+        ]
+        for q in proibidos:
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                c.execute(q)
+        with pytest.raises(psycopg.errors.ReadOnlySqlTransaction):  # 1ª trava: sessão só leitura
+            c.execute("DELETE FROM fonte_orcamentos_2025")
+        c.execute("SET default_transaction_read_only = off")
+        for q in ("DELETE FROM fonte_orcamentos_2025", "CREATE TABLE x (a int)", "CREATE TABLE public.x (a int)"):
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):  # 2ª trava: sem privilégio de escrita
+                c.execute(q)
+
+    # a empresa sem demanda aprovada só tem a fonte
+    with _entrar_como(url_pg, cred_o) as c:
+        assert [r[0] for r in c.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()")] == ["fonte_orcamentos_2025"]
+
+
+def test_bi_senha_troca_e_desliga(banco_pg, url_pg, monkeypatch, tmp_path: Path):
+    import psycopg
+
+    from lastro.bi import AcessoBI
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path))
+    t = f"s{uuid.uuid4().hex[:6]}"
+    banco_pg.criar_tenant(t, t)
+    bi = AcessoBI(banco_pg, url_pg)
+    velha = bi.gerar_credencial(t)
+    nova = bi.gerar_credencial(t)  # trocar a senha mantém usuário e schema
+    assert nova["usuario"] == velha["usuario"] and nova["senha"] != velha["senha"] and len(nova["senha"]) >= 32
+    exige_senha = True
+    try:
+        _entrar_como(url_pg, nova, senha="errada").close()
+        exige_senha = False  # Postgres local em trust: a senha não é conferida
+    except psycopg.OperationalError:
+        pass
+    if exige_senha:
+        with pytest.raises(psycopg.OperationalError):
+            _entrar_como(url_pg, velha)  # a senha antiga para de valer
+    _entrar_como(url_pg, nova).close()
+    assert bi.testar(nova | {"host": "127.0.0.1"})["ok"]
+    assert not bi.testar(nova | {"host": "127.0.0.1", "senha": "errada"})["ok"] or not exige_senha
+    bi.desligar(t)
+    with pytest.raises(psycopg.OperationalError):
+        _entrar_como(url_pg, nova)
+    assert bi.acesso(t)["ativo"] is False
+    assert "senha" not in bi.acesso(t) and nova["senha"] not in str(bi.acesso(t))  # a senha não fica no registro
+
+
+def test_bi_publicacao_atomica_e_fonte_quebrada_vira_aviso(banco_pg, url_pg, monkeypatch, tmp_path: Path):
+    from lastro.bi import AcessoBI
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path))
+    cfg = carregar()
+    t = f"q{uuid.uuid4().hex[:6]}"
+    banco_pg.criar_tenant(t, t)
+    pasta = cfg.pasta_tenant(t) / "fontes"
+    pasta.mkdir(parents=True)
+    (pasta / "boa.csv").write_text("id,valor\n1,10\n2,20\n")
+    (pasta / "ruim.parquet").write_text("isto não é parquet")
+    repo = banco_pg.repo(t, "adm@x", "admin")
+    repo.adicionar_fonte("boa", "arquivo", str(pasta / "boa.csv"))
+    repo.adicionar_fonte("ruim", "arquivo", str(pasta / "ruim.parquet"))
+    bi = AcessoBI(banco_pg, url_pg)
+    cred = bi.gerar_credencial(t)
+    r = bi.publicar(t, repo, cfg.pasta_tenant(t))
+    assert [x["tabela"] for x in r["tabelas"]] == ["fonte_boa"] and "fonte ruim" in r["avisos"][0]
+    (pasta / "boa.csv").write_text("id,valor\n1,10\n2,20\n3,30\n")
+    bi.publicar(t, repo, cfg.pasta_tenant(t))
+    with _entrar_como(url_pg, cred) as c:
+        assert c.execute("SELECT count(*), sum(valor) FROM fonte_boa").fetchone() == (3, 60)
+    assert bi.acesso(t)["tabelas"][0]["linhas"] == 3
+
+
+def test_bi_conexao_pelo_pooler_do_supabase(banco_pg):
+    from lastro.bi import AcessoBI
+
+    url = "postgresql://postgres.abcdefghijklmnop:x@aws-1-sa-east-1.pooler.supabase.com:6543/postgres"
+    c = AcessoBI(banco_pg, url).conexao("bi_0123456789")
+    assert c == {"host": "aws-1-sa-east-1.pooler.supabase.com", "porta": 5432, "banco": "postgres",
+                 "usuario": "bi_0123456789.abcdefghijklmnop", "ssl": "obrigatório"}
+
+
+def test_bi_pelo_portal_no_postgres(url_pg, monkeypatch, tmp_path: Path):
+    """Fluxo do admin: liga o BI, recebe a senha uma vez, a fonte já está lá; aprovação republica."""
+    import importlib
+
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path))
+    monkeypatch.setenv("LASTRO_BANCO_URL", url_pg)
+    import lastro.api as modulo
+
+    modulo = importlib.reload(modulo)
+    t = f"p{uuid.uuid4().hex[:6]}"
+    modulo.banco.criar_tenant(t, t)
+    modulo.banco.criar_usuario(t, f"adm@{t}", "Adm", "admin", "senha-longa-de-teste")
+    modulo.banco.criar_usuario(t, f"ana@{t}", "Ana", "demandante", "senha-longa-de-teste")
+    c = TestClient(modulo.app)
+
+    def cab(email: str) -> dict:
+        return {"Authorization": "Bearer " + c.post("/api/login", json={"email": email, "senha": "senha-longa-de-teste"}).json()["token"]}
+
+    adm = cab(f"adm@{t}")
+    assert c.get("/api/bi", headers=adm).json() == {"disponivel": True, "ligado": False}
+    c.post("/api/fontes", headers=adm, files={"arquivo": ("orcamentos.csv", EXEMPLO.read_bytes(), "text/csv")})
+    assert c.post("/api/bi/credencial", headers=cab(f"ana@{t}")).status_code == 403
+    r = c.post("/api/bi/credencial", headers=adm).json()
+    assert [x["tabela"] for x in r["publicado"]["tabelas"]] == ["fonte_orcamentos"]
+    assert r["teste"]["ok"] and "1 tabelas visíveis, sessão só leitura: sim" in r["teste"]["detalhe"]
+    estado = c.get("/api/bi", headers=adm).json()
+    assert estado["ligado"] and estado["conexao"]["usuario"] == r["credencial"]["usuario"]
+    assert r["credencial"]["senha"] not in str(estado)  # a senha não volta de novo
+    with _entrar_como(url_pg, r["credencial"]) as con:
+        assert con.execute("SELECT count(*) FROM fonte_orcamentos").fetchone()[0] > 0
+    assert c.delete("/api/bi/credencial", headers=adm).json() == {"ligado": False}
+    modulo.banco.fechar()
