@@ -42,7 +42,20 @@ CREATE TABLE IF NOT EXISTS cargas (
 CREATE TABLE IF NOT EXISTS eventos (
   id INTEGER PRIMARY KEY, tenant_id TEXT NOT NULL, demanda_id INTEGER, ator TEXT NOT NULL,
   acao TEXT NOT NULL, detalhe TEXT NOT NULL, em REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS metricas_api (
+  hora REAL PRIMARY KEY, requisicoes INTEGER NOT NULL DEFAULT 0, erros_4xx INTEGER NOT NULL DEFAULT 0,
+  erros_5xx INTEGER NOT NULL DEFAULT 0, latencia_ms INTEGER NOT NULL DEFAULT 0);
 """
+
+SQL_METRICA = (  # uma linha por hora (LST-26); o mesmo SQL serve ao SQLite e ao Postgres
+    "INSERT INTO {t} (hora, requisicoes, erros_4xx, erros_5xx, latencia_ms) VALUES ({h}, 1, {p}, {p}, {p}) "
+    "ON CONFLICT (hora) DO UPDATE SET requisicoes = {t}.requisicoes + 1, erros_4xx = {t}.erros_4xx + excluded.erros_4xx, "
+    "erros_5xx = {t}.erros_5xx + excluded.erros_5xx, latencia_ms = {t}.latencia_ms + excluded.latencia_ms"
+)
+
+
+def hora_cheia(agora: float) -> float:
+    return agora - agora % 3600
 
 CAMPOS_CARGA_ATUALIZAVEIS = {"marca_dagua", "ultima_execucao", "ultimo_status", "ultimo_aviso", "dia_cota", "chamadas_no_dia", "ativa", "hora", "cota_diaria"}
 PAPEIS_QUE_DEMANDAM = {"admin", "demandante"}
@@ -253,6 +266,15 @@ class BancoSqlite:
 
     def ping(self) -> None:
         self.con.execute("SELECT 1").fetchone()
+
+    def registrar_metrica(self, status: int, ms: int, agora: float | None = None) -> None:
+        agora = time.time() if agora is None else agora
+        sql = SQL_METRICA.format(t="metricas_api", h="?", p="?")
+        self.con.execute(sql, (hora_cheia(agora), int(400 <= status < 500), int(status >= 500), ms))
+        self.con.commit()
+
+    def metricas(self) -> list[dict]:
+        return [dict(r) for r in self.con.execute("SELECT * FROM metricas_api ORDER BY hora")]
 
     def criar_tenant(self, tenant_id: str, nome: str) -> None:
         criar_tenant(self.con, tenant_id, nome)

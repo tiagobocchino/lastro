@@ -8,6 +8,7 @@ mostra; o filtro por tenant no SQL fica como segunda trava, não como a única.
 from __future__ import annotations
 
 import json
+import time
 from contextlib import contextmanager
 from typing import Iterator
 
@@ -18,9 +19,11 @@ from psycopg_pool import ConnectionPool
 
 from .banco import (
     CAMPOS_CARGA_ATUALIZAVEIS,
+    SQL_METRICA,
     confere_senha,
     gerar_senha_provisoria,
     hash_senha,
+    hora_cheia,
     validar_nova_senha,
 )
 
@@ -53,6 +56,18 @@ class BancoPostgres:
     def ping(self) -> None:
         with self._dono() as con:
             con.execute("SELECT 1").fetchone()
+
+    def registrar_metrica(self, status: int, ms: int, agora: float | None = None) -> None:
+        agora = time.time() if agora is None else agora
+        sql = SQL_METRICA.format(t="interno.metricas_api", h="to_timestamp(%s)", p="%s")
+        with self._dono() as con:
+            con.execute(sql, (hora_cheia(agora), int(400 <= status < 500), int(status >= 500), ms))
+
+    def metricas(self) -> list[dict]:
+        with self._dono() as con:
+            return [dict(r) for r in con.execute(
+                "SELECT extract(epoch FROM hora)::float AS hora, requisicoes, erros_4xx, erros_5xx, latencia_ms "
+                "FROM interno.metricas_api ORDER BY hora")]
 
     def criar_tenant(self, tenant_id: str, nome: str) -> None:
         with self._dono() as con:

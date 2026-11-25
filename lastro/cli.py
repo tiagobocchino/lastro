@@ -77,6 +77,9 @@ def main(argv: list[str] | None = None) -> None:
     s = sub.add_parser("serve", help="sobe a API e o portal")
     s.add_argument("--porta", type=int, default=int(os.environ.get("PORT", "8000")))
     sub.add_parser("cargas", help="roda as cargas agendadas que estão na hora (o Cloud Scheduler faz isso em produção)")
+    pn = sub.add_parser("painel", help="gera o painel de operação (HTML) a partir do schema painel do Supabase")
+    pn.add_argument("--saida", default="painel-operacao.html")
+    pn.add_argument("--dias", type=int, default=30)
     b = sub.add_parser("buscar", help="busca na Caixa de Ferramenta global")
     b.add_argument("pergunta")
     a = p.parse_args(argv)
@@ -97,6 +100,12 @@ def main(argv: list[str] | None = None) -> None:
         banco = _abrir(cfg)
         for r in executar_devidas(banco, abrir_cofre(cfg, banco), cfg):
             print(f"carga {r['carga']} ({r['tenant']}, {r['saas']}): {r['status']} · {r['chamadas']} requisições {r.get('aviso', '')}")
+    elif a.cmd == "painel":
+        from .painel import gerar  # noqa: PLC0415
+
+        with open(a.saida, "w", encoding="utf-8") as f:
+            f.write(gerar(dias=a.dias))
+        print(f"painel gravado em {a.saida}")
     elif a.cmd == "buscar":
         caixa = Caixa({"global": CAIXA_GLOBAL})
         for t in caixa.buscar(a.pergunta):

@@ -45,6 +45,29 @@ WEB = Path(__file__).parent / "web"
 app = FastAPI(title="Lastro", version="0.1.0")
 
 
+NAO_MEDIR = ("/saude", "/web/", "/favicon")
+
+
+@app.middleware("http")
+async def medir(request, call_next):  # noqa: ANN001, ANN201
+    """Conta requisições, 4xx, 5xx e latência por hora (LST-26). Falha ao gravar nunca derruba a resposta."""
+    from starlette.concurrency import run_in_threadpool  # noqa: PLC0415
+
+    inicio = time.perf_counter()
+    status = 500
+    try:
+        resposta = await call_next(request)
+        status = resposta.status_code
+        return resposta
+    finally:
+        if not request.url.path.startswith(NAO_MEDIR):
+            ms = int((time.perf_counter() - inicio) * 1000)
+            try:
+                await run_in_threadpool(banco.registrar_metrica, status, ms)
+            except Exception as e:  # noqa: BLE001
+                log.warning("métrica não gravada: %s", type(e).__name__)
+
+
 class Sessao(BaseModel):
     email: str
     tenant: str

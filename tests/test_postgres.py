@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 import uuid
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -289,3 +290,100 @@ def test_contas_nos_dois_bancos(banco):
     assert b.autenticar(f"ana@{a}", "senha-da-ana-forte")["tenant_id"] == a
     assert [u["email"] for u in b.usuarios(o)] == []
     assert [u["email"] for u in b.usuarios(a)] == [f"ana@{a}", f"rui@{a}"]
+
+
+# --- Monitoramento (LST-26) -------------------------------------------------------------
+
+@pytest.fixture
+def monitor(url_pg):
+    import psycopg
+
+    con = psycopg.connect(url_pg, autocommit=True)
+    for t in ("interno.alertas", "interno.verificacoes", "interno.emails", "interno.metricas_api", "net.pedidos", "net._http_response"):
+        con.execute(f"TRUNCATE {t}")
+    con.execute("DELETE FROM vault.secrets WHERE name LIKE 'lastro_%'")
+    con.execute("SELECT vault.create_secret('https://api.exemplo', 'lastro_url_api')")
+    yield con
+    con.close()
+
+
+def _responder(con, status: int, corpo: str = '{"estado":"ok","banco":"ok"}') -> None:
+    pedido = con.execute("SELECT max(pedido) FROM interno.verificacoes").fetchone()[0]
+    con.execute("INSERT INTO net._http_response (id, status_code, content) VALUES (%s, %s, %s)", (pedido, status, corpo))
+
+
+def _alertas(con) -> dict:
+    return dict(con.execute("SELECT tipo, fechado_em IS NULL FROM interno.alertas").fetchall())
+
+
+def test_api_fora_do_ar_abre_alerta_e_fecha_quando_volta(monitor):
+    con = monitor
+    con.execute("SELECT interno.monitorar()")
+    url, = con.execute("SELECT url FROM net.pedidos WHERE metodo='GET'").fetchone()
+    assert url == "https://api.exemplo/saude"
+    _responder(con, 503, "")
+    con.execute("SELECT interno.monitorar()")
+    assert _alertas(con) == {}  # uma falha só não é queda
+    _responder(con, 200, '{"estado":"ok","banco":"erro"}')  # respondeu, mas sem banco: também é falha
+    con.execute("SELECT interno.monitorar()")
+    assert _alertas(con) == {"fora_do_ar": True}
+    assert con.execute("SELECT enviado FROM interno.emails").fetchall() == [(False,)]  # sem Resend: fica no painel
+    con.execute("SELECT vault.create_secret('re_chave_falsa', 'lastro_resend_chave')")
+    con.execute("SELECT vault.create_secret('alertas@exemplo.com', 'lastro_alerta_email')")
+    _responder(con, 200)
+    con.execute("SELECT interno.monitorar()")
+    assert _alertas(con) == {"fora_do_ar": False}
+    url, corpo, cab = con.execute("SELECT url, corpo, cabecalhos FROM net.pedidos WHERE metodo='POST'").fetchone()
+    assert url == "https://api.resend.com/emails" and corpo["to"] == ["alertas@exemplo.com"]
+    assert cab["Authorization"] == "Bearer re_chave_falsa" and "normalizado" in corpo["subject"]
+    assert con.execute("SELECT disponibilidade_pct FROM painel.disponibilidade_dia").fetchone()[0] == pytest.approx(Decimal("33.33"))
+
+
+def test_pedido_sem_resposta_vira_falha(monitor):
+    con = monitor
+    con.execute("SELECT interno.monitorar()")
+    con.execute("UPDATE interno.verificacoes SET em = now() - interval '5 minutes'")
+    con.execute("SELECT interno.monitorar()")
+    assert con.execute("SELECT ok FROM interno.verificacoes WHERE resolvida").fetchall() == [(False,)]
+
+
+def test_taxa_de_5xx_e_limite_gratuito(monitor, banco_pg):
+    con = monitor
+    for i in range(30):
+        banco_pg.registrar_metrica(500 if i < 3 else 200, 40)
+    assert banco_pg.metricas()[0]["requisicoes"] == 30
+    con.execute("SELECT interno.avaliar_alertas()")
+    assert _alertas(con) == {"erros_5xx": True}  # 3 de 30 = 10%, acima de 5%
+    con.execute("UPDATE interno.limites SET valor = 0.001 WHERE nome = 'banco_mb'")
+    try:
+        con.execute("SELECT interno.avaliar_alertas()")
+        assert _alertas(con)["banco_cheio"] is True
+    finally:
+        con.execute("UPDATE interno.limites SET valor = 500 WHERE nome = 'banco_mb'")
+    r = con.execute("SELECT requisicoes, erros_5xx, taxa_5xx FROM painel.requisicoes_dia").fetchone()
+    assert r[0] == 30 and r[1] == 3 and float(r[2]) == 0.1
+
+
+def test_painel_leitor_so_le_as_views(monitor, url_pg):
+    import psycopg
+
+    con = monitor
+    with psycopg.connect(url_pg) as leitor:
+        leitor.execute("SET ROLE painel_leitor")
+        for v in ("requisicoes_dia", "disponibilidade_dia", "demandas_dia", "cargas", "uso_gratuito", "alertas"):
+            leitor.execute(f"SELECT * FROM painel.{v}").fetchall()
+        for proibido in ("SELECT * FROM interno.metricas_api", "SELECT * FROM public.usuarios", "SELECT interno.monitorar()",
+                         "SELECT * FROM vault.decrypted_secrets"):
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                leitor.execute(proibido)
+            leitor.rollback()
+            leitor.execute("SET ROLE painel_leitor")
+    assert con.execute("SELECT rolcanlogin FROM pg_roles WHERE rolname='painel_leitor'").fetchone() == (False,)
+
+
+def test_painel_html_a_partir_do_banco(monitor, url_pg, banco_pg):
+    from lastro.painel import gerar
+
+    banco_pg.registrar_metrica(200, 120)
+    h = gerar(url_pg)
+    assert "Operação do Lastro" in h and "storage" in h and "banco" in h
