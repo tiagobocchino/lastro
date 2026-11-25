@@ -1,0 +1,354 @@
+swagger: '2.0'
+info:
+  description: API para antecipação de parcelas
+  version: 1.0.1
+  title: API para antecipação de parcelas
+host: api.sienge.com.br
+basePath: '/{subdomain-do-cliente}/public/api/v1'
+tags:
+  - name: Antecipação de parcelas
+    description: API para antecipação de parcelas para uso dos Recebimentos Instantâneos com bancos homologados e com as VANs bancárias homologadas mediante aquisição de seus respectivos connectores.
+schemes:
+  - https
+paths:
+  /prepayment-slip-register/:
+    post:
+      tags:
+        - Antecipação de parcelas
+      summary: >-
+        Registra cobrança referente a antecipação de parcelas.
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Informações para registrar cobrança de parcelas.
+          required: true
+          schema:
+            $ref: '#/definitions/BillingDTO'
+      responses:
+        '201':
+          description: Cobrança enviada com sucesso
+        '400':
+          description: Inconsistências que impedem o envio da cobrança
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '404':
+          description: Parcelas não encontradas para o envio da cobrança
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '422':
+          description: Agrupamento por cliente somente é válido se todos os títulos forem da mesma empresa.
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '500':
+          description: Erro interno no servidor
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+  /prepayment-slip-register/simulate:
+    post:
+      tags:
+        - Antecipação de parcelas
+      summary: >-
+        Simula informações para antecipação de parcelas.
+      description: >-
+        Simula dados detalhados para antecipação de parcelas incluindo valores e vencimentos.
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Informações para simular dados da cobrança a ser gerada
+          required: true
+          schema:
+            $ref: '#/definitions/BillingDTO'
+      responses:
+        '200':
+          description: Simulação realizada com sucesso
+          schema:
+           $ref: "#/definitions/GetCustomerExtractHistory"
+        '400':
+          description: Inconsistências que impedem o envio da cobrança
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '404':
+          description: Parcelas não encontradas para o envio da cobrança
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '422':
+          description: Agrupamento por cliente somente é válido se todos os títulos forem da mesma empresa.
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '500':
+          description: Erro interno no servidor
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+  /prepayment-slip-register/simulate-billings:
+    post:
+      tags:
+        - Antecipação de parcelas
+      summary: >-
+        Simula as cobranças da antecipação de parcelas, uma por boleto.
+      description: >-
+        Simula a antecipação das parcelas informadas e devolve um item em billings para cada
+        boleto que o registro (POST /prepayment-slip-register) vai gerar, com as parcelas de cada
+        boleto e o valor total de todos os boletos em totalAmount. Use esta operação quando o
+        agrupamento puder gerar mais de um boleto (por exemplo, agrupamento por cliente com
+        parcelas de contratos diferentes). A requisição é a mesma de /prepayment-slip-register/simulate.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Informações para simular as cobranças a serem geradas
+          required: true
+          schema:
+            $ref: '#/definitions/BillingDTO'
+      responses:
+        '200':
+          description: Simulação realizada com sucesso
+          schema:
+            $ref: '#/definitions/SimulatedBillings'
+        '400':
+          description: Requisição inválida, como campo obrigatório não informado
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '403':
+          description: Usuário sem autorização para a empresa das parcelas informadas
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '404':
+          description: Parcelas não encontradas ou fora das situações Em Aberto, Processando ou Rejeitada
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '422':
+          description: >-
+            Inconsistências que impedem a simulação, como agrupamento por cliente com títulos de
+            empresas diferentes ou empresa e conta corrente não informadas ou não encontradas
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+        '500':
+          description: Erro interno no servidor
+          schema:
+            $ref: '#/definitions/ResponseMessage'
+definitions:
+  GetResponseDocument:
+    type: object
+    required:
+      - links
+      - resultSetMetadata
+      - results
+    properties:
+      resultSetMetadata:
+        $ref: '#/definitions/ResultSetMetadata'
+      results:
+        type: array
+        description: Lista de cobranças retornados como resultado da pesquisa.
+        items:
+          $ref: '#/definitions/Results'
+          
+  Results:
+    type: object
+    properties:
+      urlReport:
+        type: string
+        description: Url para download da segunda via do boleto.
+      digitableNumber:
+        type: string
+        description: Número digitável do boleto.
+  
+  ResultSetMetadata:
+    type: object
+    required:
+      - count
+      - limit
+      - offset
+    properties:
+      count:
+        type: integer
+        format: int64
+        description: >-
+          Total de resultados disponíveis na base de dados como resultado da
+          pesquisa efetuada.
+      offset:
+        type: integer
+        format: int32
+        description: >-
+          Deslocamento entre o começo da lista e um dado elemento. Valor default
+          é 0.
+      limit:
+        type: integer
+        format: int32
+        description: >-
+          Quantidade máxima de resultados da pesquisa a serem retornados. Valor
+          default é 100 e o valor máximo permitido é 200.
+        minimum: 1
+        maximum: 200
+
+  BillingDTO:
+    type: object
+    required:
+      - installments
+      - companyId
+      - accountNumber
+      - newDueDate
+      - groupBy
+      - correctAnnualInstallment
+    properties:
+      companyId:
+        type: integer
+        format: int32
+        example: "1"
+        description: Código da empresa da conta corrente
+      installments:
+        type: array
+        description: Lista das parcelas
+        items:
+          type: object
+          properties:
+            billId:
+              type: integer
+              format: int32
+              example: "10"
+              description: Código do título
+            installmentId:
+              type: integer
+              format: int32
+              description: Código da parcela 
+      accountNumber:
+        type: string
+        example: "6538-2"
+        description: Código da conta corrente 
+      newDueDate:
+        type: string
+        description: Data do vencimento da cobrança
+        example: "2021-01-01"
+      groupBy:
+        description: O agrupamento pode ser por Cliente('CUSTOMER'), por Titulo('INSTALLMENT'), ou sem Agrupamento('NONE')
+        type: string
+        enum: [CUSTOMER, INSTALLMENT, NONE]
+      matchDueDate:
+        description: Agrupar parcelas com vencimento no mesmo dia ('SAME_DAY'), no mesmo mês ('SAME_MONTH') ou todos vencimentos das parcelas ('ALL')
+        type: string
+        enum: [ALL, SAME_DAY, SAME_MONTH]
+      percentPresentValue:
+        type: number
+        format: double
+        description: percentual para calcular o valor presente nas parcelas 
+        example: 11.11
+      calculatePresentValue:
+        type: boolean
+        description: Opção para calcular o valor presente nas parcelas 
+      correctAnnualInstallment:     
+        type: boolean
+        description: Opção para corrigir o valor anual das parcelas 
+  ResponseMessage:
+    type: object
+    properties:
+      status:
+        type: integer
+        description: Status Http
+      developerMessage:
+        type: string
+        description: Mensagem de resposta para analise do desenvolvedor
+        example: Developer description message
+      clientMessage:
+        type: string
+        description: Mensagem de resposta para o usuário
+        example: Client description message.
+  GetCustomerExtractHistory:
+    type: object
+    properties:
+      receivableBillId:
+        type: integer
+        format: int32
+        example: "10"
+        description: Código do título
+      amount:
+        type: integer
+        format: int32
+        example: "4000.22"
+        description: Valor da cobrança
+      newDueDate:
+        type: string
+        description: Data do vencimento da cobrança
+        example: "2021-01-01"
+      installments:
+            type: array
+            description: Lista das parcelas
+            items:
+              type: object
+              properties:
+                installmentId:
+                  type: integer
+                  format: int32
+                  description: Código da parcela 
+                dueDate:
+                  type: string
+                  description: Data de vencimento da parcela
+                  example: "2021-01-01"
+                installmentValue:
+                  type: integer
+                  format: int32
+                  example: "4000.22"
+                  description: Valor da parcela
+ 
+  SimulatedBillings:
+    type: object
+    properties:
+      totalAmount:
+        type: number
+        format: double
+        example: 8000.44
+        description: Soma dos valores de todas as cobranças simuladas, com duas casas decimais
+      billings:
+        type: array
+        description: Cobranças simuladas, uma por boleto a ser gerado
+        items:
+          $ref: '#/definitions/SimulatedBilling'
+  SimulatedBilling:
+    type: object
+    properties:
+      receivableBillId:
+        type: integer
+        format: int32
+        example: 10
+        description: Código do título da cobrança
+      amount:
+        type: number
+        format: double
+        example: 4000.22
+        description: Valor da cobrança
+      newDueDate:
+        type: string
+        description: Data do vencimento da cobrança, no formato dd/MM/yyyy
+        example: "01/01/2021"
+      installments:
+        type: array
+        description: Parcelas que compõem a cobrança
+        items:
+          $ref: '#/definitions/SimulatedInstallment'
+  SimulatedInstallment:
+    type: object
+    properties:
+      receivableBillId:
+        type: integer
+        format: int32
+        example: 10
+        description: Código do título ao qual a parcela pertence. Uma cobrança pode reunir parcelas de títulos diferentes
+      installmentId:
+        type: integer
+        format: int32
+        example: 1
+        description: Código da parcela
+      dueDate:
+        type: string
+        description: Data de vencimento da parcela, no formato dd/MM/yyyy
+        example: "01/01/2021"
+      installmentValue:
+        type: number
+        format: double
+        example: 4000.22
+        description: Valor da parcela

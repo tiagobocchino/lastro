@@ -189,3 +189,74 @@ def portal() -> str:
 
 
 app.mount("/web", StaticFiles(directory=WEB), name="web")
+
+
+# ---- Conectores SaaS: catálogo, teste de conexão, importação, Postman e sandbox -------------
+
+from datetime import date as _date  # noqa: E402
+from fastapi import Request  # noqa: E402
+from fastapi.responses import JSONResponse, Response  # noqa: E402
+
+from .saas import servico as saas_servico  # noqa: E402
+from .saas.motor import RelogioReal  # noqa: E402
+from .saas.simulador import Simulador  # noqa: E402
+
+_SIMULADORES: dict[str, Simulador] = {}
+
+
+class TesteConexao(BaseModel):
+    entidade: str
+    credenciais: dict[str, str]
+    variaveis: dict[str, str] = {}
+    desde: str | None = None
+    modo: str = "sandbox"
+    importar: bool = False
+
+
+@app.get("/api/saas")
+def catalogo_saas(s: Annotated[Sessao, Depends(sessao)]) -> list[dict]:
+    return saas_servico.resumo_catalogo()
+
+
+@app.post("/api/saas/{saas}/testar")
+def testar_saas(saas: str, dados: TesteConexao, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    _papel(s, {"admin"})
+    # Modo real: só admin, credencial do cliente (somente leitura), nada é guardado além do laudo.
+    try:
+        desde = _date.fromisoformat(dados.desde) if dados.desde else None
+        laudo = saas_servico.testar(saas, dados.entidade, dados.credenciais, dados.variaveis, desde, dados.modo)
+    except (LookupError, ValueError) as e:
+        raise HTTPException(400, str(e)) from e
+    p.repo.registrar(s.email, "testou_conector", {k: v for k, v in laudo.items() if k not in ("_extracao", "amostra")}, None)
+    if laudo["ok"] and dados.importar:
+        destino = saas_servico.importar_como_fonte(p.pasta, p.repo.tenant, laudo)
+        fid = p.repo.adicionar_fonte(f"{saas}_{dados.entidade}", "arquivo", str(destino))
+        laudo["fonte_id"] = fid
+    laudo.pop("_extracao", None)
+    return laudo
+
+
+@app.get("/api/saas/{saas}/postman")
+def postman(saas: str, request: Request, s: Annotated[Sessao, Depends(sessao)]) -> JSONResponse:
+    if saas not in saas_servico.CAT:
+        raise HTTPException(404, "SaaS fora do catálogo")
+    base = str(request.base_url).rstrip("/")
+    return JSONResponse(saas_servico.colecao_postman(saas, base), headers={"Content-Disposition": f'attachment; filename="lastro-{saas}.postman_collection.json"'})
+
+
+@app.api_route("/sandbox/{saas}/{caminho:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"], include_in_schema=False)
+async def sandbox(saas: str, caminho: str, request: Request) -> Response:
+    """API simulada, sem login do Lastro: é o alvo do Postman e de testes externos. Nada aqui toca dado real."""
+    if saas not in saas_servico.CAT:
+        return JSONResponse({"erro": "SaaS fora do catálogo"}, status_code=404)
+    sim = _SIMULADORES.setdefault(saas, Simulador(saas, n=180, relogio=RelogioReal()))
+    corpo = None
+    if await request.body():
+        try:
+            corpo = await request.json()
+        except ValueError:
+            return JSONResponse({"erro": "corpo não é JSON"}, status_code=400)
+    st, cab, resp = sim.responder(request.method, "/" + caminho, dict(request.query_params), dict(request.headers), corpo)
+    if resp is None:
+        return Response(status_code=st, headers=cab)
+    return JSONResponse(resp, status_code=st, headers=cab)

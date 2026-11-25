@@ -1,0 +1,560 @@
+# RD Station Developers Documentation
+
+> Documentation for RD Station Developers
+
+## Guias: Partner Program
+- [Desenvolvimento de Integrações](https://developers.rdstation.com/docs/desenvolvimento-de-integrações.md)
+- [Tech Partners](https://developers.rdstation.com/docs/tech-partners.md): Seja um Tech Partner RD Station
+
+## API: Introdução
+- [Boas vindas](https://developers.rdstation.com/reference/welcome.md)
+- [Suporte](https://developers.rdstation.com/reference/support.md)
+
+## API: Integrações multiproduto
+- [Webhook Service](https://developers.rdstation.com/reference/webhooks.md)
+  - [Criar um webhook](https://developers.rdstation.com/reference/post_integrations-webhooks.md): Cria uma assinatura de webhook na conta que a sua integração está vinculada. Os webhooks criados não serão listados na tela do RD Station Marketing.
+  - [Listar todos os webhooks](https://developers.rdstation.com/reference/get_integrations-webhooks.md): Retorna uma lista com todos os webhooks criados pela sua integração na conta que eles estão vinculados. Os webhooks criados diretamente pela tela do RD Station Marketing não serão listados.
+  - [Listar um Webhook](https://developers.rdstation.com/reference/getonesubscription.md): Retorna um Webhook criado pela sua integração na conta que ela está vinculado. O webhook criado diretamente pela tela do RD Station Marketing não será listado.
+  - [Atualizar um Webhook](https://developers.rdstation.com/reference/updatesubscription.md): Atualiza uma assinatura de webhook na conta que a sua integração está vinculada. Os webhooks atualizados não serão listados na tela do RD Station Marketing. Para atualizar um webhook, utilize o uuid…
+  - [Deletar um Webhook](https://developers.rdstation.com/reference/delete_integrations-webhooks-uuid.md): Deleta uma assinatura de webhook da conta que a sua integração está vinculada. Os webhooks não serão listados na tela do RD Station Marketing, sendo assim, para deletar um webhook, utilize o uuid…
+  - [Webhooks CRM payload](https://developers.rdstation.com/reference/webhooks-payload-crm.md)
+  - [Webhooks MKT payload](https://developers.rdstation.com/reference/webhooks-payload-mkt.md)
+  - [Retries Logic](https://developers.rdstation.com/reference/retries-logic.md)
+- [Exemplos de casos de uso](https://developers.rdstation.com/reference/exemplos-de-casos-de-uso.md): Separamos alguns casos de uso que podem ser implementados para te ajudar a planejar o desenvolvimento de sua integração
+
+## API: RD Station Marketing API
+- [Introdução e requisitos](https://developers.rdstation.com/reference/introducao-rdsm.md)
+- Guia de uso
+  - [Limite de requisições da API](https://developers.rdstation.com/reference/limite-de-requisicoes-da-api.md)
+  - [Como migrar a API 1.x para API 2.0 do RD Station Marketing](https://developers.rdstation.com/reference/rdsm-como-migrar-api-v1-para-api-v2.md)
+  - [Mensagens de erro](https://developers.rdstation.com/reference/mensagens-de-erro-rdsm.md)
+- [Autenticação](https://developers.rdstation.com/reference/autenticação.md)
+- Contatos
+  - [Consultar contato pelo uuid/email/phone](https://developers.rdstation.com/reference/get_platform-contacts-identifier-value-1.md): Retorna dados padrão e personalizados de um contato específico.
+  - [Criar contato](https://developers.rdstation.com/reference/post_platform-contacts-1.md): Apenas cria um novo contato na Base de Leads; se o contato já existir, ocorrerá o erro `EMAIL_ALREADY_IN_USE`. <br>Não há o registro de um [Evento de…
+  - [Atualizar contato pelo uuid/email/phone](https://developers.rdstation.com/reference/patch_platform-contacts-identifier-value-1.md): Cria ou atualiza um contato existente na Base de Leads. <br>Não há o registro de [Evento de Conversão](https://developers.rdstation.com/reference/eventos-padr%C3%A3o) no histórico do contato.…
+  - [Excluir contato pelo uuid/email/phone](https://developers.rdstation.com/reference/delete_platform-contacts-identifier-value-1.md): Deleta um contato específico.
+  - [Criar uma tag para o lead pelo uuid/email/phone](https://developers.rdstation.com/reference/post_platform-contacts-identifier-value-tag-1.md): Apenas atualiza um contato já existente na Base de Leads; se o contato não existir, ocorrerá o erro `RESOURCE_NOT_FOUND`. <br> Não há o registro de [Evento de…
+  - [Consultar eventos associado ao contato](https://developers.rdstation.com/reference/get_platform-contacts-uuid-events-1.md): Retorna uma lista de eventos associados ao contato.
+- [Campos personalizados](https://developers.rdstation.com/reference/campos-personalizados.md): Endpoints para gerenciar a informação de Campos na sua conta do RD Station.
+- [Consultar pelo UUID/email/phone do contato](https://developers.rdstation.com/reference/get_platform-contacts-identifier-value-funnels-default-1.md): Retorna uma lista de Funis associados ao contato.
+- [Atualizar pelo UUID/email/phone do contato](https://developers.rdstation.com/reference/put_platform-contacts-identifier-value-funnels-default-1.md): Atualiza as informações do funil associado ao contato.
+- [Consultar contatos de uma segmentação](https://developers.rdstation.com/reference/get_platform-segmentations-id-contacts-1.md): Retorna uma lista de contatos associados a uma segmentação. <br>Saiba como personalizar a consulta [aqui](https://developers.rdstation.com/reference/mais-informa%C3%A7%C3%B5es).
+- [Mais informações](https://developers.rdstation.com/reference/mais-informações.md)
+- [Inserir leads em um fluxo](https://developers.rdstation.com/reference/post_platform-workflows-id-leads-1.md): Permite inserir leads num fluxo de automação
+- [Análise](https://developers.rdstation.com/reference/estatisticas.md)
+  - [Consultar Estatísticas de E-mail Marketing](https://developers.rdstation.com/reference/get_platform-analytics-emails.md): O objetivo desta API é fornecer os indicadores de engajamento e performance das campanhas de Email Marketing enviadas no período consultado, que irão te auxiliar a analisar a eficiência das suas…
+  - [Consultar Estatísticas de Email via Fluxo de Automação](https://developers.rdstation.com/reference/get_platform-analytics-workflow-emails.md): O objetivo desta API é fornecer os indicadores de engajamento e performance dos emails enviados por meio de fluxos de automação no período consultado, que irão te auxiliar a analisar a eficiência dos…
+  - [Consultar Estatísticas do Funil de Vendas](https://developers.rdstation.com/reference/get_platform-analytics-funnel.md): O objetivo desta API é fornecer os dados funil de vendas com as quantidades de visitantes, leads, oportunidades e vendas cumulativo referente ao período consultado, a fim de trazer mais clareza com…
+  - [Consultar Estatísticas dos Ativos de Conversão](https://developers.rdstation.com/reference/get_platform-analytics-conversions.md): O objetivo desta API é fornecer os indicadores de conversão para ativos de marketing, a fim de trazer mais clareza com relação a performance do seu ativo.
+- [Evento de conversão padrão](https://developers.rdstation.com/reference/evento-de-conversão-padrão.md): O evento de conversão pode ser utilizado para **criar e atualizar** contatos na Base de Leads.O RD Station Marketing considera o valor do atributo `conversion_identifier` como identificador do evento…
+- [Eventos de Qualificação do Contato](https://developers.rdstation.com/reference/evento-de-qualificacao-do-contato.md)
+  - [Evento de Marcação de Oportunidade](https://developers.rdstation.com/reference/evento-marcacao-oportunidade.md): O evento de Marcação de Oportunidade, registra a marcação de um contato como oportunidade no RD Station Marketing. Este evento não cria um novo contato e requer a existência de um contato prévio para…
+  - [Evento de Marcação de Oportunidade Ganha](https://developers.rdstation.com/reference/evento-marcacao-oportunidade-ganha.md): O evento de Marcação de Oportunidade Ganha, registra um contato como oportunidade ganha no RD Station Marketing. Este evento não cria um novo contato e requer a existência de um contato prévio para…
+  - [Evento de Marcação de Oportunidade Perdida](https://developers.rdstation.com/reference/evento-marcacao-oportunidade-perdida.md): O evento de Marcação de Oportunidade Perdida, registra um contato como oportunidade perdida no RD Station Marketing. Este evento não cria um novo contato e requer a existência de um contato prévio…
+- [Eventos de E-commerce](https://developers.rdstation.com/reference/eventos-de-ecommerce.md)
+  - [Evento de Checkout Iniciado](https://developers.rdstation.com/reference/evento-de-checkout-iniciado.md): ## Identificação do contato  Envie `email` ou `phone`. Pelo menos um dos dois precisa estar presente no `payload`, caso contrário o evento é recusado e não chega ao RD Station Marketing.  Os campos…
+  - [Evento de Carrinho Abandonado](https://developers.rdstation.com/reference/evento-de-carrinho-abandonado.md): ## Identificação do contato  Envie `email` ou `phone`. Pelo menos um dos dois precisa estar presente no `payload`, caso contrário o evento é recusado e não chega ao RD Station Marketing.  Os campos…
+  - [Evento de Pedido Realizado](https://developers.rdstation.com/reference/evento-de-pedido-realizado.md): ## Identificação do contato  Envie `email` ou `phone`. Pelo menos um dos dois precisa estar presente no `payload`, caso contrário o evento é recusado e não chega ao RD Station Marketing.  Os campos…
+  - [Evento de Pedido Pago](https://developers.rdstation.com/reference/evento-de-pedido-pago.md): ## Identificação do contato  Envie `email` ou `phone`. Pelo menos um dos dois precisa estar presente no `payload`, caso contrário o evento é recusado e não chega ao RD Station Marketing.  Os campos…
+  - [Evento de Pedido Cancelado](https://developers.rdstation.com/reference/evento-de-cancelamento-de-pedido.md): ## Identificação do contato  Envie `email` ou `phone`. Pelo menos um dos dois precisa estar presente no `payload`, caso contrário o evento é recusado e não chega ao RD Station Marketing.  Os campos…
+  - [Eventos de Pedido Reembolsado](https://developers.rdstation.com/reference/eventos-de-pedido-reembolsado.md): ## Identificação do contato  Envie `email` ou `phone`. Pelo menos um dos dois precisa estar presente no `payload`, caso contrário o evento é recusado e não chega ao RD Station Marketing.  Os campos…
+  - [Eventos de Pedido Enviado](https://developers.rdstation.com/reference/eventos-de-pedido-enviado.md): ## Identificação do contato  Envie `email` ou `phone`. Pelo menos um dos dois precisa estar presente no `payload`, caso contrário o evento é recusado e não chega ao RD Station Marketing.  Os campos…
+  - [Evento de Pedido Entregue](https://developers.rdstation.com/reference/evento-de-pedido-entregue.md): ## Identificação do contato  Envie `email` ou `phone`. Pelo menos um dos dois precisa estar presente no `payload`, caso contrário o evento é recusado e não chega ao RD Station Marketing.  Os campos…
+- [Eventos de E-commerce (Descontinuados)](https://developers.rdstation.com/reference/eventos-ecommerce-deprecated.md)
+  - [Evento de Fechamento de Pedido](https://developers.rdstation.com/reference/evento-fechamento-pedido.md): O RD Station Marketing considera sempre o valor do atributo `event_type ORDER_PLACED` como identificador deste evento customizado. Esse evento é registrado sempre que ocorre o fechamento de pedido em…
+  - [Evento de Fechamento de Pedido com um Item específico](https://developers.rdstation.com/reference/evento-fechamento-pedido-item-especifico.md): O RD Station Marketing considera sempre o valor do atributo `event_type ORDER_PLACED_ITEM` como identificador do evento customizado. Esse evento é registrado sempre que ocorre o fechamento de pedido…
+  - [Evento de Abandono de Carrinho](https://developers.rdstation.com/reference/evento-abandono-carrinho.md): O RD Station Marketing considera sempre o valor do atributo `event_type CART_ABANDONED` como identificador do evento customizado. Esse evento é registrado sempre que ocorre o abandono de carrinho em…
+  - [Evento de Abandono de um Item do Carrinho](https://developers.rdstation.com/reference/evento-abandono-item-carrinho.md): O RD Station Marketing considera sempre o valor do atributo `event_type CART_ABANDONED_ITEM` como identificador do evento customizado. Esse evento é registrado sempre que ocorre o abandono de…
+- [Evento de Início da Conversa](https://developers.rdstation.com/reference/evento-inicio-conversa.md): O RD Station Marketing considera sempre o valor do atributo `event_type CHAT_STARTED` como identificador do evento customizado. Esse evento é registrado sempre que ocorre o início de uma conversa em…
+- [Evento de Término da Conversa](https://developers.rdstation.com/reference/evento-termino-conversa.md): O RD Station Marketing considera sempre o valor do atributo `event_type CHAT_FINISHED` como identificador do evento customizado. Esse evento é registrado sempre que ocorre o término de uma conversa…
+- Batch de Eventos
+  - [Batch de Eventos](https://developers.rdstation.com/reference/batch-eventos.md)
+- [Evento de Conversão via API Key](https://developers.rdstation.com/reference/evento-de-conversao-via-api-key.md)
+  - [Conversão via API Key](https://developers.rdstation.com/reference/conversao.md): O evento de conversão pode ser utilizado para **criar e atualizar** contatos na Base de Leads. O RD Station Marketing considera o valor do atributo `conversion_identifier` como identificador da…
+- [Catálogo de produtos](https://developers.rdstation.com/reference/catalogo-de-produtos.md)
+  - [Listar catálogos](https://developers.rdstation.com/reference/listar-catalogo-de-produtos.md)
+  - [Consultar catálogo por id](https://developers.rdstation.com/reference/consultar-catalogo-de-produtos.md)
+  - [Cadastrar catálogo](https://developers.rdstation.com/reference/cadastrar-catalogo-de-produtos.md)
+  - [Atualizar catálogo](https://developers.rdstation.com/reference/atualizar-catalogo-de-produtos.md)
+  - [Deletar catálogo](https://developers.rdstation.com/reference/deletar-catalogo-de-produtos.md)
+
+## API: RD Station CRM API v1
+- [Introdução e requisitos](https://developers.rdstation.com/reference/crm-v1-introducao-e-requisitos.md)
+- Guia de uso
+  - [Bases legais](https://developers.rdstation.com/reference/crm-v1-bases-legais.md)
+  - [Limite de requisições da API](https://developers.rdstation.com/reference/crm-v1-limite-de-requisicoes-da-api.md)
+  - [Mensagens de erro](https://developers.rdstation.com/reference/crm-v1-mensagens-de-erro.md)
+- [Anotações](https://developers.rdstation.com/reference/crm-v1-activities.md)
+  - [Listar anotações](https://developers.rdstation.com/reference/crm-v1-list-activities.md): Listar anotações
+  - [Criar anotação](https://developers.rdstation.com/reference/crm-v1-create-activity.md): Criar anotação
+- [Campanhas](https://developers.rdstation.com/reference/crm-v1-campaigns.md)
+  - [Listar campanhas](https://developers.rdstation.com/reference/crm-v1-list-campaigns.md): Listar campanhas
+  - [Criar campanha](https://developers.rdstation.com/reference/crm-v1-create-campaign.md): Criar campanha
+  - [Obter campanha](https://developers.rdstation.com/reference/crm-v1-get-campaign.md): Obter campanha
+  - [Atualizar campanha](https://developers.rdstation.com/reference/crm-v1-update-campaign.md): Atualizar campanha
+- [Contatos](https://developers.rdstation.com/reference/crm-v1-contacts.md)
+  - [Listar contatos](https://developers.rdstation.com/reference/crm-v1-list-contacts.md): Listar contatos
+  - [Criar contato](https://developers.rdstation.com/reference/crm-v1-create-contact.md): Criar contato
+  - [Obter contato](https://developers.rdstation.com/reference/crm-v1-get-contact.md): Obter contato
+  - [Atualizar contato](https://developers.rdstation.com/reference/crm-v1-update-contact.md): Atualizar contato
+- [Campos personalizados](https://developers.rdstation.com/reference/crm-v1-custom-fields.md)
+  - [Listar campos personalizados](https://developers.rdstation.com/reference/crm-v1-list-custom-fields.md): Listar campos personalizados
+  - [Criar campo personalizado](https://developers.rdstation.com/reference/crm-v1-create-custom-field.md): Criar campo personalizado
+  - [Obter campo personalizado](https://developers.rdstation.com/reference/crm-v1-get-custom-field.md): Obter campo personalizado
+  - [Atualizar campo personalizado](https://developers.rdstation.com/reference/crm-v1-update-custom-field.md): Atualizar campo personalizado
+  - [Deletar campo personalizado](https://developers.rdstation.com/reference/crm-v1-delete-custom-field.md): Deletar campo personalizado
+- [Motivos de perda](https://developers.rdstation.com/reference/crm-v1-deal-lost-reasons.md)
+  - [Listar motivos de perda](https://developers.rdstation.com/reference/crm-v1-list-lost-reasons.md): Listar motivos de perda
+  - [Criar motivo de perda](https://developers.rdstation.com/reference/crm-v1-create-lost-reason.md): Criar motivo de perda
+  - [Obter motivo de perda](https://developers.rdstation.com/reference/crm-v1-get-lost-reason.md): Obter motivo de perda
+  - [Atualizar motivo de perda](https://developers.rdstation.com/reference/crm-v1-update-lost-reason.md): Atualizar motivo de perda
+- [Funis de vendas](https://developers.rdstation.com/reference/crm-v1-deal-pipelines.md)
+  - [Listar funis de vendas](https://developers.rdstation.com/reference/crm-v1-list-pipelines.md): Listar funis de vendas
+  - [Criar funil de vendas](https://developers.rdstation.com/reference/crm-v1-create-pipeline.md): Criar funil de vendas
+  - [Obter funil de vendas](https://developers.rdstation.com/reference/crm-v1-get-pipeline.md): Obter funil de vendas
+  - [Atualizar funil de vendas](https://developers.rdstation.com/reference/crm-v1-update-pipeline.md): Atualizar funil de vendas
+- [Produtos na negociação](https://developers.rdstation.com/reference/crm-v1-deal-products.md)
+  - [Listar produtos na negociação](https://developers.rdstation.com/reference/crm-v1-list-products-from-deal.md): Listar produtos na negociação
+  - [Criar produto na negociação](https://developers.rdstation.com/reference/crm-v1-create-product-to-deal.md): Criar produto na negociação
+  - [Criar produtos na negociação](https://developers.rdstation.com/reference/crm-v1-create-products-to-deal.md): Criar produtos na negociação
+  - [Atualizar produto na negociação](https://developers.rdstation.com/reference/crm-v1-update-product-from-deal.md): Atualizar produto na negociação
+  - [Deletar produto na negociação](https://developers.rdstation.com/reference/crm-v1-delete-product-from-deal.md): Deletar produto na negociação
+  - [Atualizar produtos na negociação](https://developers.rdstation.com/reference/crm-v1-update-products-from-deal.md): Atualizar produtos na negociação
+  - [Deletar produtos na negociação](https://developers.rdstation.com/reference/crm-v1-delete-products-from-deal.md): Deletar produtos na negociação
+- [Fontes](https://developers.rdstation.com/reference/crm-v1-deal-sources.md)
+  - [Listar fontes](https://developers.rdstation.com/reference/crm-v1-list-sources.md): Listar fontes
+  - [Criar fonte](https://developers.rdstation.com/reference/crm-v1-create-source.md): Criar fonte
+  - [Obter fonte](https://developers.rdstation.com/reference/crm-v1-get-source.md): Obter fonte
+  - [Atualizar fonte](https://developers.rdstation.com/reference/crm-v1-update-source.md): Atualizar fonte
+- [Etapas do funil de vendas](https://developers.rdstation.com/reference/crm-v1-deal-stages.md)
+  - [Listar etapas do funil de vendas](https://developers.rdstation.com/reference/crm-v1-list-stages.md): Listar etapas do funil de vendas
+  - [Criar etapa do funil de vendas](https://developers.rdstation.com/reference/crm-v1-create-stage.md): Criar etapa do funil de vendas
+  - [Obter etapa do funil de vendas](https://developers.rdstation.com/reference/crm-v1-get-stage.md): Obter etapa do funil de vendas
+  - [Atualizar etapa do funil de vendas](https://developers.rdstation.com/reference/crm-v1-update-stage.md): Atualizar etapa do funil de vendas
+- [Negociações](https://developers.rdstation.com/reference/crm-v1-deals.md)
+  - [Listar negociações](https://developers.rdstation.com/reference/crm-v1-list-deals.md): Listar negociações
+  - [Criar negociação](https://developers.rdstation.com/reference/crm-v1-create-deal.md): Criar negociação
+  - [Obter negociação](https://developers.rdstation.com/reference/crm-v1-get-deal.md): Obter negociação
+  - [Atualizar negociação](https://developers.rdstation.com/reference/crm-v1-update-deal.md): Atualizar negociação
+  - [Listar contatos da negociação](https://developers.rdstation.com/reference/crm-v1-list-contacts-from-deal.md): Listar contatos da negociação
+- [Empresas](https://developers.rdstation.com/reference/crm-v1-organizations.md)
+  - [Listar empresas](https://developers.rdstation.com/reference/crm-v1-list-organizations.md): Listar empresas
+  - [Criar empresa](https://developers.rdstation.com/reference/crm-v1-create-organization.md): Criar empresa
+  - [Obter empresa](https://developers.rdstation.com/reference/crm-v1-get-organization.md): Obter empresa
+  - [Atualizar empresa](https://developers.rdstation.com/reference/crm-v1-update-organization.md): Atualizar empresa
+  - [Listar contatos da empresa](https://developers.rdstation.com/reference/crm-v1-list-contacts-from-organization.md): Listar contatos da empresa
+- [Produtos](https://developers.rdstation.com/reference/crm-v1-products.md)
+  - [Listar produtos](https://developers.rdstation.com/reference/crm-v1-list-products.md): Listar produtos
+  - [Criar produto](https://developers.rdstation.com/reference/crm-v1-create-product.md): Criar produto
+  - [Obter produto](https://developers.rdstation.com/reference/crm-v1-get-product.md): Obter produto
+  - [Atualizar produto](https://developers.rdstation.com/reference/crm-v1-update-product.md): Atualizar produto
+- [Tarefas](https://developers.rdstation.com/reference/crm-v1-tasks.md)
+  - [Listar tarefas](https://developers.rdstation.com/reference/crm-v1-list-tasks.md): Listar tarefas
+  - [Criar tarefa](https://developers.rdstation.com/reference/crm-v1-create-task.md): Criar tarefa
+  - [Obter tarefa](https://developers.rdstation.com/reference/crm-v1-get-task.md): Obter tarefa
+  - [Atualizar tarefa](https://developers.rdstation.com/reference/crm-v1-update-task.md): Atualizar tarefa
+- [Equipes](https://developers.rdstation.com/reference/crm-v1-teams.md)
+  - [Listar equipes](https://developers.rdstation.com/reference/crm-v1-list-teams.md): Listar equipes
+  - [Obter equipe](https://developers.rdstation.com/reference/crm-v1-get-team.md): Obter equipe
+- [Token de autenticação](https://developers.rdstation.com/reference/crm-v1-token.md)
+  - [Verificar token](https://developers.rdstation.com/reference/crm-v1-token-check.md): Verificar token.
+- [Usuários](https://developers.rdstation.com/reference/crm-v1-users.md)
+  - [Listar usuários](https://developers.rdstation.com/reference/crm-v1-list-users.md): Listar usuários
+  - [Obter usuário](https://developers.rdstation.com/reference/crm-v1-get-user.md): Obter usuário
+  - [Obter usuário autenticado](https://developers.rdstation.com/reference/crm-v1-get-current-user.md): Obter o usuário associado ao token de autenticação.
+- [Webhooks](https://developers.rdstation.com/reference/crm-v1-webhooks.md)
+  - [Listar webhooks](https://developers.rdstation.com/reference/crm-v1-list-webhooks.md): Listar webhooks
+  - [Criar webhook](https://developers.rdstation.com/reference/crm-v1-create-webhook.md): Criar webhook
+  - [Obter webhook](https://developers.rdstation.com/reference/crm-v1-get-webhook.md): Obter webhook
+  - [Atualizar webhook](https://developers.rdstation.com/reference/crm-v1-update-webhook.md): Atualizar webhook
+  - [Deletar webhook](https://developers.rdstation.com/reference/crm-v1-delete-webhook.md): Deletar webhook
+
+## API: RD Station CRM API v2
+- [Introdução](https://developers.rdstation.com/reference/crm-v2-introduction.md)
+- [Autenticação](https://developers.rdstation.com/reference/crm-v2-authentication.md)
+  - [Passo 1: Criar um aplicativo e credenciais](https://developers.rdstation.com/reference/crm-v2-authentication-step-1.md)
+  - [Passo 2: Gerar código de autorização](https://developers.rdstation.com/reference/crm-v2-authentication-step-2.md)
+  - [Passo 3: Obter token de acesso](https://developers.rdstation.com/reference/crm-v2-authentication-step-3.md)
+  - [Passo 4: Renovar token de acesso](https://developers.rdstation.com/reference/crm-v2-authentication-step-4.md)
+- [Filtrando com RDQL](https://developers.rdstation.com/reference/crm-v2-rdql-filtering.md)
+- [Bases legais](https://developers.rdstation.com/reference/crm-v2-legal-bases.md)
+- [Casos de uso](https://developers.rdstation.com/reference/crm-v2-use-cases.md)
+- [Campanhas](https://developers.rdstation.com/reference/crm-v2-campaigns.md)
+  - [Listar campanhas](https://developers.rdstation.com/reference/crm-v2-list-campaigns.md): Listar campanhas da conta, permitindo que sistemas externos acessem e utilizem essas informações para atribuição.  ## Filtro  Propriedades disponíveis para filtro usando…
+  - [Criar campanha](https://developers.rdstation.com/reference/crm-v2-create-campaign.md): Permite a criação de uma nova campanha. É útil para registrar novas iniciativas de marketing antes que elas comecem a gerar negociações.
+  - [Obter campanha](https://developers.rdstation.com/reference/crm-v2-get-campaign.md): Obter campanha específica pelo seu ID, como nome e descrição.
+  - [Atualizar campanha](https://developers.rdstation.com/reference/crm-v2-update-campaign.md): Atualiza os dados de uma campanha existente. Pode ser usado para corrigir ou alterar o nome ou a descrição de uma iniciativa de marketing.
+- [Contatos](https://developers.rdstation.com/reference/crm-v2-contacts.md)
+  - [Listar contatos](https://developers.rdstation.com/reference/crm-v2-list-contacts.md): Recupera uma lista paginada de todos os contatos na conta.  ## Filtro  Propriedades disponíveis para filtro usando [RDQL](crm-v2-rdql-filtering).  | Propriedade | Tipo | Descrição | | :--- | :--- |…
+  - [Criar contato](https://developers.rdstation.com/reference/crm-v2-create-contact.md): Cria um novo contato.
+  - [Obter contato](https://developers.rdstation.com/reference/crm-v2-get-contact.md): Obter contato específico pelo seu ID.
+  - [Atualizar contato](https://developers.rdstation.com/reference/crm-v2-update-contact.md): Atualiza os campos de um contato existente.
+- [Campos personalizados](https://developers.rdstation.com/reference/crm-v2-custom-fields.md)
+  - [Listar campos personalizados](https://developers.rdstation.com/reference/crm-v2-list-custom-fields.md): Listar campos personalizados da conta, permitindo filtrar por entidade (negociação, contato, etc.) para entender a estrutura de dados de cada recurso.  ## Filtro  Propriedades disponíveis para filtro…
+  - [Criar campo personalizado](https://developers.rdstation.com/reference/crm-v2-create-custom-field.md): Permite a criação de um novo campo personalizado para uma entidade específica, definindo seu rótulo, tipo (texto, data, opção, etc.) e outras propriedades, como obrigatoriedade e visibilidade.
+  - [Obter campo personalizado](https://developers.rdstation.com/reference/crm-v2-get-custom-field.md): Obter campo personalizado pelo seu ID.
+  - [Atualizar campo personalizado](https://developers.rdstation.com/reference/crm-v2-update-custom-field.md): Atualiza as propriedades do campo personalizado existente. É útil para alterar títulos, adicionar novas opções a um campo de múltipla escolha ou modificar regras de visibilidade.
+  - [Deletar campo personalizado](https://developers.rdstation.com/reference/crm-v2-delete-custom-field.md): Deletar permanentemente o campo personalizado da conta. Esta é uma ação destrutiva e deve ser usada com cautela, pois pode resultar na perda de dados armazenados nesse campo em todos os registros…
+- [Produtos na negociação](https://developers.rdstation.com/reference/crm-v2-deal-products.md)
+  - [Listar produtos na negociação](https://developers.rdstation.com/reference/crm-v2-list-products-from-deal.md): Listar produtos associados a uma negociação específica. É ideal para cenários onde é necessário obter os detalhes dos itens de uma venda, gerar um pedido ou sincronizar informações de carrinho de…
+  - [Criar produto na negociação](https://developers.rdstation.com/reference/crm-v2-create-product-to-deal.md): Adiciona um produto do catálogo a uma negociação existente, especificando quantidade, preço e desconto. Permite construir ou modificar a composição de uma venda programaticamente.  O array opcional…
+  - [Atualizar produto na negociação](https://developers.rdstation.com/reference/crm-v2-update-product-from-deal.md): Atualizar os produtos que já estão associados a uma negociação, como sua quantidade, preço ou desconto.  O array opcional `deal_product_custom_fields` altera só valores de campos que estavam…
+  - [Deletar produto na negociação](https://developers.rdstation.com/reference/crm-v2-delete-product-from-deal.md): Deletar permanentemente a associação de um produto com uma negociação.
+- crm-v2-dialer-calls
+  - [Listar ligações do webphone](https://developers.rdstation.com/reference/crm-v2-list-dialer-calls.md): Recupera uma lista paginada das ligações do discador webphone da conta, inclusive em `initial`. Ligações de outro discador não entram. Conta sem webphone devolve `data` vazio.  ## Filtro…
+  - [Obter ligação do webphone](https://developers.rdstation.com/reference/crm-v2-get-dialer-call.md): Obtém uma ligação do discador webphone pelo ID. Id de outro discador, de outra conta ou inexistente responde 404.
+- [Negociações](https://developers.rdstation.com/reference/crm-v2-deals.md)
+  - [Listar negociações](https://developers.rdstation.com/reference/crm-v2-list-deals.md): Este end-point recupera uma lista paginada de todas as negociações na conta, permitindo a filtragem por diversos critérios, como funil, etapa ou proprietário. É útil para sincronizar dados de…
+  - [Criar negociação](https://developers.rdstation.com/reference/crm-v2-create-deal.md): Este end-point permite a criação de uma nova negociação no RD Station CRM. É o ponto de partida para automatizar a entrada de novas oportunidades de venda, seja a partir de um formulário no site, de…
+  - [Obter negociação](https://developers.rdstation.com/reference/crm-v2-get-deal.md): Obter negociação específica pelo seu ID. Essencial para obter o estado atual de uma oportunidade antes de atualizá-la ou para obter suas informações em uma interface externa.
+  - [Atualizar negociação](https://developers.rdstation.com/reference/crm-v2-update-deal.md): Atualiza os campos da negociação. Este end-point pode ser usado para mover a negociação entre etapas ou funis, re-atribuir o proprietário ou modificar qualquer outro campo editável de negociações.
+- [Anexos](https://developers.rdstation.com/reference/crm-v2-files.md)
+  - [Listar arquivos da negociação](https://developers.rdstation.com/reference/crm-v2-list-files-from-deal.md): Lista os arquivos de uma negociação específica. É útil para exibir a lista de arquivos relacionados à jornada de vendas.  ## Ordenação  Propriedades disponíveis para…
+  - [Fazer upload de arquivo em uma negociação](https://developers.rdstation.com/reference/crm-v2-upload-file-to-deal.md): Envia um arquivo para uma negociação específica. Este endpoint aceita **requisições multipart/form-data**, permitindo o upload direto de arquivos como imagens, PDFs e documentos relacionados à venda.
+  - [Deletar arquivo da negociação](https://developers.rdstation.com/reference/crm-v2-delete-file-from-deal.md): Remove permanentemente um arquivo específico de uma negociação. Use este endpoint para excluir documentos, imagens ou anexos que não são mais relevantes no processo de venda.  O arquivo é…
+- [Motivos de perda](https://developers.rdstation.com/reference/crm-v2-lost-reasons.md)
+  - [Listar motivos de perda](https://developers.rdstation.com/reference/crm-v2-list-lost-reasons.md): Recupera a lista de todos os motivos de perda configurados na conta, tornando-os disponíveis para seleção em sistemas integrados.  ## Filtro  Propriedades disponíveis para filtro usando…
+  - [Criar motivo de perda](https://developers.rdstation.com/reference/crm-v2-create-lost-reason.md): Permite a criação de um novo motivo de perda, expandindo as opções disponíveis para classificar negociações perdidas.
+  - [Obter motivo de perda](https://developers.rdstation.com/reference/crm-v2-get-lost-reason.md): Obter motivo de perda específico pelo seu ID.
+  - [Atualizar motivo de perda](https://developers.rdstation.com/reference/crm-v2-update-lost-reason.md): Atualiza o nome de um motivo de perda existente, permitindo a correção ou o refinamento das opções de classificação.
+- [Anotações](https://developers.rdstation.com/reference/crm-v2-notes.md)
+  - [Listar anotações da negociação](https://developers.rdstation.com/reference/crm-v2-list-notes-from-deal.md): Lista as anotações de uma negociação específica. É útil para exibir o histórico de interações durante a jornada de vendas ou para análises de comunicação.  ## Filtro  Propriedades disponíveis para…
+  - [Criar anotação na negociação](https://developers.rdstation.com/reference/crm-v2-create-note-to-deal.md): Adiciona uma nova anotação em uma negociação específica. É o caminho para automatizar a entrada de registros de chamadas, resumos de reuniões ou qualquer outra informação relevante para a venda.
+- [Empresas](https://developers.rdstation.com/reference/crm-v2-organizations.md)
+  - [Listar empresas](https://developers.rdstation.com/reference/crm-v2-list-organizations.md): Recupera uma lista paginada de todas as empresas na conta.  ## Filtro  Propriedades disponíveis para filtro usando [RDQL](crm-v2-rdql-filtering).  | Propriedade | Tipo | Descrição | | :--- | :--- |…
+  - [Criar empresa](https://developers.rdstation.com/reference/crm-v2-create-organization.md): Cria uma nova empresa. Nomes de empresa são únicos em toda a conta.
+  - [Obter empresa](https://developers.rdstation.com/reference/crm-v2-get-organization.md): Obter empresa específica pelo seu ID.
+  - [Atualizar empresa](https://developers.rdstation.com/reference/crm-v2-update-organization.md): Atualiza os campos de uma empresa existente.
+- [Funis de vendas](https://developers.rdstation.com/reference/crm-v2-pipelines.md)
+  - [Listar funis de vendas](https://developers.rdstation.com/reference/crm-v2-list-pipelines.md): Listar funis de vendas.  ## Ordenação  Propriedades disponíveis para [ordenação](crm-v2-introduction#ordenação).  * `order`
+  - [Criar funil de vendas](https://developers.rdstation.com/reference/crm-v2-create-pipeline.md): Ao criar um novo funil de vendas ele é automaticamente preenchido com as etapas padrões de um funil de vendas, que posteriormente poderão ser alteradas.
+  - [Obter funil de vendas](https://developers.rdstation.com/reference/crm-v2-get-pipeline.md): Obter funil de vendas específico pelo seu ID.
+  - [Atualizar funil de vendas](https://developers.rdstation.com/reference/crm-v2-update-pipeline.md): Atualiza o nome ou a ordem de um funil de vendas existente.
+- [Produtos](https://developers.rdstation.com/reference/crm-v2-products.md)
+  - [Listar produtos](https://developers.rdstation.com/reference/crm-v2-list-products.md): O recurso "Produto" (Product) representa o catálogo de itens ou serviços que a empresa comercializa. Cada produto pode ter um nome, descrição, preço e visibilidade. A gestão do catálogo de produtos…
+  - [Criar produto](https://developers.rdstation.com/reference/crm-v2-create-product.md): Cria um novo produto com seus respectivos detalhes como nome, preço e descrição.
+  - [Obter produto](https://developers.rdstation.com/reference/crm-v2-get-product.md): Recupera as informações completas de um produto específico pelo seu ID.
+  - [Atualizar produto](https://developers.rdstation.com/reference/crm-v2-update-product.md): Atualiza os dados de um produto existente no catálogo, como seu preço, nome ou visibilidade.
+- [Segmentos](https://developers.rdstation.com/reference/crm-v2-segments.md)
+  - [Listar segmentos](https://developers.rdstation.com/reference/crm-v2-list-segments.md): Recupera a lista de todos os segmentos de empresas configurados na conta.  ## Filtro  Propriedades disponíveis para filtro usando [RDQL](crm-v2-rdql-filtering).  | Propriedade | Tipo | Descrição | |…
+  - [Criar segmento](https://developers.rdstation.com/reference/crm-v2-create-segment.md): Permite a criação de um novo segmento para classificar empresas.
+  - [Obter segmento](https://developers.rdstation.com/reference/crm-v2-get-segment.md): Obter segmento específico pelo seu ID.
+  - [Atualizar segmento](https://developers.rdstation.com/reference/crm-v2-update-segment.md): Atualiza o nome de um segmento existente.
+- [Fontes](https://developers.rdstation.com/reference/crm-v2-sources.md)
+  - [Listar fontes](https://developers.rdstation.com/reference/crm-v2-list-sources.md): Recupera a lista de todas as fontes de negociação configuradas na conta.  ## Filtro  Propriedades disponíveis para filtro usando [RDQL](crm-v2-rdql-filtering).  | Propriedade | Tipo | Descrição | |…
+  - [Criar fonte](https://developers.rdstation.com/reference/crm-v2-create-source.md): Permite a criação de uma nova fonte, possibilitando o rastreamento de novos canais de aquisição.
+  - [Obter fonte](https://developers.rdstation.com/reference/crm-v2-get-source.md): Obter fonte específica pelo seu ID.
+  - [Atualizar fonte](https://developers.rdstation.com/reference/crm-v2-update-source.md): Obter fonte específica pelo seu ID.
+- [Etapas do funil de vendas](https://developers.rdstation.com/reference/crm-v2-stages.md)
+  - [Listar etapas do funil de vendas](https://developers.rdstation.com/reference/crm-v2-list-stages-from-pipeline.md): Listar etapas de um funil de vendas específico.  ## Ordenação  Propriedades disponíveis para [ordenação](crm-v2-introduction#ordenação).  * `order`
+  - [Criar etapa do funil de vendas](https://developers.rdstation.com/reference/crm-v2-create-stage-to-pipeline.md): Cria uma nova etapa dentro de um funil de vendas existente.
+  - [Obter etapa do funil de vendas](https://developers.rdstation.com/reference/crm-v2-get-stage-from-pipeline.md): Obter etapa do funil de vendas específica.
+  - [Atualizar etapa do funil de vendas](https://developers.rdstation.com/reference/crm-v2-update-stage-from-pipeline.md): Atualiza o nome ou a ordem de uma etapa do funil de vendas existente.
+- [Tarefas](https://developers.rdstation.com/reference/crm-v2-tasks.md)
+  - [Listar tarefas](https://developers.rdstation.com/reference/crm-v2-list-tasks.md): Recupera uma lista paginada de tarefas, com filtros para status, tipo e responsável.  ## Filtro  Propriedades disponíveis para filtro usando [RDQL](crm-v2-rdql-filtering).  | Propriedade | Tipo |…
+  - [Criar tarefa](https://developers.rdstation.com/reference/crm-v2-create-task.md): Cria uma nova tarefa e a associa a uma negociação. Tarefas só podem ser criadas com o status aberto (default).
+  - [Obter tarefa](https://developers.rdstation.com/reference/crm-v2-get-task.md): Obter tarefa específica pelo seu ID.
+  - [Atualizar tarefa](https://developers.rdstation.com/reference/crm-v2-update-task.md): Atualiza os campos de uma tarefa, como seu assunto, data ou status de conclusão.
+- [Leads](https://developers.rdstation.com/reference/crm-v2-leads.md): Leads
+  - [Listar leads](https://developers.rdstation.com/reference/crm-v2-list-leads.md): Recupera uma lista paginada de leads da conta. A paginação padrão é de 25 registros por página, com no máximo 200.  ## Filtro  Propriedades disponíveis para filtro usando…
+  - [Criar lead](https://developers.rdstation.com/reference/crm-v2-create-lead.md): Cria um lead. Se `stage_id` for omitido, o lead é associado à primeira etapa do funil da conta. `rating` assume `1` e `status` assume `ongoing` quando omitidos. Na criação, `status` só aceita…
+  - [Obter lead](https://developers.rdstation.com/reference/crm-v2-get-lead.md): Obter um lead pelo seu ID.
+  - [Atualizar lead](https://developers.rdstation.com/reference/crm-v2-update-lead.md): Atualiza os campos de um lead. Lead com status `converted` não pode ser editado.  Transições de `status` permitidas: de `ongoing` para `converted` ou `discarded`; de `discarded` para `ongoing`.  ##…
+- [Reuniões](https://developers.rdstation.com/reference/crm-v2-meetings.md): Reuniões
+  - [Listar reuniões](https://developers.rdstation.com/reference/crm-v2-list-meetings.md): Este end-point recupera uma lista paginada de reuniões na conta, permitindo a filtragem por status, organizador, responsável, data de início e última atualização. É útil para sincronizar a agenda de…
+  - [Criar reunião](https://developers.rdstation.com/reference/crm-v2-create-meeting.md): Este end-point permite agendar uma nova reunião no RD Station CRM. É útil para automatizar a criação de reuniões a partir de ferramentas externas de SDR, scheduling ou outros sistemas.  ## Erros…
+  - [Obter reunião](https://developers.rdstation.com/reference/crm-v2-get-meeting.md): Obter reunião específica pelo seu ID. Essencial para consultar o estado atual de uma reunião antes de atualizá-la ou para exibir suas informações em uma interface externa.
+  - [Atualizar reunião](https://developers.rdstation.com/reference/crm-v2-update-meeting.md): Atualiza os campos da reunião. Este end-point pode ser usado para remarcar horário, alterar status, reatribuir o responsável ou modificar qualquer outro campo editável de reuniões.  ## Erros comuns…
+- [Disponibilidade para reuniões](https://developers.rdstation.com/reference/crm-v2-meeting-availability.md): Disponibilidade para reuniões
+  - [Obter disponibilidade para reuniões do usuário](https://developers.rdstation.com/reference/crm-v2-get-meeting-availability.md): Obtém a janela de disponibilidade para reuniões de um usuário específico. Útil para consultar os dias da semana e o horário diário em que o usuário pode receber reuniões antes de criar ou remarcar…
+  - [Listar disponibilidades para reuniões](https://developers.rdstation.com/reference/crm-v2-list-meeting-availabilities.md): Este end-point recupera uma lista paginada das janelas de disponibilidade para reuniões dos usuários da conta. É útil para escolher um responsável disponível ou sincronizar essas configurações com…
+- [Equipes](https://developers.rdstation.com/reference/crm-v2-teams.md)
+  - [Listar equipes](https://developers.rdstation.com/reference/crm-v2-list-teams.md): Listar equipes, incluindo seus nomes e IDs.
+  - [Obter equipe](https://developers.rdstation.com/reference/crm-v2-get-team.md): Obter equipe específica pelo seu ID, incluindo a lista de IDs dos usuários que são membros da equipe.
+- [Usuários](https://developers.rdstation.com/reference/crm-v2-users.md)
+  - [Listar usuários](https://developers.rdstation.com/reference/crm-v2-list-users.md): Listar usuários da conta.  ## Filtro  Propriedades disponíveis para filtro usando [RDQL](crm-v2-rdql-filtering).  | Propriedade | Tipo | Descrição | | :--- | :--- | :--- | | `is:active` | `Boolean` |…
+  - [Obter usuário](https://developers.rdstation.com/reference/crm-v2-get-user.md): Obter usuário específico pelo seu ID.
+- [Propostas](https://developers.rdstation.com/reference/crm-v2-proposals.md)
+  - [Listar propostas da negociação](https://developers.rdstation.com/reference/crm-v2-list-proposals-from-deal.md): Lista as propostas comerciais de uma negociação.  ## Filtro  Propriedades disponíveis para filtro usando [RDQL](crm-v2-rdql-filtering).  | Propriedade | Tipo | Descrição | | :--- | :--- | :--- | |…
+  - [Criar proposta na negociação](https://developers.rdstation.com/reference/crm-v2-create-proposal-on-deal.md): Cria uma nova proposta comercial para a negociação, a partir de um modelo (`proposal_template_id`), seções de conteúdo e, opcionalmente, `status`.  **Autor da proposta:** na API v2, o CRM associa a…
+  - [Obter proposta da negociação](https://developers.rdstation.com/reference/crm-v2-get-proposal-from-deal.md): Retorna uma proposta comercial da negociação, incluindo seções persistidas, totais, status e metadados do contrato.
+- Eventos de webhook
+  - [Campanha criada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-campaign-created.md): Esse evento de webhook é disparado quando uma campanha é criada.
+  - [Campanha deletada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-campaign-deleted.md): Esse evento de webhook é disparado quando uma campanha é deletada.
+  - [Campanha atualizada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-campaign-updated.md): Esse evento de webhook é disparado quando uma campanha é atualizada.
+  - [Contato criado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-contact-created.md): Esse evento de webhook é disparado quando um contato é criado.
+  - [Contato deletado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-contact-deleted.md): Esse evento de webhook é disparado quando um contato é deletado.
+  - [Contato atualizado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-contact-updated.md): Esse evento de webhook é disparado quando um contato é atualizado.
+  - [Negociação criada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-deal-created.md): Esse evento de webhook é disparado quando uma negociação é criada.
+  - [Negociação deletada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-deal-deleted.md): Esse evento de webhook é disparado quando uma negociação é deletada.
+  - [Negociação atualizada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-deal-updated.md): Esse evento de webhook é disparado quando uma negociação é atualizada.
+  - [Motivo de perda criado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lost-reason-created.md): Esse evento de webhook é disparado quando um motivo de perda é criado.
+  - [Motivo de perda deletado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lost-reason-deleted.md): Esse evento de webhook é disparado quando um motivo de perda é deletado.
+  - [Motivo de perda atualizado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lost-reason-updated.md): Esse evento de webhook é disparado quando um motivo de perda é atualizado.
+  - [Empresa criada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-organization-created.md): Esse evento de webhook é disparado quando uma empresa é criada.
+  - [Empresa deletada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-organization-deleted.md): Esse evento de webhook é disparado quando uma empresa é deletada.
+  - [Empresa atualizada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-organization-updated.md): Esse evento de webhook é disparado quando uma empresa é atualizada.
+  - [Produto criado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-product-created.md): Esse evento de webhook é disparado quando um produto é criado.
+  - [Produto deletado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-product-deleted.md): Esse evento de webhook é disparado quando um produto é deletado.
+  - [Produto atualizado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-product-updated.md): Esse evento de webhook é disparado quando um produto é atualizado.
+  - [Fonte criada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-source-created.md): Esse evento de webhook é disparado quando uma fonte é criada.
+  - [Fonte deletada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-source-deleted.md): Esse evento de webhook é disparado quando uma fonte é deletada.
+  - [Fonte atualizada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-source-updated.md): Esse evento de webhook é disparado quando uma fonte é atualizada.
+  - [Tarefa criada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-task-created.md): Esse evento de webhook é disparado quando uma tarefa é criada.
+  - [Tarefa deletada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-task-deleted.md): Esse evento de webhook é disparado quando uma tarefa é deletada.
+  - [Tarefa atualizada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-task-updated.md): Esse evento de webhook é disparado quando uma tarefa é atualizada.
+  - [Proposta criada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-proposal-created.md): Esse evento de webhook é disparado quando uma proposta comercial é criada na negociação.
+  - [Reunião criada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-meeting-created.md): Esse evento de webhook é disparado quando uma reunião é criada.
+  - [Participantes da reunião alterados](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-meeting-participants-changed.md): Esse evento de webhook é disparado quando os participantes (responsável ou contatos) de uma reunião são alterados.
+  - [Status da reunião alterado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-meeting-status-changed.md): Esse evento de webhook é disparado quando o status de uma reunião é alterado.
+  - [Reunião atualizada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-meeting-updated.md): Esse evento de webhook é disparado quando uma reunião é atualizada.
+  - [Lead criado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lead-created.md): Esse evento de webhook é disparado quando um lead é criado.
+  - [Lead deletado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lead-deleted.md): Esse evento de webhook é disparado quando um lead é deletado.
+  - [Responsável do lead alterado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lead-owner-changed.md): Esse evento de webhook é disparado quando o responsável de um lead é alterado. A mesma alteração também dispara `crm_lead_updated`.
+  - [Qualificação do lead alterada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lead-rating-changed.md): Esse evento de webhook é disparado quando a qualificação de um lead é alterada. A mesma alteração também dispara `crm_lead_updated`.
+  - [Etapa do lead alterada](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lead-stage-changed.md): Esse evento de webhook é disparado quando a etapa de um lead é alterada. A mesma alteração também dispara `crm_lead_updated`.
+  - [Status do lead alterado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lead-status-changed.md): Esse evento de webhook é disparado quando o status de um lead é alterado. A mesma alteração também dispara `crm_lead_updated`.
+  - [Lead atualizado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-lead-updated.md): Esse evento de webhook é disparado quando um lead é atualizado. Mudança de etapa, status, qualificação ou responsável também dispara o evento específico correspondente.
+  - [Status da ligação do Webphone alterado](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-dialer-call-status-changed.md): Esse evento de webhook é disparado a cada mudança do status de uma ligação Webphone para um status final (`answered`, `no_answer`, `busy`, `congested` ou `failed`). Permanecer em `initial`, reenvio…
+  - [Transcrição da ligação do Webphone concluída](https://developers.rdstation.com/reference/crm-v2-webhook-event-crm-dialer-call-transcription-completed.md): Esse evento de webhook é disparado uma vez quando a transcrição de uma ligação Webphone passa para `completed`. O corpo é o mesmo objeto da ligação do evento `crm_dialer_call_status_changed`, com…
+- [Webhooks](https://developers.rdstation.com/reference/crm-v2-webhooks.md)
+  - [Listar webhooks](https://developers.rdstation.com/reference/crm-v2-list-webhooks.md): Lista todos os webhooks.
+  - [Criar webhook](https://developers.rdstation.com/reference/crm-v2-create-webhook.md): Criar um webhook.
+  - [Obter webhook](https://developers.rdstation.com/reference/crm-v2-get-webhook.md): Obter um webhook específico pelo seu ID.
+  - [Atualizar webhook](https://developers.rdstation.com/reference/crm-v2-update-webhook.md): Atualizar um webhook específico pelo seu ID.
+  - [Deletar webhook](https://developers.rdstation.com/reference/crm-v2-delete-webhook.md): Deletar um webhook específico pelo seu ID.
+
+## API: RD Station Conversas API v2
+- [Introdução](https://developers.rdstation.com/reference/conversas-v2-introduction.md)
+- [Autenticação](https://developers.rdstation.com/reference/conversas-v2-authentication.md)
+- [Criptografia](https://developers.rdstation.com/reference/conversas-v2-encryption.md)
+- Contatos
+  - [Criar contato](https://developers.rdstation.com/reference/conversas-v2-create-contact.md): ⚠️ Recurso depreciado. Prefira integrações com a [POST /v2/contacts/whatsapp-business-by-brokers](conversas-v2-create-whatsapp-business-contact-by-broker).  Cria um contato genérico.
+  - [Deletar múltiplos contatos](https://developers.rdstation.com/reference/conversas-v2-delete-contacts.md): ℹ️ API disponível apenas para o plano Advanced.  Deletar múltiplos contatos usando filtros. É **obrigatório** enviar um de: `tag_name`, `integration` ou `$all`. O cliente pode excluir por etiqueta…
+  - [Atualizar contato por telefone](https://developers.rdstation.com/reference/conversas-v2-update-contact-by-phone.md): ℹ️ API disponível apenas para o plano Advanced.  Atualizar contato por seu telefone.
+  - [Obter contato por telefone](https://developers.rdstation.com/reference/conversas-v2-get-contact-by-phone.md): Obter contato por telefone. Os campos retornados em `data` estão definidos no schema da resposta.
+  - [Criar múltiplos contatos](https://developers.rdstation.com/reference/conversas-v2-create-contacts.md): ℹ️ API disponível apenas para o plano Advanced.  Criar contatos em massa.  Esta ação dispara uma rotina assíncrona. Os dados entram em uma fila e são processados de maneira assíncrona. Para consultar…
+  - [Obter contato por CPF](https://developers.rdstation.com/reference/conversas-v2-get-contact-by-cpf.md): Obter contato por CPF.
+  - [Criar contato de WhatsApp Business](https://developers.rdstation.com/reference/conversas-v2-create-whatsapp-business-contact.md): ⚠️ Recurso depreciado. Prefira integrações com a [POST /v2/contacts/whatsapp-business-by-brokers](conversas-v2-create-whatsapp-business-contact-by-broker).  Criar contato de WhatsApp Business.
+  - [Atualizar contato de WhatsApp Business](https://developers.rdstation.com/reference/conversas-v2-update-whatsapp-business-contact.md): ⚠️ Recurso depreciado. Prefira integrações com a [PUT /v2/contacts/whatsapp-business-by-brokers](conversas-v2-update-whatsapp-business-contact-by-broker).  Atualizar contato de WhatsApp Business.
+  - [Criar contato de WhatsApp Business por Broker](https://developers.rdstation.com/reference/conversas-v2-create-whatsapp-business-contact-by-broker.md): Criar contato do WhatsApp Business em um broker específico
+  - [Atualizar contato de WhatsApp Business por broker](https://developers.rdstation.com/reference/conversas-v2-update-whatsapp-business-contact-by-broker.md): Atualizar contato de WhatsApp Business por broker.  **Regras obrigatórias do payload:** - `full_name`, `cel_phone` e `integration` são obrigatórios. - `cel_phone` no formato E.164: [CC][NDC][SN].…
+  - [Listar contatos](https://developers.rdstation.com/reference/conversas-v2-list-contacts.md): Listar contatos.
+  - [Deletar contatos da carteira](https://developers.rdstation.com/reference/conversas-v2-delete-all-contacts-from-wallet.md): Deletar todos os contatos associados à carteira.
+- Campos personalizados
+  - [Listar campos personalizados](https://developers.rdstation.com/reference/conversas-v2-list-custom-fields.md): ℹ️ Este recurso está em fase de testes e disponível apenas para contas selecionadas.  Listar campos personalizados.
+  - [Criar campo personalizado](https://developers.rdstation.com/reference/conversas-v2-create-custom-field.md): ℹ️ Este recurso está em fase de testes e disponível apenas para contas selecionadas.  Criar um campo personalizado.
+  - [Obter campo personalizado](https://developers.rdstation.com/reference/conversas-v2-get-custom-field.md): ℹ️ Este recurso está em fase de testes e disponível apenas para contas selecionadas.  Obter um campo personalizado.
+  - [Atualizar campo personalizado](https://developers.rdstation.com/reference/conversas-v2-update-custom-field.md): ℹ️ Este recurso está em fase de testes e disponível apenas para contas selecionadas.  Atualizar campo personalizado.
+  - [Deletar campo personalizado](https://developers.rdstation.com/reference/conversas-v2-delete-custom-field.md): ℹ️ Este recurso está em fase de testes e disponível apenas para contas selecionadas.  Deletar campo personalizado.
+- Funcionários
+  - [Listar funcionários](https://developers.rdstation.com/reference/conversas-v2-list-employees.md): Listar funcionários.
+  - [Ativar funcionário](https://developers.rdstation.com/reference/conversas-v2-activate-employee.md): Ativa o cadastro de um funcionário, permitindo seu acesso ao sistema.
+  - [Desativar funcionário](https://developers.rdstation.com/reference/conversas-v2-deactivate-employee.md): Desativar o cadastro de um funcionário, impedindo seu acesso ao sistema.
+  - [Criar múltiplos funcionários](https://developers.rdstation.com/reference/conversas-v2-create-employees.md): ℹ️ API disponível apenas para o plano Advanced.  Criar funcionários em massa.  Esta ação dispara uma rotina assíncrona. Os dados entram em uma fila e são processados de maneira assíncrona. Para…
+  - [Desativar múltiplos funcionários](https://developers.rdstation.com/reference/conversas-v2-deactivate-employees.md): ℹ️ API disponível apenas para o plano Advanced.  Desativar o cadastro de múltiplos funcionários, impedindo-os de acessar o sistema.
+  - [Obter colaborador por ID](https://developers.rdstation.com/reference/conversas-v2-get-v1-employee-by-id.md): Retorna e-mail, perfil e departamentos do colaborador identificado por `employee_id`.
+- Flows
+  - [Listar fluxos](https://developers.rdstation.com/reference/conversas-v2-list-flows.md): Listar fluxos.
+  - [Reiniciar fluxos](https://developers.rdstation.com/reference/conversas-v2-reset-customers-flow-processes.md): Reiniciar processos de fluxo de contatos.
+- Jobs
+  - [Obter job](https://developers.rdstation.com/reference/conversas-v2-get-job.md): Obter status de uma rotina de processamento assíncrono.
+- Mensagens
+  - [Encaminhar para contato](https://developers.rdstation.com/reference/conversas-v2-forward-to-customer.md): Encaminhar atendimento para contato.
+  - [Enviar mensagem](https://developers.rdstation.com/reference/conversas-v2-send-message.md): Enviar mensagem para contato.
+  - [Enviar mensagem a partir de template preenchido](https://developers.rdstation.com/reference/conversas-v2-send-message-template-filled.md): ⚠️ Recurso depreciado. Prefira integrações com a [versão mais nova (v3)](conversas-v2-send-message-template).  Enviar mensagem de template com as variáveis já substituídas.
+  - [Enviar mensagem a partir de template preenchido via broker](https://developers.rdstation.com/reference/conversas-v2-send-message-template-filled-by-broker.md): ⚠️ Recurso depreciado. Prefira integrações com a [versão mais nova (v3)](conversas-v2-send-message-template).  Enviar mensagem de template com as variáveis já substituídas via broker (Dialog ou…
+  - [Listar histórico de conversas](https://developers.rdstation.com/reference/conversas-v2-list-messages-history.md): ℹ️ API disponível para os planos Pro e Advanced.  ℹ️ Este recurso requer criptografia.  Listar histórico de conversas.  **Paginação:** por offset (parâmetros `page` e `limit`). Não há cursor. O…
+- Relatórios
+  - [Listar dados de relatórios](https://developers.rdstation.com/reference/conversas-v2-list-reports.md): ℹ️ Este recurso está disponível na versão v4 da API.  Listar dados de relatórios de atendimento. O período entre `start_date` e `end_date` está limitado a **3 meses**.
+  - [Relatório de campanhas](https://developers.rdstation.com/reference/conversas-v2-get-campaign-report.md): ℹ️ Este recurso está disponível na versão v4 da API.  Consulta o relatório paginado de uma campanha de broadcast (um registro por destinatário processado).
+- [Templates](https://developers.rdstation.com/reference/conversas-v2-templates.md)
+  - [Listar template de mensagens](https://developers.rdstation.com/reference/conversas-v2-list-templates.md): Listar templates de mensagens.
+  - [Enviar mensagem a partir de template](https://developers.rdstation.com/reference/conversas-v2-send-message-template.md): ℹ️ Este recurso está disponível apenas na nova versão da API (v3).  ⚠️ **Importante:** O envio dessa mensagem não cria um atendimento e, por isso, ela não aparecerá no histórico caso o contato…
+- Carteiras
+  - [Listar carteiras](https://developers.rdstation.com/reference/conversas-v2-list-wallets.md): Listar carteiras.
+  - [Adicionar contato na carteira](https://developers.rdstation.com/reference/conversas-v2-create-contact-to-wallet.md): Adicionar contato à carteira.
+  - [Deletar contato da carteira](https://developers.rdstation.com/reference/conversas-v2-delete-contact-from-wallet.md): Deletar contato da carteira.
+- WhatsApp
+  - [Listar integrações de WhatsApp](https://developers.rdstation.com/reference/conversas-v2-list-whatsapp-integrations.md): Listar integrações de WhatsApp.
+  - [Listar integrações oficiais de WhatsApp](https://developers.rdstation.com/reference/conversas-v2-list-whatsapp-official-integrations.md): Listar integrações oficiais de WhatsApp.
+- Workflows
+  - [Listar workflows](https://developers.rdstation.com/reference/conversas-v2-list-workflows.md): Listar workflows.
+- Analytics
+  - [Retenção de atendimentos](https://developers.rdstation.com/reference/conversas-v2-get-v1-analytics-attendances-retention.md): Percentual de retenção e volume de atendimentos de chatbot no período.
+  - [Média de avaliações de atendimentos](https://developers.rdstation.com/reference/conversas-v2-get-v1-analytics-attendances-reviews-average.md): Retorna a média de avaliações no período.
+  - [Resumo de atendimentos](https://developers.rdstation.com/reference/conversas-v2-get-v1-analytics-attendances-summary.md): Indicadores agregados de atendimentos no intervalo informado.
+  - [Origem de contatos](https://developers.rdstation.com/reference/conversas-v2-get-v1-analytics-contacts-origin.md): Retorna estatísticas de contatos por origem em um período, com visão diária e consolidado geral por origem.
+- Campanhas
+  - [Listar campanhas](https://developers.rdstation.com/reference/conversas-v2-list-v1-campaigns.md): Lista campanhas da empresa autenticada com paginação.
+  - [Obter detalhes da campanha](https://developers.rdstation.com/reference/conversas-v2-get-v1-campaign-by-id.md): Retorna detalhes da campanha, incluindo segmentação, template e estatísticas agregadas.
+
+## API: Exact Spotter API v3
+- Atividades
+  - [Atualizar Atividade](https://developers.rdstation.com/reference/puttasksupdatebyid.md): Esta seção está atrelada a ação de atualizar uma atividade específica, passando o id da atividade como parâmetro na requisição da URL. + Campos disponíveis para atualizar a atividade:
+  - [Concluir Atividade](https://developers.rdstation.com/reference/putactivitiesdonebyid.md): Esta seção está atrelada a ação de concluir uma atividade específica, passando o id da atividade como parâmetro na requisição da URL. + Campos necessários para concluir a atividade:
+  - [Remover atividade](https://developers.rdstation.com/reference/deletetasksremovebyid.md): Esta seção está atrelada a exclusão de uma determinada atividade. + Parâmetro obrigatório
+  - [Inserir Atividade](https://developers.rdstation.com/reference/posttaskadd.md): Esta seção está atrelada a ação de inserir uma atividade. + Campos para inserção da atividade:
+  - [Listar Tipos de Atividade](https://developers.rdstation.com/reference/gettaskstype.md): Este endpoint lista todas os tipos de atividades da empresa. + Campos exibidos na listagem:
+  - [Listar Atividades](https://developers.rdstation.com/reference/gettasks.md): Este endpoint lista todas as atividades da empresa. + Campos para inserção:
+- [Introdução](https://developers.rdstation.com/reference/spotter-v3-introduction.md)
+- [Autenticação](https://developers.rdstation.com/reference/spotter-v3-authentication.md)
+- Bonificação
+  - [Listar Bonificação](https://developers.rdstation.com/reference/getbonus.md): A funcionalidade traz uma lista da bonificação recebida pelos pré-vendedores. + Dados que serão exibidos na listagem:
+- Boxes
+  - [Atualizar Box](https://developers.rdstation.com/reference/putboxesupdatebyid.md): Procedimento de atualização de um box é utilizado todas as vezes que se quer modificar algum valor já inserido anteriormente, enviando o id do box como parâmetro na URL de requisição. Neste caso há…
+  - [Excluir Box](https://developers.rdstation.com/reference/deleteboxesremovebyid.md): Procedimento de exclusão é o responsável por deletar um box que foi criado anteriormente, enviando o id do box como parâmetro na URL da requisição. Somente boxes sem um Lead associado podem ser…
+  - [Inserir Box](https://developers.rdstation.com/reference/postboxesadd.md): Esta seção está atrelada a inserção de um box na empresa, fazendo referência aos dados que deverão ser inseridos no ato da criação. Em suma, trata-se da inserção de boxes para os vendedores. + Campos…
+  - [Listar boxes](https://developers.rdstation.com/reference/getboxes.md): A funcionalidade traz uma lista dos boxes existentes da empresa. + Dados que serão exibidos na listagem: + Observações:
+- Campos Personalizados Leads
+  - [Inserir Campo Personalizado Leads](https://developers.rdstation.com/reference/postcustomfieldsadd.md): Esta seção está atrelada a inserção de um campo personalizado de leads referente a configuração do sistema. ##### Campos utilizados para realizar a inserção: + Campos gerais: + Campo de opções…
+  - [Listar Campos Personalizados de Leads](https://developers.rdstation.com/reference/getcustomfields.md): Lista de campos personalizados cadastrados pela empresa nas configurações. + Campos que serão exibidos na listagem: + Campo de opções (options):
+  - [Listar Histórico de Campos Personalizados](https://developers.rdstation.com/reference/getcustomfieldshistories.md): Esta seção está atrelada à listagem do histórico de alterações dos campos personalizados dos leads. + Campos mostrados na listagem:
+- Campos Personalizados Organização
+  - [Inserir Campo Personalizado Organização](https://developers.rdstation.com/reference/postcustomfieldsaddorganization.md): Esta seção está atrelada a inserção de um campo personalizado de organização referente a configuração do sistema. ##### Campos utilizados para realizar a inserção: + Campos gerais: + Campo de opções…
+  - [Listar Campos Personalizados de Organização](https://developers.rdstation.com/reference/getcustomfieldsorganization.md): Lista de campos personalizados cadastrados pela empresa nas configurações. + Campos que serão exibidos na listagem: + Campo de opções (options):
+- Configurações de Agendamento
+  - [Listar Configuração de Agendamento](https://developers.rdstation.com/reference/getmeetingsettings.md): Este endpoint retorna as configurações de reuniões de uma empresa, incluindo o intervalo de exibição dos boxes de reunião, se o horário comercial está habilitado e os detalhes do horário comercial…
+- Contatos
+  - [Atualizar Contato](https://developers.rdstation.com/reference/putpersonsupdatebyid.md): Esta seção está atrelada a atualização de um contato referente a um lead que já esteja presente na base da Empresa Cliente Solicitante, passando o id deste contato como referência na parametrização…
+  - [Excluir Contato](https://developers.rdstation.com/reference/deletepersonsremovebyid.md): Esta seção está atrelada a exclusão de um contato referente a um lead, que se encontra na base da Empresa Cliente solicitante, passando o id deste como referência na parametrização da URL de…
+  - [Inserir Contato](https://developers.rdstation.com/reference/postpersonsadd.md): Esta seção está atrelada ao cadastramento de um contato referente a um lead. + Campos utilizados para realizar a inserção: atribui o contato como principal do lead.Default : FALSE. + Campos…
+  - [Listar Contatos](https://developers.rdstation.com/reference/getpersons.md)
+  - [Buscar Contato por ID](https://developers.rdstation.com/reference/getpersonsbyid.md): Esta seção está atrelada a listagem da base ou lista de contatos de um lead, uma vez que seu id é informado no parâmetro da URL de requisição. + Campo obrigatório: + Campos mostrados na listagem:
+- Dashboard
+  - [Listar atividades no funil (gerencial)](https://developers.rdstation.com/reference/getfunnelactivity.md): Esta seção está atrelada à consulta das métricas de atividades no Funil Gerencial do Dashboard do Spotter, com base no período informado nos parâmetros da URL. O parâmetro de período (dataInicial e…
+  - [Listar Desempenho de vendas: Vendedores](https://developers.rdstation.com/reference/getsellerperformance.md): Este endpoint retorna os dados estruturados do card Desempenho de Vendas – Vendedores, permitindo visualizar o valor total de produtos vendidos por cada vendedor dentro do período selecionado,…
+  - [Listar Desempenho de vendas: Pré-vendedores](https://developers.rdstation.com/reference/getpresalesperformance.md): Este endpoint fornece os dados estruturados do card Desempenho de Vendas – Pré-vendedores, permitindo visualizar o volume financeiro gerado a partir das oportunidades repassadas por cada pré-vendedor…
+  - [Listar Feedback de ligações enviados](https://developers.rdstation.com/reference/getcallfeedbackssent.md): Esta seção permite consultar os dados estruturados do card Feedbacks de ligação enviados do Dashboard, com base no período informado. O endpoint retorna os feedbacks registrados para ligações…
+  - [Listar Feedbacks de ligações solicitados](https://developers.rdstation.com/reference/getcallfeedbackrequests.md): Esta seção permite consultar os dados estruturados do card Feedbacks de ligação solicitados do Dashboard do Spotter, com base no período informado. O endpoint retorna os pedidos de avaliação feitos…
+  - [Listar Métricas da Pré-venda](https://developers.rdstation.com/reference/getpresalesmetrics.md): Esta seção está atrelada à consulta das métricas de pré-venda do Dashboard do Spotter, com base no período informado nos parâmetros da URL. O parâmetro de período (dataInicial e dataFinal) é…
+  - [Listar métricas da venda](https://developers.rdstation.com/reference/getsellersmetrics.md): Esta seção permite consultar os dados do card Métricas da Venda do Dashboard, com base no período informado. O endpoint retorna indicadores-chave de desempenho de cada vendedor ou pré-vendedor (no…
+  - [Listar Previsão de Negócios por Mês $](https://developers.rdstation.com/reference/getmonthlydealforecast.md): Este endpoint retorna os dados estruturados do card Previsão de Negócios por Mês ($), facilitando a análise da expectativa de vendas por usuário e por mês, com base em leads/oportunidades que possuem…
+  - [Listar Previsão de Negócios por Qualificação #](https://developers.rdstation.com/reference/getbusinessforecastbyqualificationcount.md): Este endpoint fornece os dados consolidados para o card Previsão de Negócios por Qualificação (#) no Dashboard do Spotter. O objetivo é apresentar a quantidade de produtos com previsão de venda,…
+  - [Listar Previsão de Negócios por Qualificação $](https://developers.rdstation.com/reference/getbusinessforecastbyqualificationvalue.md): Este endpoint fornece os dados consolidados do card Previsão de Negócios por Qualificação ($) do Dashboard do Spotter. O objetivo é apresentar o valor financeiro previsto de vendas, agrupado por…
+  - [Listar Produção da Pré-venda](https://developers.rdstation.com/reference/getpresalesproduction.md): Esta seção está atrelada à consulta das métricas de Produção de Pré-venda do Dashboard do Spotter, com base no período informado nos parâmetros da URL. O parâmetro de período (dataInicial e…
+  - [Listar Produção dos vendedores](https://developers.rdstation.com/reference/getsellersproduction.md): Esta seção está atrelada à consulta das métricas de Produção de vendedores do Dashboard do Spotter, com base no período informado nos parâmetros da URL. O parâmetro de período (dataInicial e…
+  - [Listar qualificação de reuniões](https://developers.rdstation.com/reference/getmeetingquality.md): Esta seção disponibiliza os dados estruturados do card Qualidade de Reuniões (gerencial) do Dashboard, com base no período informado. O endpoint retorna a distribuição das temperaturas atribuídas às…
+  - [Listar Qualidade de reuniões S.Q.L](https://developers.rdstation.com/reference/getmeetingqualitysql.md): Este endpoint fornece os dados consolidados para o card Qualidade das Reuniões S.Q.L. no Dashboard do Spotter. O objetivo é apresentar o desempenho da qualificação de oportunidades após reuniões, com…
+  - [Listar Safra](https://developers.rdstation.com/reference/getharvest.md): Esta seção está atrelada à consulta das métricas de Safra do Dashboard do Spotter, com base no período informado nos parâmetros da URL. O parâmetro de período (dataInicial e dataFinal) é obrigatório…
+  - [Listar temperatura](https://developers.rdstation.com/reference/gettemperatures.md): Esta seção disponibiliza os dados estruturados do card Temperatura (gerencial) do Dashboard do Spotter, com base no período informado. O endpoint retorna a distribuição das temperaturas atribuídas…
+  - [Listar tempo médio por origem](https://developers.rdstation.com/reference/getaveragetime.md): Esta seção disponibiliza os dados estruturados do card Tempo médio por origem do Dashboard do Spotter, com base no período informado. O endpoint retorna o tempo médio, em segundos, entre o cadastro…
+- Dores
+  - [Listar Dores](https://developers.rdstation.com/reference/getpainpoints.md): Esta seção está atrelada a listagem das dores dos leads. + Campos mostrados na listagem:
+- Empresa/Organização
+  - [Atualizar Empresa/Organização](https://developers.rdstation.com/reference/putorganizationupdatebyid.md): Esta seção está atrelada a edição de uma empresa/organização, enviando o id da empresa/organização como parâmetro na URL de requisição. + Campos utilizados para realizar a edição: + Campo…
+  - [Listar Campos Personalizados de Organizações](https://developers.rdstation.com/reference/getorganizationscustomfields.md): Lista os dados de campos personalizados de empresa/organização. + Dados que serão exibidos na listagem:
+  - [Inserir Empresa/Organização](https://developers.rdstation.com/reference/postorganizationadd.md): Esta seção está atrelada ao cadastro de uma empresa/organização, fazendo referência aos dados que deverão ser inseridos no ato da criação. + Campos utilizados para realizar a inserção da…
+  - [Listar Empresa/Organização](https://developers.rdstation.com/reference/getorganization.md): Este endpoint está atrelado a listagem das organizações cadastrados no Spotter, retornando com os dados que foram inseridos no ato da criação.
+- Etapas Funil
+  - [Listar Fases da Empresa](https://developers.rdstation.com/reference/getstages.md): Esta seção traz a lista das fases cadastradas por empresa. + Dados que serão exibidos na listagem:
+- Funil
+  - [Listar funis da empresa](https://developers.rdstation.com/reference/getfunnels.md): Esta seção traz a lista dos funis da empresa. + Dados que serão exibidos na listagem
+- Grupos
+  - [Criar Grupo](https://developers.rdstation.com/reference/postgroupsadd.md): Esta seção está atrelada a criação de um novo Grupo. + Campos utilizados para realizar a inserção É obrigatório informar ao menos e-mail de um usuário para inserção.
+  - [Remover Grupo](https://developers.rdstation.com/reference/deletegroupsremovebyid.md): Esta seção está atrelada a exclusão de um determinado grupo. + Parâmetro obrigatório
+  - [Inserir usuários](https://developers.rdstation.com/reference/putgroupadduserbyid.md): Esta seção está atrelada a inclusão de usuário(s) em um determinado grupo. + Parâmetro obrigatório + Campos utilizados para realizar a inserção É obrigatório informar ao menos e-mail de um usuário…
+  - [Listar Grupos](https://developers.rdstation.com/reference/getgroups.md): Esta seção está atrelada a listagem dos grupos da empresa. + Campos mostrados na listagem:
+  - [Remover usuário](https://developers.rdstation.com/reference/putgroupremoveuserbyid.md): Endpoint que permite remover usuários de um determinado grupo + Parâmetro obrigatório + Dados obrigatórios É obrigatório informar ao menos e-mail de um usuário para exclusão.
+- Histórico de Ligação
+  - [Listar Histórico de Ligação](https://developers.rdstation.com/reference/getcallshistory.md): Esta seção traz a lista do histórico de ligação do lead. + Dados que serão exibidos na listagem: ou dentro do sistema;
+  - [Buscar Gravação de Ligação](https://developers.rdstation.com/reference/getcallrecordingbyid.md): Esta seção está atrelada à consulta da gravação de uma ligação específica, informando o id da ligação como parâmetro na URL.
+- Histórico de Qualificação
+  - [Listar histórico](https://developers.rdstation.com/reference/getqualificationhistories.md): Esta seção está atrelada a listagem das aplicações dos filtros, trazendo as suas perguntas e respectivas respostas. + Dados que serão exibidos na listagem:
+- Leads
+  - [Agendar Lead](https://developers.rdstation.com/reference/postscheduleadd.md): Esta seção está atrelada a agendar o lead para uma box disponível. + Campos utilizados para realizar o agendamento: + Campos obrigatórios: + Observações:
+  - [Qualificar Lead (Filtro ou Feedback)](https://developers.rdstation.com/reference/postleadsqualification.md): Este endpoint possui dois casos de uso, determinados pela etapa atual do lead.  ## Leads - Aplicar Filtro  Este endpoint é utilizado para passar o lead pelas etapas do funil com base nas perguntas e…
+  - [Atualizar Leads](https://developers.rdstation.com/reference/putleadsupdatebyid.md): Esta seção está atrelada a edição de um lead na empresa, enviando o id do lead como parâmetro na URL de requisição. + Campos utilizados para realizar a edição: + Campo obrigatório: + Campos…
+  - [Listar Campos Personalizados do Lead](https://developers.rdstation.com/reference/getleadscustomfields.md): Lista os dados de campos personalizados de leads cadastrados pela empresa.
+  - [Excluir campo personalizado](https://developers.rdstation.com/reference/deletecustomfieldsleadsremovebyleadid.md): Esta seção permite excluir campos personalizados atrelados ao Lead, passando o id deste como referência na parametrização da URL de requisição. + Campo obrigatório: + Parâmetro opcional + Observações:
+  - [Listar Campos Personalizados de Leads](https://developers.rdstation.com/reference/getcustomfieldsleads.md): Lista os dados de campos personalizados de leads. + Dados que serão exibidos na listagem:
+  - [Listar Etapas do Funil do Lead](https://developers.rdstation.com/reference/getleadpipelinestagesbyid.md): Esta seção está atrelada a listar todo ciclo de vida de um lead. É opcional o id do lead como referência na parametrização da URL de requisição. + Campo opcional: + Campos mostrados na listagem: +…
+  - [Listar Etapas do Lead](https://developers.rdstation.com/reference/getleadstagesbyid.md): Esta seção está atrelada a listar todo ciclo de vida de um lead. É opcional o id do lead como referência na parametrização da URL de requisição. + Campo opcional: + Campos mostrados na listagem: +…
+  - [Descartar Leads](https://developers.rdstation.com/reference/postleadslost.md): Esta seção está atrelada ao descarte de um lead. + Campos utilizados para realizar o descarte: + Campos obrigatórios:
+  - [Excluir Lead](https://developers.rdstation.com/reference/deleteleadsdeletebyid.md): Procedimento de exclusão é o responsável por deletar um lead que foi criado anteriormente, enviando o id do lead como parâmetro na URL da requisição. + Parâmetro obrigatório:
+  - [Inserir Leads](https://developers.rdstation.com/reference/postleadsadd.md): Esta seção está atrelada ao cadastro de um lead na empresa, fazendo referência aos dados que deverão ser inseridos no ato da criação. Também é possível neste momento fazer a criação de campos…
+  - [Listar Leads](https://developers.rdstation.com/reference/getleads.md): Esta seção está atrelada a listagem de um lead na empresa, retornando com os dados que foram inseridos no ato da criação. ##### Campos exibidos na listagem: + Informações referentes ao lead: +…
+  - [Mudar Funil](https://developers.rdstation.com/reference/postchangefunnel.md): Esta seção está atrelada a mudar o lead de funil. + Campos utilizados para realizar a mudança: + Campos obrigatórios: + Observações:
+  - [Pular Etapas](https://developers.rdstation.com/reference/postskipsteps.md): Esta seção está atrelada ao pular etapa de um lead. + Campos utilizados para realizar o pular etapa: + Campos obrigatórios:
+  - [Recuperar Lead Descartado](https://developers.rdstation.com/reference/postleadsrecover.md): Esta seção está atrelada na recuperação de um lead que outrora foi descartado, utilizando como parâmetro o id deste. + Campos utilizados para realizar a recuperação do descarte: + Campo obrigatório:…
+  - [Transferir Leads](https://developers.rdstation.com/reference/postleadstransfer.md): Esta seção está atrelada a permissão de transferência de Leads de um pré-vendedor para outro, ou para um grupo de pré-vendedores. + Campos utilizados para realizar a transferência: + Campo…
+  - [Transferir Vendedor](https://developers.rdstation.com/reference/postsellertransfer.md): Esta seção está atrelada a possibilidade de transferência de vendedor de um usuário para outro. + Campos utilizados para realizar a transferência de vendedor: + Campo obrigatório:
+  - [Vender Leads](https://developers.rdstation.com/reference/postleadswon.md): Esta seção está atrelada a venda de um lead na empresa. + Campos utilizados para realizar a venda: SalesRepEmail.Se o valor: TRUE, o atributo SalesRepEmail será ignorado, a venda será registrada para…
+  - [Listar Etapas do Lead](https://developers.rdstation.com/reference/getstagesleadbyid.md): Esta seção está atrelada à listagem do histórico de etapas percorridas por um lead, informando o id do lead como parâmetro na URL. + Campos mostrados na listagem:
+- Leads Descartados
+  - [Listar Descartados](https://developers.rdstation.com/reference/getlosts.md): Esta seção está atrelada a listagem de descarte de leads. + Campos que serão mostrados na listagem:
+- Leads Transferidos
+  - [Listar Transferências](https://developers.rdstation.com/reference/gettransferhistory.md): Esta seção está atrelada a listagem de leads transferidos. + Campos que serão mostrados na listagem:
+- Leads Vendidos
+  - [Listar Leads Vendidos](https://developers.rdstation.com/reference/getleadssold.md): Esta seção está atrelada a listagem dos leads vendidos na empresa. + Dados que serão exibidos na listagem: + Observações:
+- Leads e Contatos
+  - [Listar Leads e Contatos](https://developers.rdstation.com/reference/getleadsandpersons.md): Esta seção está atrelada a listagem dos dados dos leads e seus respectivos contatos. ##### Campos exibidos na listagem: + Informações referentes ao lead: + Informações referentes aos contatos do lead…
+- Localização
+  - [Listar Localização](https://developers.rdstation.com/reference/getcities.md): Esta seção está atrelada a listagem de localizações (cidade, estado e país). + Campos mostrados na listagem:
+- Mercado
+  - [Listar Mercado](https://developers.rdstation.com/reference/getindustries.md): A funcionalidade traz uma lista dos mercados cadastrados por empresa. + Dados que serão exibidos na listagem:
+- Metas
+  - [Listar Metas](https://developers.rdstation.com/reference/getgoals.md): A funcionalidade traz uma lista das metas dos pré-vendedores e vendedores. O endpoint é um espelho da tabela disponível em Configurações -> Metas, Pontuações e Bonificações. . + Dados que serão…
+- Motivos de Descarte
+  - [Listar Motivos de Descarte](https://developers.rdstation.com/reference/getdiscardreasons.md): Esta seção está atrelada a listagem dos motivos de descarte da empresa. + Campos mostrados na listagem:
+- Origem e sub-origem
+  - [Listar Origem e Sub-origem](https://developers.rdstation.com/reference/getsources.md): Esta seção traz a consulta de registros de todas as origens e suas sub-origens cadastradas. + Dados que serão exibidos na listagem:
+- Perguntas e Respostas
+  - [Listar Perguntas e Respostas](https://developers.rdstation.com/reference/getanswers.md): Esta seção traz a lista de perguntas e respostas dos questionários. ##### Campos exibidos na listagem: + Informações gerais: + Informações sobre as perguntas (questions): + Informações sobre as…
+- Pontuação
+  - [Listar Pontuação](https://developers.rdstation.com/reference/getscores.md): A funcionalidade traz uma lista da pontuação recebida pelos pré-vendedores. O endpoint é um espelho do extrato de pontuação. + Dados que serão exibidos na listagem:
+- Produtos
+  - [Atualizar Produto](https://developers.rdstation.com/reference/putproductsupdatebyid.md): Esta seção está atrelada a ação de atualizar um produto específico, passando o id do produto como parâmetro na requisição da URL. + Campos disponíveis para atualizar o usuário: + Campos obrigatórios:…
+  - [Remover produto](https://developers.rdstation.com/reference/deleteproductsremovebyid.md): Esta seção está atrelada a exclusão de um determinado produto. + Parâmetro obrigatório
+  - [Inserir produto](https://developers.rdstation.com/reference/postproductsadd.md): O endpoint permite inserir um produto nas Configurações -> Padrões da empresa. + Dados utilizados na inserção: + Campos obrigatórios: + Campos que o sistema valida a duplicidade : + Observações:
+  - [Listar produtos](https://developers.rdstation.com/reference/getproducts.md): Esta seção traz a lista de produtos ativos da empresa.
+- Produtos Sugeridos
+  - [Adicionar Produto Sugerido](https://developers.rdstation.com/reference/postrecommendedproductsadd.md): Esta seção permite adicionar produtos sugeridos ao Lead. + Campos utilizados para realizar a inserção: + Campos obrigatórios:
+  - [Excluir produto sugerido](https://developers.rdstation.com/reference/deleterecommendedproductsremovebyleadid.md): Esta seção permite excluir produtos atrelados ao Lead, passando o id deste como referência na parametrização da URL de requisição. + Campo obrigatório: + Parâmetro opcional + Observações: Se o…
+  - [Listar Produtos Sugeridos](https://developers.rdstation.com/reference/getrecommendedproducts.md): Esta seção traz a lista de produtos do lead. É necessário informar o id do lead no parâmetro da URL, sempre que a consulta se fizer necessário. + Campo opcional: + Dados que serão exibidos na…
+- Pré-vendedores
+  - [Listar pré-vendedores](https://developers.rdstation.com/reference/getsdrs.md): A funcionalidade está atrelada a uma consulta de todos os pré-vendedores registrados no sistema. + Dados que serão exibidos na listagem:
+- Resultado de ligação
+  - [Listar Resultado de Ligação](https://developers.rdstation.com/reference/getcallsresult.md): Esta seção traz a lista do resultado de ligação do lead. + Dados que serão exibidos na listagem:
+- Reuniões
+  - [Listar Feedbacks Pendentes](https://developers.rdstation.com/reference/getpendingfeedbacks.md): Essa seção está atrelada a retornar os feedbacks pendentes de reuniões. + Campos mostrados na listagem:
+  - [Listar Reuniões](https://developers.rdstation.com/reference/getmeetings.md): Esta seção está atrelada a listagem das reuniões, filtrando pela empresa. ##### Campos exibidos na listagem: + Informações gerais: + Informações referente ao lead: + Informações referente ao…
+- Temperatura
+  - [Listar Temperaturas](https://developers.rdstation.com/reference/getqualificationtemparature.md): Esta seção é dedicada à listagem das temperaturas de qualificação utilizadas nas avaliações. + Campos mostrados na listagem:
+- Timeline
+  - [Inserir Comentário na Timeline](https://developers.rdstation.com/reference/posttimelineadd.md): O endpoint permite inserir um comentário na Timeline do Lead. + Dados utilizados na inserção:
+  - [Listar timeline](https://developers.rdstation.com/reference/getlisttimelinebyleadid.md): Esta seção está atrelada a listar a timeline de um determinado Lead. O identificador do lead é obrigatório na URL de requisição. + Dados que serão exibidos na listagem:
+- Transcrição
+  - [Listar transcrição](https://developers.rdstation.com/reference/gettranscriptions.md): Esta seção está atrelada à consulta das transcrições realizadas no sistema. A consulta retorna os registros de transcrições com base no período informado nos parâmetros da URL. O parâmetro de período…
+- Usuário
+  - [Atualizar Usuário](https://developers.rdstation.com/reference/putuserupdatebyid.md): Esta seção está atrelada a ação de atualizar um usuário específico, passando o id do usuário como parâmetro na requisição da URL. + Campos disponíveis para atualizar o usuário: + Campos obrigatórios:
+  - [Inserir usuário](https://developers.rdstation.com/reference/postuseradd.md): O endpoint permite inserir um usuário na Empresa. + Dados utilizados na inserção: + Campos obrigatórios:
+- Vendedores
+  - [Listar Vendedores](https://developers.rdstation.com/reference/getsellers.md): Esta seção está atrelada a listagem dos vendedores da empresa. + Campos mostrados na listagem:
+- Webhooks
+  - [Inserir Webhooks](https://developers.rdstation.com/reference/postwebhooksadd.md): Esta seção está atrelada ao cadastro de uma URL que tem como objetivo notificar os clientes diante dos eventos listados abaixo. + Dados utilizados na inserção: + Eventos:
+  - [Listar Eventos Cadastrados](https://developers.rdstation.com/reference/getwebhooks.md): Esta seção traz a listagem de todos os eventos que foram cadastrados no webhook pelo usuário. + Dados que serão exibidos na listagem:
+  - [Listar Eventos Disponíveis para Cadastro](https://developers.rdstation.com/reference/getwebhookevent.md): Esta seção traz a listagem de todos os eventos que podem ser cadastrados no webhook pelo usuário. + Dados que serão exibidos na listagem:
+  - [Remover Webhook](https://developers.rdstation.com/reference/deletewebhooksdeletebyid.md)
+- Whatsapp
+  - [Inserir mensagem](https://developers.rdstation.com/reference/postwhatsappadd.md): Este endpoint permite a inserção de mensagens do WhatsApp associadas a um lead. Ele suporta tanto mensagens de texto quanto de mídia, possibilitando agrupar conversas por meio de um session_id +…
+
+## Recipes
+- [[Caso de uso] Inserir leads em uma planilha Google Sheets com Webhooks - RD Station Marketing](https://developers.rdstation.com/recipes/caso-de-uso-inserir-leads-em-uma-planilha-google-sheets-com-webhooks-rd-station-marketing.md)
+- [Como utilizar o refresh_token para atualizar o access_token - Autenticação RD Station Marketing](https://developers.rdstation.com/recipes/como-utilizar-o-refresh_token-para-atualizar-o-access_token-autenticação-rd-station-marketing.md)
+- [Gerando sua URL de autenticação](https://developers.rdstation.com/recipes/gerando-sua-url-de-autenticação-autenticação-rd-station-marketing.md)
+- [Obtendo os tokens para autenticação - Autenticação RD Station Marketing](https://developers.rdstation.com/recipes/obtendo-os-tokens-para-autenticação-autenticação-rd-station-marketing.md)
+- [Sua primeira chamada para a API v2 do RD Station CRM](https://developers.rdstation.com/recipes/primeiro-uso-da-api-v2-do-rd-station-crm.md)
+
+## Changelog
+- [RD Station Conversas: Conteúdo do template no detalhe da campanha](https://developers.rdstation.com/changelog/conversas-v1-campaigns-template-content.md)
+- [RD Station Conversas: Campanha, atendimento e erro no histórico](https://developers.rdstation.com/changelog/conversas-v2-messages-history-campaign-call-error.md)
+- [RD Station Conversas: Campos personalizados nas APIs públicas de contato](https://developers.rdstation.com/changelog/conversas-v2-customizable-field-contatos.md)
+- [RD Station Marketing: Suporte ao identificador phone nos eventos da API](https://developers.rdstation.com/changelog/marketing-v2-suporte-phone-api-eventos.md)
+- [RD Station Marketing: Campo phone adicionado na resposta da API de Contatos](https://developers.rdstation.com/changelog/marketing-v2-phone-resposta-api-contatos.md)
+- [RD Station Marketing: Suporte ao identificador phone na API de Contatos](https://developers.rdstation.com/changelog/marketing-v2-suporte-phone-api-contatos.md)
+- [RD Station Conversas: Nova documentação API v2](https://developers.rdstation.com/changelog/conversas-v2-nova-documentacao-api-v2.md)
+- [RD Station Marketing:  Eventos legados de e-commerce serão desativados em 2025](https://developers.rdstation.com/changelog/rd-station-marketing-eventos-legados-de-e-commerce-serão-desativados-em-2025.md)
+- [RD Station Marketing para Ecommerce: Novos eventos disponíveis](https://developers.rdstation.com/changelog/rd-station-marketing-para-ecommerce-novos-eventos.md)
+- [RD Station CRM: Nova propriedade para valores monetários em produtos](https://developers.rdstation.com/changelog/crm-v1-nova-propriedade-para-valores-monetarios-em-produtos.md)

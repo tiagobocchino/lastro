@@ -1,0 +1,185 @@
+# Catálogo de conectores SaaS · fonte única dos contratos de API.
+#
+# Cada contrato foi tirado da documentação oficial (docs/fontes-saas/) ou medido contra a API real
+# (projeto GIMI/EngenhaDev). O motor (lastro/saas/motor.py) só lê: GET, ou POST de chamadas de
+# consulta quando a API é RPC (OMIE). `confianca` diz de onde veio o contrato.
+#
+# Campos:
+#   auth.tipo       basic | api_key_header | bearer_estatico | email_token_header | login_bearer | oauth2_refresh | credencial_no_corpo
+#   paginacao.tipo  offset | pagina | pagina_total | cursor | cabecalho
+#   envelope        onde estão os registros e o total na resposta
+#   erro_200        campo do corpo que indica erro mesmo com HTTP 200
+#   limite          por_minuto / por_segundo / por_dia (cota)
+#   incremental     parâmetro que filtra por data de atualização
+
+sienge:
+  nome: Sienge (ERP construção)
+  confianca: documentação oficial (api.sienge.com.br/docs, 87 specs OpenAPI)
+  base_url: "https://api.sienge.com.br/{subdominio}/public/api/v1"
+  auth: {tipo: basic, campos: [usuario, senha]}
+  paginacao: {tipo: offset, param_offset: offset, param_limite: limit, maximo: 200}
+  envelope: {registros: results, total: resultSetMetadata.count}
+  limite: {por_minuto: 200, por_dia_por_pacote: {Free: 100, Start: 1000, Special: 2500, Essencial: 5000, Enterprise: 10000, Business: 30000, Ultimate: 75000, Infinity: 200000}}
+  incremental: {param: modifiedAfter, formato: "%Y-%m-%d"}
+  entidades:
+    contratos_venda: {caminho: /sales-contracts}
+    clientes: {caminho: /customers}
+    empreendimentos: {caminho: /enterprises}
+    centros_custo: {caminho: /cost-centers}
+  armadilhas:
+    - "Cota diária do pacote Free é 100 requisições: uma carga completa pode não caber num dia."
+    - "Bulk data tem URL própria (/public/api/bulk-data/v1) e limite de 20/min."
+
+cvcrm:
+  nome: CV CRM · CVDW (CRM imobiliário)
+  confianca: documentação oficial (desenvolvedor.cvcrm.com.br)
+  base_url: "https://{dominio}.cvcrm.com.br/api/v1/cvdw"
+  auth: {tipo: login_bearer, url_login: "https://{dominio}.cvcrm.com.br/api/v3/auth/token", campos: [email, senha], validade_s: 21600}
+  paginacao: {tipo: pagina_total, param_pagina: pagina, param_limite: registros_por_pagina, maximo: 500, primeira: 1}
+  envelope: {registros: dados, total: total_de_registros, paginas: total_de_paginas}
+  limite: {por_minuto: 20}
+  incremental: {param: a_partir_data_referencia, formato: "%Y-%m-%d"}
+  entidades:
+    leads: {caminho: /leads}
+    reservas: {caminho: /reservas}
+    unidades: {caminho: /unidades}
+    corretores: {caminho: /corretores}
+  armadilhas:
+    - "Padrão de 30 registros por página: sem registros_por_pagina a carga leva 16x mais chamadas."
+    - "20 req/min: espaçar 3 s entre chamadas."
+    - "Token v3 expira em 6 h: renovar no meio de cargas longas."
+
+omie:
+  nome: Omie (ERP)
+  confianca: medido contra a API real em 24/08/2026 (GIMI)
+  base_url: "https://app.omie.com.br/api/v1"
+  auth: {tipo: credencial_no_corpo, campos: [app_key, app_secret]}
+  rpc: true   # toda chamada é POST {call, app_key, app_secret, param}; só chamadas Listar/Consultar
+  paginacao: {tipo: pagina_total, param_pagina: pagina, param_limite: registros_por_pagina, maximo: 100, primeira: 1}
+  envelope: {total: total_de_registros, paginas: total_de_paginas}
+  erro_200: {campo: faultstring}
+  limite: {por_minuto: 60, pausa_s: 0.3}
+  entidades:
+    clientes: {caminho: /geral/clientes/, call: ListarClientes, registros: clientes_cadastro}
+    vendedores: {caminho: /geral/vendedores/, call: ListarVendedores, registros: cadastro}
+  armadilhas:
+    - "Erro vem com HTTP 200 e faultstring no corpo."
+    - "O nome do array muda por endpoint (clientes_cadastro × cadastro)."
+    - "Teto de 100 por página mesmo pedindo mais."
+    - "Campos aninhados (enderecoEntrega, info) viram colunas com prefixo na silver."
+
+iapp:
+  nome: IApp (CRM/orçamentos industriais)
+  confianca: medido contra a API real (GIMI)
+  base_url: "https://api.iniciativaaplicativos.com.br/api"
+  auth: {tipo: api_key_header, cabecalhos: {token: token, secret: secret}}
+  paginacao: {tipo: pagina, param_pagina: page, param_limite: offset, maximo: 50, primeira: 1}
+  envelope: {registros: data}
+  erro_200: {campo: success, valor_erro: false}
+  limite: {por_minuto: 60}
+  entidades:
+    contratos: {caminho: /contracts}
+    clientes: {caminho: /clients}
+  armadilhas:
+    - "success:false com HTTP 200 (ESTABELECIMENTO_NOT_FOUND) vira carga vazia silenciosa se não for checado."
+    - "Credencial por empresa: uma carga por empresa, partição company=."
+    - "O parâmetro chamado offset é o TAMANHO da página; page começa em 1 (page=0 rejeitado desde 08/10/2026)."
+
+imuv:
+  nome: IMUV (gestão)
+  confianca: medido contra a API real em 17/07/2026 (GIMI)
+  base_url: "https://{subdominio}.imuv.me/administrator/api"
+  auth: {tipo: login_bearer, url_login: "https://{subdominio}.imuv.me/administrator/api/auth/login", campos: [email, senha], campo_token: auth_key}
+  paginacao: {tipo: cabecalho, param_pagina: page, param_limite: per-page, maximo: 50, cab_paginas: X-Pagination-Page-Count, cab_total: X-Pagination-Total-Count, primeira: 1}
+  limite: {por_minuto: 60}
+  entidades:
+    vendas: {caminho: /sale}
+    tarefas: {caminho: /task, maximo: 10}
+  armadilhas:
+    - "Nunca inferir o fim por lote menor que o pedido: o teto é 50 (10 em /task)."
+    - "Token só no Authorization: Bearer; na query volta 401."
+
+pipedrive:
+  nome: Pipedrive (CRM)
+  confianca: documentação oficial (OpenAPI v2)
+  base_url: "https://api.pipedrive.com/api/v2"
+  auth: {tipo: api_key_header, cabecalhos: {token: x-api-token}}
+  paginacao: {tipo: cursor, param_cursor: cursor, param_limite: limit, maximo: 500, cursor_resposta: additional_data.next_cursor}
+  envelope: {registros: data}
+  erro_200: {campo: success, valor_erro: false}
+  limite: {por_minuto: 120}
+  incremental: {param: updated_since, formato: "%Y-%m-%dT%H:%M:%SZ"}
+  entidades:
+    negocios: {caminho: /deals}
+    pessoas: {caminho: /persons}
+    organizacoes: {caminho: /organizations}
+
+hubspot:
+  nome: HubSpot (CRM)
+  confianca: documentação oficial (developers.hubspot.com)
+  base_url: "https://api.hubapi.com/crm/v3/objects"
+  auth: {tipo: bearer_estatico}
+  paginacao: {tipo: cursor, param_cursor: after, param_limite: limit, maximo: 100, cursor_resposta: paging.next.after}
+  envelope: {registros: results}
+  limite: {por_segundo: 10}
+  entidades:
+    negocios: {caminho: /deals}
+    contatos: {caminho: /contacts}
+    empresas: {caminho: /companies}
+  armadilhas:
+    - "Incremental por data exige a Search API (POST de leitura) e tem limite próprio, mais baixo."
+
+agendor:
+  nome: Agendor (CRM)
+  confianca: documentação oficial (swagger v3)
+  base_url: "https://api.agendor.com.br/v3"
+  auth: {tipo: api_key_header, cabecalhos: {token: Authorization}, prefixo: "Token "}
+  paginacao: {tipo: pagina, param_pagina: page, param_limite: per_page, maximo: 100, primeira: 1}
+  envelope: {registros: data}
+  limite: {por_minuto: 60}
+  incremental: {param: updatedAtGt, formato: "%Y-%m-%dT%H:%M:%SZ"}
+  entidades:
+    negocios: {caminho: /deals}
+    pessoas: {caminho: /people}
+    organizacoes: {caminho: /organizations}
+
+kommo:
+  nome: Kommo (CRM)
+  confianca: documentação oficial (developers.kommo.com)
+  base_url: "https://{subdominio}.kommo.com/api/v4"
+  auth: {tipo: bearer_estatico}
+  paginacao: {tipo: pagina, param_pagina: page, param_limite: limit, maximo: 250, primeira: 1}
+  envelope: {registros: _embedded.leads}
+  limite: {por_segundo: 7}
+  incremental: {param: "filter[updated_at][from]", formato: epoch}
+  entidades:
+    negocios: {caminho: /leads, registros: _embedded.leads}
+    contatos: {caminho: /contacts, registros: _embedded.contacts}
+  armadilhas:
+    - "Página vazia volta HTTP 204 sem corpo: é o fim da lista, não erro."
+
+rdstation_crm:
+  nome: RD Station CRM
+  confianca: documentação oficial (developers.rdstation.com) · limites confirmados; paginação a validar no piloto
+  base_url: "https://crm.rdstation.com/api/v1"
+  auth: {tipo: oauth2_refresh}
+  paginacao: {tipo: pagina, param_pagina: page, param_limite: limit, maximo: 200, primeira: 1}
+  envelope: {registros: deals, total: total}
+  limite: {por_minuto: 120}
+  entidades:
+    negocios: {caminho: /deals, registros: deals}
+    contatos: {caminho: /contacts, registros: contacts}
+
+contaazul:
+  nome: Conta Azul (ERP financeiro)
+  confianca: documentação oficial (developers.contaazul.com) · paginação a validar no piloto
+  base_url: "https://api-v2.contaazul.com/v1"
+  auth: {tipo: oauth2_refresh}
+  paginacao: {tipo: pagina, param_pagina: pagina, param_limite: tamanho_pagina, maximo: 100, primeira: 1}
+  envelope: {registros: itens, total: itens_totais}
+  limite: {por_minuto: 60}
+  entidades:
+    vendas: {caminho: /venda/busca}
+    contas_receber: {caminho: /financeiro/eventos-financeiros/contas-a-receber/buscar}
+  armadilhas:
+    - "OAuth2 com refresh_token: o cliente autoriza uma vez; o token de acesso precisa ser renovado."

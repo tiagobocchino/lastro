@@ -1,0 +1,106 @@
+swagger: "2.0"
+info:
+  title: Marcas
+  description: API de Marcas.
+  version: "1.0"
+  license:
+    name: Softplan - Todos os direitos reservados
+host: api.sienge.com.br
+basePath: "/{subdominio-do-cliente}/public/api/v1"
+paths:
+  "/trademarks":
+    get:
+      operationId: getTrademarks
+      tags:
+        - Marcas
+      summary: Realiza a busca de Marcas Existentes.
+      description: A API disponibiliza uma lista de Marcas existentes no sistema, trazendo o id, descrição e status.
+      produces:
+        - application/json
+      parameters:
+        - name: trademarkId
+          in: query
+          description: Código da Marca
+          required: false
+          type: integer
+        - name: trademarkDescription
+          in: query
+          description: Descrição da Marca
+          required: false
+          type: string
+        - name: status
+          in: query
+          description: Status da Marca, indica se está ativa (ACTIVE) ou inativa (INACTIVE).
+          required: false
+          type: string
+          default: ACTIVE
+        - name: offset
+          in: query
+          description: >-
+            Deslocamento do primeiro item do resultado em relação ao primeiro item 
+            da série total de resultados válidos. Valor default é 0.
+          required: false
+          type: integer
+          default: 0
+          format: int32
+        - name: limit
+          in: query
+          description: >-
+            Quantidade máxima de resultados da pesquisa a serem retornados.
+            Valor default 100, valor mínimo permitido 1 e valor máximo permitido 200.
+          required: false
+          type: integer
+          default: 100
+          maximum: 200
+          minimum: 1
+          format: int32
+      responses:
+        "200":
+          description: >-
+            Requisição bem-sucedida, retorna um array com todos os grupos de insumos.
+          schema:
+            $ref: "#/definitions/TrademarkDTO"
+        "400":
+          description: Requisição mal formada
+          schema:
+            $ref: "#/definitions/ApiError"
+        "500":
+          description: Erro interno no servidor
+          schema:
+            $ref: "#/definitions/ApiError"
+definitions:
+  TrademarkDTO:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Código da Marca
+        example: 1
+      description:
+        type: string
+        description: Descrição da Marca
+        example: Starian
+      status:
+        type: string
+        description: Status da Marca, indica se está ativa (ACTIVE) ou inativa (INACTIVE).
+        example: ACTIVE
+  ApiError:
+    type: object
+    required:
+      - developerMessage
+      - status
+    properties:
+      status:
+        type: string
+        description: Status http
+      developerMessage:
+        type: string
+        description: >-
+          Mensagem de erro pertinente a ser reportada ao developer consumidor da
+          API.
+      clientMessage:
+        type: array
+        description: Lista contendo mensagem de errors relavantes para o utilizador final
+        items:
+          type: string
+    description: Objeto que encapsula os atributos de erros da API

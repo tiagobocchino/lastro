@@ -1,0 +1,492 @@
+# HubSpot docs
+
+## Home
+
+- [HubSpot Developer Documentation](https://developers.hubspot.com/docs/index.md)
+
+## Get Started
+
+### Overview
+
+- [Introduction to HubSpot's developer platform](https://developers.hubspot.com/docs/getting-started/introduction.md): Learn how to get started developing on HubSpot.
+- [Development overview](https://developers.hubspot.com/docs/getting-started/developer-overview.md): Learn about the development overview page in HubSpot.
+- [Quickstart](https://developers.hubspot.com/docs/getting-started/quickstart.md): Get up and running on the latest version of HubSpot's developer platform.
+- [HubSpot Account Types](https://developers.hubspot.com/docs/getting-started/account-types.md): Learn about the different types of HubSpot accounts and what each one is used for.
+
+- [Apps (184 pages)](https://developers.hubspot.com/docs/_llms/apps.txt): Platform, Legacy.
+- [CMS (124 pages)](https://developers.hubspot.com/docs/_llms/cms.txt): Start Building, Reference, Best Practices, Marketplace, Versions & Deprecations.
+- [APIs (3787 pages)](https://developers.hubspot.com/docs/_llms/apis.txt): 2027-03-beta, 2026-09, 2026-03, Legacy.
+
+## Developer Tooling
+
+- [Developer Tooling Overview](https://developers.hubspot.com/docs/developer-tooling/overview.md)
+
+### Platform
+
+- [Developer platform and API versioning](https://developers.hubspot.com/docs/developer-tooling/platform/versioning.md): Learn about the changes released for each version of HubSpot's developer platform and REST APIs
+- [API usage guidelines and limits](https://developers.hubspot.com/docs/developer-tooling/platform/usage-guidelines.md): Learn about the different API and developer feature limits in HubSpot.
+- [APIs by tier](https://developers.hubspot.com/docs/developer-tooling/platform/apis-by-tier.md): View which HubSpot APIs are available for each product and subscription tier.
+- [Breaking Changes on the HubSpot Platform](https://developers.hubspot.com/docs/developer-tooling/platform/breaking-change-definition.md): What changes qualify as breaking vs non-breaking. Use this to help guide your app development
+
+### Local development
+
+- [Install and use the HubSpot Agent CLI (BETA)](https://developers.hubspot.com/docs/developer-tooling/local-development/agent-cli/guide.md): Learn how to install the Agent CLI to allow AI agents to directly interact with data and streamline headless usage of HubSpot.
+- [Build with config profiles](https://developers.hubspot.com/docs/developer-tooling/local-development/build-with-config-profiles.md): Learn how to set up and use config profiles in a project to streamline building and testing apps.
+- [Test your HubSpot apps with configurable test accounts](https://developers.hubspot.com/docs/developer-tooling/local-development/configurable-test-accounts.md): Set up test accounts that simulate HubSpot subscriptions for comprehensive app testing.
+- [Install the HubSpot Visual Studio Code extension](https://developers.hubspot.com/docs/developer-tooling/local-development/vs-code-extension.md)
+- [Troubleshooting](https://developers.hubspot.com/docs/developer-tooling/local-development/troubleshooting.md): Troubleshooting methods available for local development.
+
+#### HubSpot CLI
+
+- [Install the HubSpot CLI](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/install-the-cli.md): Learn how to get started with local development by installing the HubSpot CLI
+- [Authenticate the CLI with personal access keys](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/personal-access-key.md): Learn about connecting the HubSpot CLI to your account using a personal access key.
+- [CLI version support and deprecation policy](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/version-support.md): Learn about HubSpot CLI versioning and guidance on upgrading.
+
+##### Commands
+
+- [HubSpot CLI commands overview](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/reference.md): A quick reference list of all HubSpot CLI commands
+- [General CLI commands](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/commands/general-commands.md): Learn about general CLI commands.
+- [Account CLI commands](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/commands/account-commands.md): Learn about account and authentication CLI commands.
+- [App and project CLI commands](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/project-commands.md): Learn about the available CLI commands for managing apps and projects.
+- [CMS CLI commands](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/commands/cms-commands.md): Learn about CMS-related CLI commands.
+- [Custom object CLI commands](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/commands/custom-object-commands.md): Learn about custom object CLI commands.
+- [HubDB CLI commands](https://developers.hubspot.com/docs/developer-tooling/local-development/hubspot-cli/commands/hubdb-commands.md): Learn about HubDB CLI commands.
+
+#### Developer MCP
+
+- [Set up the developer MCP server](https://developers.hubspot.com/docs/developer-tooling/local-development/developer-mcp/setup.md): Learn how to use HubSpot's locally installed MCP server in your IDE to streamline app and CMS content development.
+- [Developer MCP server tools](https://developers.hubspot.com/docs/developer-tooling/local-development/developer-mcp/tools.md): Reference for all tools available in HubSpot's developer MCP server, including parameters and example prompts.
+
+### Third-party tools
+
+- [Set up GitHub Actions](https://developers.hubspot.com/docs/developer-tooling/third-party-tools/set-up-github-actions.md): Automate HubSpot project deployments with GitHub Actions to upload your project on every push to your repository.
+- [Use Postman collections to make API requests to HubSpot](https://developers.hubspot.com/docs/developer-tooling/third-party-tools/postman.md): Learn how to configure Postman to interact with HubSpot APIs.
+
+### SDKs
+
+- [Node](https://developers.hubspot.com/docs/developer-tooling/sdks/node.md)
+- [Php](https://developers.hubspot.com/docs/developer-tooling/sdks/php.md)
+- [Python](https://developers.hubspot.com/docs/developer-tooling/sdks/python.md)
+- [Ruby](https://developers.hubspot.com/docs/developer-tooling/sdks/ruby.md)
+
+## Build with AI
+
+### Get Started
+
+- [Introduction](https://developers.hubspot.com/docs/build-with-ai/introduction.md): Use AI to explore what HubSpot can do, build custom solutions, and work with HubSpot data.
+- [Foundations](https://developers.hubspot.com/docs/build-with-ai/foundations.md): Core concepts every builder should understand before using AI agents to build on HubSpot.
+- [AI Quickstart](https://developers.hubspot.com/docs/build-with-ai/quickstart.md): Start building with AI by connecting your agent to HubSpot.
+- [Example prompts](https://developers.hubspot.com/docs/build-with-ai/example-prompts.md): Ready-to-use prompts for building on HubSpot with AI.
+- [Using agent context files](https://developers.hubspot.com/docs/build-with-ai/agent-context-files.md): Learn about the context files that HubSpot automatically includes in projects created via the CLI and developer MCP server.
+
+#### Best Practices
+
+- [Working with agents](https://developers.hubspot.com/docs/build-with-ai/best-practices/working-with-your-agent.md): Techniques for getting better results from your AI coding agent.
+- [Managing projects](https://developers.hubspot.com/docs/build-with-ai/best-practices/managing-your-project.md): How to keep your HubSpot project healthy as it grows.
+- [Scaling up](https://developers.hubspot.com/docs/build-with-ai/best-practices/scaling-up.md): Strategies for working with multiple agents and scaling your AI-assisted builds.
+- [Agent skills](https://developers.hubspot.com/docs/build-with-ai/best-practices/agent-skills.md): What skills are and how to write effective ones for your agent.
+
+### Tools
+
+- [Breeze Assistant](https://developers.hubspot.com/docs/build-with-ai/breeze-assistant.md): Use Breeze Assistant to explore what's possible and figure out what to build.
+- [Developer MCP server](https://developers.hubspot.com/docs/build-with-ai/developer-mcp-server.md): Build custom HubSpot solutions with AI doing the coding.
+- [Agent CLI](https://developers.hubspot.com/docs/build-with-ai/agent-cli.md): Let your agent interact with data through a terminal interface to empower headless usage of HubSpot.
+- [Using the HubSpot MCP server](https://developers.hubspot.com/docs/build-with-ai/remote-mcp-server.md): Connect an external AI tool or application to your CRM over OAuth.
+
+## OpenAPI Specs
+
+- [account-account-info-v2027-03-beta](/docs/specs/2027-03-beta/account-account-info-v2027-03-beta.json)
+- [automation-automation-v4-v2027-03-beta](/docs/specs/2027-03-beta/automation-automation-v4-v2027-03-beta.json)
+- [cms-knowledge-base-v2027-03-beta](/docs/specs/2027-03-beta/cms-knowledge-base-v2027-03-beta.json)
+- [crm-activity-auto-associations-v2027-03-beta](/docs/specs/2027-03-beta/crm-activity-auto-associations-v2027-03-beta.json)
+- [crm-object-library-v2027-03-beta](/docs/specs/2027-03-beta/crm-object-library-v2027-03-beta.json)
+- [crm-data-quality-v2027-03-beta](/docs/specs/2027-03-beta/crm-data-quality-v2027-03-beta.json)
+- [crm-calling-extensions-v2027-03-beta](/docs/specs/2027-03-beta/crm-calling-extensions-v2027-03-beta.json)
+- [crm-unified-schemas-v2027-03-beta](/docs/specs/2027-03-beta/crm-unified-schemas-v2027-03-beta.json)
+- [crm-smart-transfer-v2027-03-beta](/docs/specs/2027-03-beta/crm-smart-transfer-v2027-03-beta.json)
+- [marketing-aeo-v2027-03-beta](/docs/specs/2027-03-beta/marketing-aeo-v2027-03-beta.json)
+- [marketing-forms-v2027-03-beta](/docs/specs/2027-03-beta/marketing-forms-v2027-03-beta.json)
+- [marketing-lead-scoring-v2027-03-beta](/docs/specs/2027-03-beta/marketing-lead-scoring-v2027-03-beta.json)
+- [scheduler-meetings-v2027-03-beta](/docs/specs/2027-03-beta/scheduler-meetings-v2027-03-beta.json)
+- [analytics-reporting-v2027-03-beta](/docs/specs/2027-03-beta/analytics-reporting-v2027-03-beta.json)
+- [commerce-contracts-v2027-03-beta](/docs/specs/2027-03-beta/commerce-contracts-v2027-03-beta.json)
+- [crm-subscription-lifecycle-v2027-03-beta](/docs/specs/2027-03-beta/crm-subscription-lifecycle-v2027-03-beta.json)
+- [commerce-payments-v2027-03-beta](/docs/specs/2027-03-beta/commerce-payments-v2027-03-beta.json)
+- [commerce-payment-methods-v2027-03-beta](/docs/specs/2027-03-beta/commerce-payment-methods-v2027-03-beta.json)
+- [commerce-payments-settings-v2027-03-beta](/docs/specs/2027-03-beta/commerce-payments-settings-v2027-03-beta.json)
+- [webhooks-journal-webhooks-journal-v2027-03-beta](/docs/specs/2027-03-beta/webhooks-journal-webhooks-journal-v2027-03-beta.json)
+- [webhooks-webhooks-v2027-03-beta](/docs/specs/2027-03-beta/webhooks-webhooks-v2027-03-beta.json)
+- [account-account-info-v2026-09](/docs/specs/2026-09/account-account-info-v2026-09.json)
+- [account-audit-logs-v2026-09](/docs/specs/2026-09/account-audit-logs-v2026-09.json)
+- [business-units-business-units-v2026-09](/docs/specs/2026-09/business-units-business-units-v2026-09.json)
+- [meta-origins-v2026-09](/docs/specs/2026-09/meta-origins-v2026-09.json)
+- [settings-multicurrency-v2026-09](/docs/specs/2026-09/settings-multicurrency-v2026-09.json)
+- [settings-tax-rates-v2026-09](/docs/specs/2026-09/settings-tax-rates-v2026-09.json)
+- [settings-teams-v2026-09](/docs/specs/2026-09/settings-teams-v2026-09.json)
+- [settings-user-provisioning-v2026-09](/docs/specs/2026-09/settings-user-provisioning-v2026-09.json)
+- [crm-app-uninstalls-v2026-09](/docs/specs/2026-09/crm-app-uninstalls-v2026-09.json)
+- [crm-public-app-feature-flags-v3-v2026-09](/docs/specs/2026-09/crm-public-app-feature-flags-v3-v2026-09.json)
+- [auth-oauth-v2026-09](/docs/specs/2026-09/auth-oauth-v2026-09.json)
+- [automation-email-templates-v2026-09](/docs/specs/2026-09/automation-email-templates-v2026-09.json)
+- [automation-sequences-v2026-09](/docs/specs/2026-09/automation-sequences-v2026-09.json)
+- [automation-actions-v4-v2026-09](/docs/specs/2026-09/automation-actions-v4-v2026-09.json)
+- [cms-authors-v2026-09](/docs/specs/2026-09/cms-authors-v2026-09.json)
+- [cms-blog-settings-v2026-09](/docs/specs/2026-09/cms-blog-settings-v2026-09.json)
+- [cms-posts-v2026-09](/docs/specs/2026-09/cms-posts-v2026-09.json)
+- [cms-tags-v2026-09](/docs/specs/2026-09/cms-tags-v2026-09.json)
+- [cms-cms-content-audit-v2026-09](/docs/specs/2026-09/cms-cms-content-audit-v2026-09.json)
+- [cms-domains-v2026-09](/docs/specs/2026-09/cms-domains-v2026-09.json)
+- [cms-hubdb-v2026-09](/docs/specs/2026-09/cms-hubdb-v2026-09.json)
+- [cms-media-bridge-v2026-09](/docs/specs/2026-09/cms-media-bridge-v2026-09.json)
+- [cms-pages-v2026-09](/docs/specs/2026-09/cms-pages-v2026-09.json)
+- [cms-site-search-v2026-09](/docs/specs/2026-09/cms-site-search-v2026-09.json)
+- [cms-source-code-v2026-09](/docs/specs/2026-09/cms-source-code-v2026-09.json)
+- [cms-url-mappings-v2026-09](/docs/specs/2026-09/cms-url-mappings-v2026-09.json)
+- [cms-url-redirects-v2026-09](/docs/specs/2026-09/cms-url-redirects-v2026-09.json)
+- [communication-preferences-subscriptions-v2026-09](/docs/specs/2026-09/communication-preferences-subscriptions-v2026-09.json)
+- [conversations-conversations-v2026-09](/docs/specs/2026-09/conversations-conversations-v2026-09.json)
+- [conversations-custom-channels-v2026-09](/docs/specs/2026-09/conversations-custom-channels-v2026-09.json)
+- [conversations-visitor-identification-v2026-09](/docs/specs/2026-09/conversations-visitor-identification-v2026-09.json)
+- [crm-calls-v2026-09](/docs/specs/2026-09/crm-calls-v2026-09.json)
+- [crm-emails-v2026-09](/docs/specs/2026-09/crm-emails-v2026-09.json)
+- [crm-meetings-v2026-09](/docs/specs/2026-09/crm-meetings-v2026-09.json)
+- [crm-notes-v2026-09](/docs/specs/2026-09/crm-notes-v2026-09.json)
+- [crm-postal-mail-v2026-09](/docs/specs/2026-09/crm-postal-mail-v2026-09.json)
+- [crm-tasks-series-v2026-09](/docs/specs/2026-09/crm-tasks-series-v2026-09.json)
+- [crm-tasks-v2026-09](/docs/specs/2026-09/crm-tasks-v2026-09.json)
+- [crm-associations-v2026-09](/docs/specs/2026-09/crm-associations-v2026-09.json)
+- [crm-associations-schema-v2026-09](/docs/specs/2026-09/crm-associations-schema-v2026-09.json)
+- [crm-object-library-v2026-09](/docs/specs/2026-09/crm-object-library-v2026-09.json)
+- [crm-exports-v2026-09](/docs/specs/2026-09/crm-exports-v2026-09.json)
+- [crm-calling-extensions-v2026-09](/docs/specs/2026-09/crm-calling-extensions-v2026-09.json)
+- [crm-public-app-crm-cards-v2026-09](/docs/specs/2026-09/crm-public-app-crm-cards-v2026-09.json)
+- [crm-transcriptions-v2026-09](/docs/specs/2026-09/crm-transcriptions-v2026-09.json)
+- [crm-video-conferencing-extension-v2026-09](/docs/specs/2026-09/crm-video-conferencing-extension-v2026-09.json)
+- [crm-imports-v2026-09](/docs/specs/2026-09/crm-imports-v2026-09.json)
+- [crm-limits-tracking-v2026-09](/docs/specs/2026-09/crm-limits-tracking-v2026-09.json)
+- [crm-lists-v2026-09](/docs/specs/2026-09/crm-lists-v2026-09.json)
+- [crm-appointments-v2026-09](/docs/specs/2026-09/crm-appointments-v2026-09.json)
+- [crm-carts-v2026-09](/docs/specs/2026-09/crm-carts-v2026-09.json)
+- [crm-commerce-payments-v2026-09](/docs/specs/2026-09/crm-commerce-payments-v2026-09.json)
+- [crm-commerce-subscriptions-v2026-09](/docs/specs/2026-09/crm-commerce-subscriptions-v2026-09.json)
+- [crm-communications-v2026-09](/docs/specs/2026-09/crm-communications-v2026-09.json)
+- [crm-companies-v2026-09](/docs/specs/2026-09/crm-companies-v2026-09.json)
+- [crm-contacts-v2026-09](/docs/specs/2026-09/crm-contacts-v2026-09.json)
+- [crm-contracts-v2026-09](/docs/specs/2026-09/crm-contracts-v2026-09.json)
+- [crm-courses-v2026-09](/docs/specs/2026-09/crm-courses-v2026-09.json)
+- [crm-custom-objects-v2026-09](/docs/specs/2026-09/crm-custom-objects-v2026-09.json)
+- [crm-deal-splits-v2026-09](/docs/specs/2026-09/crm-deal-splits-v2026-09.json)
+- [crm-deals-v2026-09](/docs/specs/2026-09/crm-deals-v2026-09.json)
+- [crm-discounts-v2026-09](/docs/specs/2026-09/crm-discounts-v2026-09.json)
+- [crm-feedback-submissions-v2026-09](/docs/specs/2026-09/crm-feedback-submissions-v2026-09.json)
+- [crm-fees-v2026-09](/docs/specs/2026-09/crm-fees-v2026-09.json)
+- [crm-forecast-types-v2026-09](/docs/specs/2026-09/crm-forecast-types-v2026-09.json)
+- [crm-forecasts-v2026-09](/docs/specs/2026-09/crm-forecasts-v2026-09.json)
+- [crm-goal-targets-v2026-09](/docs/specs/2026-09/crm-goal-targets-v2026-09.json)
+- [crm-invoices-v2026-09](/docs/specs/2026-09/crm-invoices-v2026-09.json)
+- [crm-leads-v2026-09](/docs/specs/2026-09/crm-leads-v2026-09.json)
+- [crm-line-items-v2026-09](/docs/specs/2026-09/crm-line-items-v2026-09.json)
+- [crm-listings-v2026-09](/docs/specs/2026-09/crm-listings-v2026-09.json)
+- [crm-object-tags-v2026-09](/docs/specs/2026-09/crm-object-tags-v2026-09.json)
+- [crm-objects-v2026-09](/docs/specs/2026-09/crm-objects-v2026-09.json)
+- [crm-orders-v2026-09](/docs/specs/2026-09/crm-orders-v2026-09.json)
+- [crm-partner-clients-v2026-09](/docs/specs/2026-09/crm-partner-clients-v2026-09.json)
+- [crm-partner-services-v2026-09](/docs/specs/2026-09/crm-partner-services-v2026-09.json)
+- [crm-price-book-items-crm-reads-api-v2026-09](/docs/specs/2026-09/crm-price-book-items-crm-reads-api-v2026-09.json)
+- [crm-price-books-crm-reads-api-v2026-09](/docs/specs/2026-09/crm-price-books-crm-reads-api-v2026-09.json)
+- [crm-products-v2026-09](/docs/specs/2026-09/crm-products-v2026-09.json)
+- [crm-projects-v2026-09](/docs/specs/2026-09/crm-projects-v2026-09.json)
+- [crm-quotes-v2026-09](/docs/specs/2026-09/crm-quotes-v2026-09.json)
+- [crm-schemas-v2026-09](/docs/specs/2026-09/crm-schemas-v2026-09.json)
+- [crm-services-v2026-09](/docs/specs/2026-09/crm-services-v2026-09.json)
+- [crm-taxes-v2026-09](/docs/specs/2026-09/crm-taxes-v2026-09.json)
+- [crm-tickets-v2026-09](/docs/specs/2026-09/crm-tickets-v2026-09.json)
+- [crm-users-v2026-09](/docs/specs/2026-09/crm-users-v2026-09.json)
+- [crm-crm-owners-v2026-09](/docs/specs/2026-09/crm-crm-owners-v2026-09.json)
+- [crm-pipelines-v2026-09](/docs/specs/2026-09/crm-pipelines-v2026-09.json)
+- [crm-pipeline-governance-v2026-09](/docs/specs/2026-09/crm-pipeline-governance-v2026-09.json)
+- [crm-properties-v2026-09](/docs/specs/2026-09/crm-properties-v2026-09.json)
+- [crm-property-validations-v2026-09](/docs/specs/2026-09/crm-property-validations-v2026-09.json)
+- [data-studio-datasource-ingestion-v2026-09](/docs/specs/2026-09/data-studio-datasource-ingestion-v2026-09.json)
+- [events-manage-event-definitions-v2026-09](/docs/specs/2026-09/events-manage-event-definitions-v2026-09.json)
+- [events-events-v2026-09](/docs/specs/2026-09/events-events-v2026-09.json)
+- [events-send-event-completions-v2026-09](/docs/specs/2026-09/events-send-event-completions-v2026-09.json)
+- [files-files-v2026-09](/docs/specs/2026-09/files-files-v2026-09.json)
+- [marketing-campaigns-public-api-v2026-09](/docs/specs/2026-09/marketing-campaigns-public-api-v2026-09.json)
+- [marketing-marketing-emails-v2026-09](/docs/specs/2026-09/marketing-marketing-emails-v2026-09.json)
+- [marketing-marketing-events-v2026-09](/docs/specs/2026-09/marketing-marketing-events-v2026-09.json)
+- [marketing-single-send-v2026-09](/docs/specs/2026-09/marketing-single-send-v2026-09.json)
+- [marketing-transactional-single-send-v2026-09](/docs/specs/2026-09/marketing-transactional-single-send-v2026-09.json)
+- [crm-notetaker-conversation-recap-v2026-09](/docs/specs/2026-09/crm-notetaker-conversation-recap-v2026-09.json)
+- [scheduler-meetings-v2026-09](/docs/specs/2026-09/scheduler-meetings-v2026-09.json)
+- [commerce-paymentsaccounts-v2026-09](/docs/specs/2026-09/commerce-paymentsaccounts-v2026-09.json)
+- [commerce-payment-links-v2026-09](/docs/specs/2026-09/commerce-payment-links-v2026-09.json)
+- [commerce-price-books-v2026-09](/docs/specs/2026-09/commerce-price-books-v2026-09.json)
+- [webhooks-webhooks-v2026-09](/docs/specs/2026-09/webhooks-webhooks-v2026-09.json)
+- [webhooks-journal-webhooks-journal-v2026-09](/docs/specs/2026-09/webhooks-journal-webhooks-journal-v2026-09.json)
+- [account-account-info-v2026-03](/docs/specs/2026-03/account-account-info-v2026-03.json)
+- [account-audit-logs-v2026-03](/docs/specs/2026-03/account-audit-logs-v2026-03.json)
+- [business-units-business-units-v2026-03](/docs/specs/2026-03/business-units-business-units-v2026-03.json)
+- [meta-origins-v2026-03](/docs/specs/2026-03/meta-origins-v2026-03.json)
+- [settings-multicurrency-v2026-03](/docs/specs/2026-03/settings-multicurrency-v2026-03.json)
+- [settings-tax-rates-v2026-03](/docs/specs/2026-03/settings-tax-rates-v2026-03.json)
+- [settings-user-provisioning-v2026-03](/docs/specs/2026-03/settings-user-provisioning-v2026-03.json)
+- [crm-app-uninstalls-v2026-03](/docs/specs/2026-03/crm-app-uninstalls-v2026-03.json)
+- [crm-public-app-feature-flags-v3-v2026-03](/docs/specs/2026-03/crm-public-app-feature-flags-v3-v2026-03.json)
+- [auth-oauth-v2026-03](/docs/specs/2026-03/auth-oauth-v2026-03.json)
+- [automation-sequences-v2026-03](/docs/specs/2026-03/automation-sequences-v2026-03.json)
+- [automation-actions-v4-v2026-03](/docs/specs/2026-03/automation-actions-v4-v2026-03.json)
+- [cms-authors-v2026-03](/docs/specs/2026-03/cms-authors-v2026-03.json)
+- [cms-blog-settings-v2026-03](/docs/specs/2026-03/cms-blog-settings-v2026-03.json)
+- [cms-posts-v2026-03](/docs/specs/2026-03/cms-posts-v2026-03.json)
+- [cms-tags-v2026-03](/docs/specs/2026-03/cms-tags-v2026-03.json)
+- [cms-cms-content-audit-v2026-03](/docs/specs/2026-03/cms-cms-content-audit-v2026-03.json)
+- [cms-domains-v2026-03](/docs/specs/2026-03/cms-domains-v2026-03.json)
+- [cms-hubdb-v2026-03](/docs/specs/2026-03/cms-hubdb-v2026-03.json)
+- [cms-media-bridge-v2026-03](/docs/specs/2026-03/cms-media-bridge-v2026-03.json)
+- [cms-pages-v2026-03](/docs/specs/2026-03/cms-pages-v2026-03.json)
+- [cms-site-search-v2026-03](/docs/specs/2026-03/cms-site-search-v2026-03.json)
+- [cms-source-code-v2026-03](/docs/specs/2026-03/cms-source-code-v2026-03.json)
+- [cms-url-mappings-v2026-03](/docs/specs/2026-03/cms-url-mappings-v2026-03.json)
+- [cms-url-redirects-v2026-03](/docs/specs/2026-03/cms-url-redirects-v2026-03.json)
+- [communication-preferences-subscriptions-v2026-03](/docs/specs/2026-03/communication-preferences-subscriptions-v2026-03.json)
+- [conversations-custom-channels-v2026-03](/docs/specs/2026-03/conversations-custom-channels-v2026-03.json)
+- [conversations-visitor-identification-v2026-03](/docs/specs/2026-03/conversations-visitor-identification-v2026-03.json)
+- [crm-calls-v2026-03](/docs/specs/2026-03/crm-calls-v2026-03.json)
+- [crm-emails-v2026-03](/docs/specs/2026-03/crm-emails-v2026-03.json)
+- [crm-meetings-v2026-03](/docs/specs/2026-03/crm-meetings-v2026-03.json)
+- [crm-notes-v2026-03](/docs/specs/2026-03/crm-notes-v2026-03.json)
+- [crm-postal-mail-v2026-03](/docs/specs/2026-03/crm-postal-mail-v2026-03.json)
+- [crm-tasks-v2026-03](/docs/specs/2026-03/crm-tasks-v2026-03.json)
+- [crm-associations-v2026-03](/docs/specs/2026-03/crm-associations-v2026-03.json)
+- [crm-associations-schema-v2026-03](/docs/specs/2026-03/crm-associations-schema-v2026-03.json)
+- [crm-object-library-v2026-03](/docs/specs/2026-03/crm-object-library-v2026-03.json)
+- [crm-exports-v2026-03](/docs/specs/2026-03/crm-exports-v2026-03.json)
+- [crm-calling-extensions-v2026-03](/docs/specs/2026-03/crm-calling-extensions-v2026-03.json)
+- [crm-public-app-crm-cards-v2026-03](/docs/specs/2026-03/crm-public-app-crm-cards-v2026-03.json)
+- [crm-transcriptions-v2026-03](/docs/specs/2026-03/crm-transcriptions-v2026-03.json)
+- [crm-video-conferencing-extension-v2026-03](/docs/specs/2026-03/crm-video-conferencing-extension-v2026-03.json)
+- [crm-imports-v2026-03](/docs/specs/2026-03/crm-imports-v2026-03.json)
+- [crm-limits-tracking-v2026-03](/docs/specs/2026-03/crm-limits-tracking-v2026-03.json)
+- [crm-lists-v2026-03](/docs/specs/2026-03/crm-lists-v2026-03.json)
+- [crm-appointments-v2026-03](/docs/specs/2026-03/crm-appointments-v2026-03.json)
+- [crm-carts-v2026-03](/docs/specs/2026-03/crm-carts-v2026-03.json)
+- [crm-commerce-payments-v2026-03](/docs/specs/2026-03/crm-commerce-payments-v2026-03.json)
+- [crm-commerce-subscriptions-v2026-03](/docs/specs/2026-03/crm-commerce-subscriptions-v2026-03.json)
+- [crm-communications-v2026-03](/docs/specs/2026-03/crm-communications-v2026-03.json)
+- [crm-companies-v2026-03](/docs/specs/2026-03/crm-companies-v2026-03.json)
+- [crm-contacts-v2026-03](/docs/specs/2026-03/crm-contacts-v2026-03.json)
+- [crm-contracts-v2026-03](/docs/specs/2026-03/crm-contracts-v2026-03.json)
+- [crm-courses-v2026-03](/docs/specs/2026-03/crm-courses-v2026-03.json)
+- [crm-custom-objects-v2026-03](/docs/specs/2026-03/crm-custom-objects-v2026-03.json)
+- [crm-deal-splits-v2026-03](/docs/specs/2026-03/crm-deal-splits-v2026-03.json)
+- [crm-deals-v2026-03](/docs/specs/2026-03/crm-deals-v2026-03.json)
+- [crm-discounts-v2026-03](/docs/specs/2026-03/crm-discounts-v2026-03.json)
+- [crm-feedback-submissions-v2026-03](/docs/specs/2026-03/crm-feedback-submissions-v2026-03.json)
+- [crm-fees-v2026-03](/docs/specs/2026-03/crm-fees-v2026-03.json)
+- [crm-goal-targets-v2026-03](/docs/specs/2026-03/crm-goal-targets-v2026-03.json)
+- [crm-invoices-v2026-03](/docs/specs/2026-03/crm-invoices-v2026-03.json)
+- [crm-leads-v2026-03](/docs/specs/2026-03/crm-leads-v2026-03.json)
+- [crm-line-items-v2026-03](/docs/specs/2026-03/crm-line-items-v2026-03.json)
+- [crm-listings-v2026-03](/docs/specs/2026-03/crm-listings-v2026-03.json)
+- [crm-objects-v2026-03](/docs/specs/2026-03/crm-objects-v2026-03.json)
+- [crm-orders-v2026-03](/docs/specs/2026-03/crm-orders-v2026-03.json)
+- [crm-partner-clients-v2026-03](/docs/specs/2026-03/crm-partner-clients-v2026-03.json)
+- [crm-partner-services-v2026-03](/docs/specs/2026-03/crm-partner-services-v2026-03.json)
+- [crm-products-v2026-03](/docs/specs/2026-03/crm-products-v2026-03.json)
+- [crm-projects-v2026-03](/docs/specs/2026-03/crm-projects-v2026-03.json)
+- [crm-quotes-v2026-03](/docs/specs/2026-03/crm-quotes-v2026-03.json)
+- [crm-schemas-v2026-03](/docs/specs/2026-03/crm-schemas-v2026-03.json)
+- [crm-services-v2026-03](/docs/specs/2026-03/crm-services-v2026-03.json)
+- [crm-taxes-v2026-03](/docs/specs/2026-03/crm-taxes-v2026-03.json)
+- [crm-tickets-v2026-03](/docs/specs/2026-03/crm-tickets-v2026-03.json)
+- [crm-users-v2026-03](/docs/specs/2026-03/crm-users-v2026-03.json)
+- [crm-crm-owners-v2026-03](/docs/specs/2026-03/crm-crm-owners-v2026-03.json)
+- [crm-pipelines-v2026-03](/docs/specs/2026-03/crm-pipelines-v2026-03.json)
+- [crm-properties-v2026-03](/docs/specs/2026-03/crm-properties-v2026-03.json)
+- [crm-property-validations-v2026-03](/docs/specs/2026-03/crm-property-validations-v2026-03.json)
+- [events-manage-event-definitions-v2026-03](/docs/specs/2026-03/events-manage-event-definitions-v2026-03.json)
+- [events-events-v2026-03](/docs/specs/2026-03/events-events-v2026-03.json)
+- [events-send-event-completions-v2026-03](/docs/specs/2026-03/events-send-event-completions-v2026-03.json)
+- [files-files-v2026-03](/docs/specs/2026-03/files-files-v2026-03.json)
+- [marketing-campaigns-public-api-v2026-03](/docs/specs/2026-03/marketing-campaigns-public-api-v2026-03.json)
+- [marketing-marketing-emails-v2026-03](/docs/specs/2026-03/marketing-marketing-emails-v2026-03.json)
+- [marketing-marketing-events-v2026-03](/docs/specs/2026-03/marketing-marketing-events-v2026-03.json)
+- [marketing-transactional-single-send-v2026-03](/docs/specs/2026-03/marketing-transactional-single-send-v2026-03.json)
+- [scheduler-meetings-v2026-03](/docs/specs/2026-03/scheduler-meetings-v2026-03.json)
+- [webhooks-webhooks-v2026-03](/docs/specs/2026-03/webhooks-webhooks-v2026-03.json)
+- [account-account-info-v3](/docs/specs/legacy/v3/account-account-info-v3.json)
+- [account-activity-v1](/docs/specs/legacy/v1/account-activity-v1.json)
+- [account-audit-logs-v3](/docs/specs/legacy/v3/account-audit-logs-v3.json)
+- [business-units-business-units-v3](/docs/specs/legacy/v3/business-units-business-units-v3.json)
+- [settings-multicurrency-v3](/docs/specs/legacy/v3/settings-multicurrency-v3.json)
+- [settings-tax-rates-v1](/docs/specs/legacy/v1/settings-tax-rates-v1.json)
+- [settings-user-provisioning-v3](/docs/specs/legacy/v3/settings-user-provisioning-v3.json)
+- [crm-app-uninstalls-v3](/docs/specs/legacy/v3/crm-app-uninstalls-v3.json)
+- [crm-public-app-feature-flags-v3-v3](/docs/specs/legacy/v3/crm-public-app-feature-flags-v3-v3.json)
+- [auth-oauth-v3](/docs/specs/legacy/v3/auth-oauth-v3.json)
+- [auth-oauth-v1](/docs/specs/legacy/v1/auth-oauth-v1.json)
+- [automation-sequences-v4](/docs/specs/legacy/v4/automation-sequences-v4.json)
+- [automation-actions-v4-v4](/docs/specs/legacy/v4/automation-actions-v4-v4.json)
+- [automation-automation-v4-v4](/docs/specs/legacy/v4/automation-automation-v4-v4.json)
+- [create-manage-workflows-v3](/docs/specs/legacy/v3/create-manage-workflows-v3.json)
+- [create-manage-workflows-v2](/docs/specs/legacy/v2/create-manage-workflows-v2.json)
+- [cms-authors-v3](/docs/specs/legacy/v3/cms-authors-v3.json)
+- [cms-blog-settings-v3](/docs/specs/legacy/v3/cms-blog-settings-v3.json)
+- [blog-details-v2](/docs/specs/legacy/v2/blog-details-v2.json)
+- [blog-comments-v3](/docs/specs/legacy/v3/blog-comments-v3.json)
+- [cms-posts-v3](/docs/specs/legacy/v3/cms-posts-v3.json)
+- [blog-posts-v2](/docs/specs/legacy/v2/blog-posts-v2.json)
+- [cms-tags-v3](/docs/specs/legacy/v3/cms-tags-v3.json)
+- [blog-topics-v3](/docs/specs/legacy/v3/blog-topics-v3.json)
+- [cms-cms-content-audit-v3](/docs/specs/legacy/v3/cms-cms-content-audit-v3.json)
+- [cms-domains-v3](/docs/specs/legacy/v3/cms-domains-v3.json)
+- [domains-v1](/docs/specs/legacy/v1/domains-v1.json)
+- [cms-hubdb-v3](/docs/specs/legacy/v3/cms-hubdb-v3.json)
+- [modules-v4](/docs/specs/legacy/v4/modules-v4.json)
+- [cms-media-bridge-v1](/docs/specs/legacy/v1/cms-media-bridge-v1.json)
+- [cms-pages-v3](/docs/specs/legacy/v3/cms-pages-v3.json)
+- [pages-v2](/docs/specs/legacy/v2/pages-v2.json)
+- [cms-site-search-v3](/docs/specs/legacy/v3/cms-site-search-v3.json)
+- [site-search-v2](/docs/specs/legacy/v2/site-search-v2.json)
+- [cms-source-code-v3](/docs/specs/legacy/v3/cms-source-code-v3.json)
+- [cms-url-mappings-v3](/docs/specs/legacy/v3/cms-url-mappings-v3.json)
+- [cms-url-redirects-v3](/docs/specs/legacy/v3/cms-url-redirects-v3.json)
+- [communication-preferences-subscriptions-v4](/docs/specs/legacy/v4/communication-preferences-subscriptions-v4.json)
+- [communication-preferences-subscriptions-v3](/docs/specs/legacy/v3/communication-preferences-subscriptions-v3.json)
+- [marketing-subscriptions-v1](/docs/specs/legacy/v1/marketing-subscriptions-v1.json)
+- [conversations-conversations-v3](/docs/specs/legacy/v3/conversations-conversations-v3.json)
+- [conversations-custom-channels-v3](/docs/specs/legacy/v3/conversations-custom-channels-v3.json)
+- [conversations-visitor-identification-v3](/docs/specs/legacy/v3/conversations-visitor-identification-v3.json)
+- [crm-calls-v3](/docs/specs/legacy/v3/crm-calls-v3.json)
+- [crm-emails-v3](/docs/specs/legacy/v3/crm-emails-v3.json)
+- [crm-meetings-v3](/docs/specs/legacy/v3/crm-meetings-v3.json)
+- [crm-notes-v3](/docs/specs/legacy/v3/crm-notes-v3.json)
+- [crm-postal-mail-v3](/docs/specs/legacy/v3/crm-postal-mail-v3.json)
+- [crm-tasks-v3](/docs/specs/legacy/v3/crm-tasks-v3.json)
+- [crm-engagements-v1](/docs/specs/legacy/v1/crm-engagements-v1.json)
+- [crm-associations-v4](/docs/specs/legacy/v4/crm-associations-v4.json)
+- [crm-associations-schema-v4](/docs/specs/legacy/v4/crm-associations-schema-v4.json)
+- [crm-associations-schema-v3](/docs/specs/legacy/v3/crm-associations-schema-v3.json)
+- [crm-associations-v3](/docs/specs/legacy/v3/crm-associations-v3.json)
+- [crm-associations-v1](/docs/specs/legacy/v1/crm-associations-v1.json)
+- [crm-exports-v3](/docs/specs/legacy/v3/crm-exports-v3.json)
+- [crm-calling-extensions-v3](/docs/specs/legacy/v3/crm-calling-extensions-v3.json)
+- [crm-public-app-crm-cards-v3](/docs/specs/legacy/v3/crm-public-app-crm-cards-v3.json)
+- [crm-timeline-v3](/docs/specs/legacy/v3/crm-timeline-v3.json)
+- [crm-timeline-v1](/docs/specs/legacy/v1/crm-timeline-v1.json)
+- [crm-transcriptions-v3](/docs/specs/legacy/v3/crm-transcriptions-v3.json)
+- [crm-video-conferencing-extension-v3](/docs/specs/legacy/v3/crm-video-conferencing-extension-v3.json)
+- [crm-extensions-v1](/docs/specs/legacy/v1/crm-extensions-v1.json)
+- [crm-imports-v3](/docs/specs/legacy/v3/crm-imports-v3.json)
+- [crm-limits-tracking-v3](/docs/specs/legacy/v3/crm-limits-tracking-v3.json)
+- [crm-lists-v3](/docs/specs/legacy/v3/crm-lists-v3.json)
+- [crm-appointments-v3](/docs/specs/legacy/v3/crm-appointments-v3.json)
+- [crm-carts-v3](/docs/specs/legacy/v3/crm-carts-v3.json)
+- [crm-commerce-payments-v3](/docs/specs/legacy/v3/crm-commerce-payments-v3.json)
+- [crm-commerce-subscriptions-v3](/docs/specs/legacy/v3/crm-commerce-subscriptions-v3.json)
+- [crm-communications-v3](/docs/specs/legacy/v3/crm-communications-v3.json)
+- [crm-companies-v3](/docs/specs/legacy/v3/crm-companies-v3.json)
+- [crm-companies-v2](/docs/specs/legacy/v2/crm-companies-v2.json)
+- [crm-companies-v1](/docs/specs/legacy/v1/crm-companies-v1.json)
+- [crm-contacts-v3](/docs/specs/legacy/v3/crm-contacts-v3.json)
+- [crm-contacts-v1](/docs/specs/legacy/v1/crm-contacts-v1.json)
+- [crm-contracts-v3](/docs/specs/legacy/v3/crm-contracts-v3.json)
+- [crm-courses-v3](/docs/specs/legacy/v3/crm-courses-v3.json)
+- [crm-custom-objects-v3](/docs/specs/legacy/v3/crm-custom-objects-v3.json)
+- [crm-deal-splits-v3](/docs/specs/legacy/v3/crm-deal-splits-v3.json)
+- [crm-deals-v3](/docs/specs/legacy/v3/crm-deals-v3.json)
+- [crm-deals-v1](/docs/specs/legacy/v1/crm-deals-v1.json)
+- [crm-discounts-v3](/docs/specs/legacy/v3/crm-discounts-v3.json)
+- [crm-feedback-submissions-v3](/docs/specs/legacy/v3/crm-feedback-submissions-v3.json)
+- [crm-fees-v3](/docs/specs/legacy/v3/crm-fees-v3.json)
+- [crm-forecasts-v3](/docs/specs/legacy/v3/crm-forecasts-v3.json)
+- [crm-forecast-types-v3](/docs/specs/legacy/v3/crm-forecast-types-v3.json)
+- [crm-goal-targets-v3](/docs/specs/legacy/v3/crm-goal-targets-v3.json)
+- [crm-invoices-v3](/docs/specs/legacy/v3/crm-invoices-v3.json)
+- [crm-leads-v3](/docs/specs/legacy/v3/crm-leads-v3.json)
+- [crm-line-items-v3](/docs/specs/legacy/v3/crm-line-items-v3.json)
+- [crm-line-items-v1](/docs/specs/legacy/v1/crm-line-items-v1.json)
+- [crm-listings-v3](/docs/specs/legacy/v3/crm-listings-v3.json)
+- [crm-object-library-v3](/docs/specs/legacy/v3/crm-object-library-v3.json)
+- [crm-objects-v3](/docs/specs/legacy/v3/crm-objects-v3.json)
+- [crm-orders-v3](/docs/specs/legacy/v3/crm-orders-v3.json)
+- [crm-partner-clients-v3](/docs/specs/legacy/v3/crm-partner-clients-v3.json)
+- [crm-partner-services-v3](/docs/specs/legacy/v3/crm-partner-services-v3.json)
+- [crm-products-v3](/docs/specs/legacy/v3/crm-products-v3.json)
+- [crm-products-v1](/docs/specs/legacy/v1/crm-products-v1.json)
+- [crm-projects-v3](/docs/specs/legacy/v3/crm-projects-v3.json)
+- [crm-quotes-v3](/docs/specs/legacy/v3/crm-quotes-v3.json)
+- [crm-schemas-v3](/docs/specs/legacy/v3/crm-schemas-v3.json)
+- [crm-services-v3](/docs/specs/legacy/v3/crm-services-v3.json)
+- [crm-taxes-v3](/docs/specs/legacy/v3/crm-taxes-v3.json)
+- [crm-tickets-v3](/docs/specs/legacy/v3/crm-tickets-v3.json)
+- [crm-tickets-v1](/docs/specs/legacy/v1/crm-tickets-v1.json)
+- [crm-users-v3](/docs/specs/legacy/v3/crm-users-v3.json)
+- [crm-crm-owners-v3](/docs/specs/legacy/v3/crm-crm-owners-v3.json)
+- [crm-owners-v2](/docs/specs/legacy/v2/crm-owners-v2.json)
+- [crm-pipelines-v3](/docs/specs/legacy/v3/crm-pipelines-v3.json)
+- [crm-pipelines-v1](/docs/specs/legacy/v1/crm-pipelines-v1.json)
+- [crm-properties-v3](/docs/specs/legacy/v3/crm-properties-v3.json)
+- [crm-properties-v2](/docs/specs/legacy/v2/crm-properties-v2.json)
+- [crm-properties-v1-companies](/docs/specs/legacy/v1/crm-properties-v1-companies.json)
+- [crm-properties-v1-contacts](/docs/specs/legacy/v1/crm-properties-v1-contacts.json)
+- [crm-properties-v1-deals](/docs/specs/legacy/v1/crm-properties-v1-deals.json)
+- [crm-property-validations-v3](/docs/specs/legacy/v3/crm-property-validations-v3.json)
+- [events-manage-event-definitions-v3](/docs/specs/legacy/v3/events-manage-event-definitions-v3.json)
+- [events-events-v3](/docs/specs/legacy/v3/events-events-v3.json)
+- [events-send-event-completions-v3](/docs/specs/legacy/v3/events-send-event-completions-v3.json)
+- [files-files-v3](/docs/specs/legacy/v3/files-files-v3.json)
+- [marketing-campaigns-public-api-v3](/docs/specs/legacy/v3/marketing-campaigns-public-api-v3.json)
+- [marketing-forms-v3](/docs/specs/legacy/v3/marketing-forms-v3.json)
+- [forms-v3-legacy](/docs/specs/legacy/v3/forms-v3-legacy.json)
+- [forms-v2](/docs/specs/legacy/v2/forms-v2.json)
+- [forms-v1](/docs/specs/legacy/v1/forms-v1.json)
+- [marketing-marketing-emails-v3](/docs/specs/legacy/v3/marketing-marketing-emails-v3.json)
+- [marketing-marketing-events-v3](/docs/specs/legacy/v3/marketing-marketing-events-v3.json)
+- [marketing-events-tracking-v1](/docs/specs/legacy/v1/marketing-events-tracking-v1.json)
+- [marketing-single-send-v4](/docs/specs/legacy/v4/marketing-single-send-v4.json)
+- [marketing-transactional-single-send-v3](/docs/specs/legacy/v3/marketing-transactional-single-send-v3.json)
+- [transactional-emails-v1](/docs/specs/legacy/v1/transactional-emails-v1.json)
+- [email-analytics-v1](/docs/specs/legacy/v1/email-analytics-v1.json)
+- [reporting-v2](/docs/specs/legacy/v2/reporting-v2.json)
+- [scheduler-meetings-v3](/docs/specs/legacy/v3/scheduler-meetings-v3.json)
+- [webhooks-webhooks-v3](/docs/specs/legacy/v3/webhooks-webhooks-v3.json)
+
+> The links below point to documentation indexes. Follow each `/_llms/` index recursively until you reach documentation pages.
+
+## Indexes
+
+- [Apps (184 pages)](https://developers.hubspot.com/docs/_llms/apps.txt): Platform, Legacy.
+- [Apps / Platform (168 pages)](https://developers.hubspot.com/docs/_llms/apps/platform.txt): Build apps, Add features, Publish to the HubSpot Marketplace.
+- [CMS (124 pages)](https://developers.hubspot.com/docs/_llms/cms.txt): Start Building, Reference, Best Practices, Marketplace, Versions & Deprecations.
+- [APIs (3787 pages)](https://developers.hubspot.com/docs/_llms/apis.txt): 2027-03-beta, 2026-09, 2026-03, Legacy.
+- [APIs / 2027-03-beta (210 pages)](https://developers.hubspot.com/docs/_llms/apis/2027-03-beta.txt): Account & Settings, Automation, CMS, CRM, Data integration, Marketing, Meetings, Reporting, Revenue, Webhooks journal.
+- [APIs / 2026-09 (1182 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09.txt): Account & Settings, App Management, Authentication, Automation, CMS, Communication preferences, Conversations, CRM, Data studio, Events, Files, Marketing, Meetings, Revenue, Webhooks, Webhooks journal.
+- [APIs / 2026-09 / CMS (220 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/cms.txt): Blogs, Content audit, Domains, HubDB, Media Bridge, Pages, Site Search, Source code, URL mappings, URL redirects.
+- [APIs / 2026-09 / CRM (637 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm.txt): Activities, Associations, CRM Data Model, Exports, Extensions, Imports, Limits Tracking, Segments (Lists), Objects, Owners, Pipelines, Properties, Property Validations.
+- [APIs / 2026-09 / CRM / Objects (398 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm/objects.txt): Appointments, Carts, Commerce Payments, Commerce Subscriptions, Communications, Companies, Contacts, Contracts, Courses, Custom Objects, Deal Splits, Deals, Discounts, Feedback Submissions, Fees, Forecasts, Goals, Invoices, Leads, Line Items, Listings, Object Tags, Objects, Orders, Partner Clients, Partner Services, Price Book Items, Price Books, Products, Projects, Quotes, Schemas, Services, Taxes, Tickets, Users.
+- [APIs / 2026-09 / CRM / Objects / Communications (13 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm/objects/communications.txt): Batch, Search.
+- [APIs / 2026-09 / CRM / Objects / Courses (14 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm/objects/courses.txt): Batch, Merge, Search.
+- [APIs / 2026-09 / CRM / Objects / Custom Objects (13 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm/objects/custom-objects.txt): Batch, Search.
+- [APIs / 2026-09 / CRM / Objects / Invoices (14 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm/objects/invoices.txt): Batch, Search.
+- [APIs / 2026-09 / CRM / Objects / Listings (13 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm/objects/listings.txt): Batch, Search.
+- [APIs / 2026-09 / CRM / Objects / Orders (15 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm/objects/orders.txt): Batch, Merge, Search.
+- [APIs / 2026-09 / CRM / Objects / Services (14 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm/objects/services.txt): Batch, Merge, Search.
+- [APIs / 2026-09 / CRM / Objects / Tickets (15 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/crm/objects/tickets.txt): Batch, Search.
+- [APIs / 2026-09 / Marketing (81 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-09/marketing.txt): Campaigns, CTAs, Forms, Marketing Emails, Marketing Events, Single Send, Transactional Emails.
+- [APIs / 2026-03 (1072 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-03.txt): Account & Settings, App Management, Authentication, Automation, CMS, Communication preferences, Conversations, CRM, Events, Files, Marketing, Scheduler, Webhooks, Webhooks journal.
+- [APIs / 2026-03 / CMS (216 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-03/cms.txt): Blogs, Content audit, Domains, HubDB, Media Bridge, Pages, Site Search, Source code, URL mappings, URL redirects.
+- [APIs / 2026-03 / CRM (602 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-03/crm.txt): Activities, Associations, CRM Data Model, Exports, Extensions, Imports, Limits Tracking, Segments (Lists), Objects, Owners, Pipelines, Properties, Property Validations.
+- [APIs / 2026-03 / CRM / Objects (380 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-03/crm/objects.txt): Appointments, Carts, Commerce Payments, Commerce Subscriptions, Communications, Companies, Contacts, Contracts, Courses, Custom Objects, Deal Splits, Deals, Discounts, Feedback Submissions, Fees, Goals, Invoices, Leads, Line Items, Listings, Objects, Orders, Partner Clients, Partner Services, Products, Projects, Quotes, Schemas, Services, Taxes, Tickets, Users.
+- [APIs / 2026-03 / CRM / Objects / Contacts (14 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-03/crm/objects/contacts.txt): Batch, Search.
+- [APIs / 2026-03 / CRM / Objects / Invoices (14 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-03/crm/objects/invoices.txt): Batch, Search.
+- [APIs / 2026-03 / CRM / Objects / Tickets (15 pages)](https://developers.hubspot.com/docs/_llms/apis/2026-03/crm/objects/tickets.txt): Batch, Search.
+- [APIs / Legacy (1323 pages)](https://developers.hubspot.com/docs/_llms/apis/legacy.txt): Account & Settings, App Management, Authentication, Automation, CMS, Communication preferences, Conversations, CRM, Events, Files, Marketing, Reporting, Scheduler, Webhooks.
+- [APIs / Legacy / CMS (257 pages)](https://developers.hubspot.com/docs/_llms/apis/legacy/cms.txt): Blogs, Content audit, Domains, HubDB, Legacy modules, Media Bridge, Pages, Site Search, Source code, URL mappings, URL redirects, v2.
+- [APIs / Legacy / CRM (735 pages)](https://developers.hubspot.com/docs/_llms/apis/legacy/crm.txt): Activities, Associations, Exports, Extensions, Imports, Limits Tracking, Segments (Lists), Objects, Owners, Pipelines, Properties, Property Validations.
+- [APIs / Legacy / CRM / Objects (425 pages)](https://developers.hubspot.com/docs/_llms/apis/legacy/crm/objects.txt): Appointments, Carts, Commerce Payments, Commerce Subscriptions, Communications, Companies, Contacts, Contracts, Courses, Custom Objects, Deal Splits, Deals, Discounts, Feedback Submissions, Fees, Forecasts, Goals, Invoices, Leads, Line Items, Listings, Object Library, Objects, Orders, Partner Clients, Partner Services, Products, Projects, Quotes, Schemas, Services, Taxes, Tickets, Users.
+- [APIs / Legacy / CRM / Objects / Contacts (41 pages)](https://developers.hubspot.com/docs/_llms/apis/legacy/crm/objects/contacts.txt): Batch, GDPR, Search, v1.
+- [APIs / Legacy / CRM / Objects / Line Items (22 pages)](https://developers.hubspot.com/docs/_llms/apis/legacy/crm/objects/line-items.txt): Batch, Search, v1.
+- [APIs / Legacy / CRM / Objects / Products (22 pages)](https://developers.hubspot.com/docs/_llms/apis/legacy/crm/objects/products.txt): Batch, Search, v1.
+- [APIs / Legacy / CRM / Objects / Tickets (23 pages)](https://developers.hubspot.com/docs/_llms/apis/legacy/crm/objects/tickets.txt): Batch, Search, v1.

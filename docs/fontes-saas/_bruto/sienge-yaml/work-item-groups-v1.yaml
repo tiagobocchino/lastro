@@ -1,0 +1,117 @@
+swagger: "2.0"
+info:
+  title: Grupos de Serviços
+  description: API de Grupos de Serviços.
+  version: "1.0"
+  license:
+    name: Softplan - Todos os direitos reservados
+host: api.sienge.com.br
+basePath: "/{subdominio-do-cliente}/public/api/v1"
+paths:
+  "/work-item-groups":
+    get:
+      operationId: getWorkItemGroups
+      tags:
+        - Grupos de Serviços
+      summary: Realiza a busca de Grupos de Serviços.
+      description: A API disponibiliza uma lista de Grupos de Serviços existentes no sistema, trazendo o código de referência, nível, descrição, Código Auxiliar e Código do tipo de obra.
+      produces:
+        - application/json
+      parameters:
+        - name: buildingTypeId
+          in: query
+          description: Tipo de obra
+          required: false
+          type: integer
+        - name: workItemGroups
+          in: query
+          description: Códigos dos Grupos de Serviços.
+          required: false
+          type: array
+          items:
+            type: string
+        - name: description
+          in: query
+          description: Descrição dos Grupos de Serviços
+          required: false
+          type: string
+        - name: offset
+          in: query
+          description: >-
+            Deslocamento do primeiro item do resultado em relação ao primeiro item 
+            da série total de resultados válidos. Valor default é 0.
+          required: false
+          type: integer
+          default: 0
+          format: int32
+        - name: limit
+          in: query
+          description: >-
+            Quantidade máxima de resultados da pesquisa a serem retornados.
+            Valor default 100, valor mínimo permitido 1 e valor máximo permitido 200.
+          required: false
+          type: integer
+          default: 100
+          maximum: 200
+          minimum: 1
+          format: int32
+      responses:
+        "200":
+          description: >-
+            Requisição bem-sucedida, retorna um array com todos os grupos de serviços.
+          schema:
+            $ref: "#/definitions/WorkItemGroupsResponseDTO"
+        "400":
+          description: Requisição mal formada
+          schema:
+            $ref: "#/definitions/ApiError"
+        "500":
+          description: Erro interno no servidor
+          schema:
+            $ref: "#/definitions/ApiError"
+definitions:
+  WorkItemGroupsResponseDTO:
+    type: object
+    properties:
+      referenceId:
+        type: string
+        description: Código de referência do grupo de serviço
+        example: "006.001"
+      level:
+        type: integer
+        description: Nível do grupo de serviço.
+        example: 2
+      description:
+        type: string
+        description: Nome/descrição do grupo de serviço
+        example: "ESCORAMENTO DE TERRENO DE VIZINHOS"
+      workItemGroupCode:
+        type: string
+        description: Código Auxilar do grupo de serviço.
+        example: MO_INICIAL01
+        maximum: 15
+      buildingTypeId:
+        type: number
+        description: Código do tipo de obra
+        example: 1
+        maximum: 4
+  ApiError:
+    type: object
+    required:
+      - developerMessage
+      - status
+    properties:
+      status:
+        type: string
+        description: Status http
+      developerMessage:
+        type: string
+        description: >-
+          Mensagem de erro pertinente a ser reportada ao developer consumidor da
+          API.
+      clientMessage:
+        type: array
+        description: Lista contendo mensagem de errors relavantes para o utilizador final
+        items:
+          type: string
+    description: Objeto que encapsula os atributos de erros da API

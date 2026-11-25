@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sienge Plataforma</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700"
+      rel="stylesheet"
+    />
+    <link href="index.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div class="general-information">
+      <h4 class="title">Introdução</h4>
+      <p>
+        O <strong>Sienge Plataforma</strong> disponibiliza a documentação das
+        APIs de forma pública para clientes, parceiros de integração ou
+        desenvolvedores independentes.
+      </p>
+      <div class="info-banner">
+        <img src="images/info_icon.svg" alt="Info" class="info-icon" />
+        <span class="banner-text">
+          <strong>Nova página de documentação de APIs disponível!</strong><br>
+          Acesse a <a target="_blank" href="https://api.sienge.com.br/v1/docs/">nova documentação de APIs</a> com navegação mais fluida, busca aprimorada e novos recursos.
+        </span>
+      </div>  
+      <h4 class="title">URL E requisições</h4>
+      <p>
+        Além de realizar a autenticação com o usuário e senha no momento da
+        requisição às APIs, é necessário informar o seu sub domínio que
+        identifica qual será o cliente Sienge que receberá a requisição. Essa
+        informação irá complementar a url para qual será realizada chamada na
+        API.
+      </p>
+      <p>Exemplo:</p>
+      <div class="markdown">
+        https://api.sienge.com.br/{subdonimio-do-cliente}/public/api/{versão-da-api}/{recurso}
+      </div>
+      <p>Exemplo:</p>
+      <ul>
+        <li>
+          <strong>Subdomínio do Cliente</strong>:
+          <i>minhaempresa</i>.sienge.com.br
+        </li>
+        <li><strong>Versão da API</strong>: v1</li>
+        <li><strong>Recurso</strong>: examples</li>
+      </ul>
+      <p>
+        <strong>URL Final:</strong>
+        <code
+          >https://api.sienge.com.br/minhaempresa/public/api/v1/examples</code
+        >
+      </p>
+      <p>
+        É importante Ressaltar que a URL para APIs BULK DATA são diferentes,
+        como a seguir:
+      </p>
+      <p>
+        <code
+          >https://api.sienge.com.br/minhaempresa/public/api/bulk-data/v1/examples</code
+        >
+      </p>
+      <p>Lembre-se de sempre utilizar criptografia, ou seja, HTTPS… ; )</p>
+      <h4 class="title">Limites de Requisições - Rate-Limits</h4>
+      <p>
+        Por padrão todos os endpoints da API dividem um número máximo de
+        requisições por dia, que é definido pelo pacote contratado ou uma
+        limitação de segurança por minuto, conforme a seguir.
+      </p>
+      <h5 class="title">Limites de Segurança</h5>
+      <p>
+        O limite máximo de requisições por Segurança são calculadas no volume de
+        requisições a ser feito por um cliente (sub domínio).
+      </p>
+      <p>
+        As limitações são bloqueantes pelo volume por minuto conforme tabela
+        abaixo.
+      </p>
+      <table class="greyGridTable">
+        <thead>
+          <tr>
+            <th>Tipos</th>
+            <th>Requisiçoes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>REST</td>
+            <td>200 / minuto</td>
+          </tr>
+          <tr>
+            <td>BULK</td>
+            <td>20 / minuto</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Neste caso, um usuário pode requisitar quantos endpoints achar
+        necessário respeitando este limite..
+      </p>
+      <h5 class="title">Limites por pacotes de API</h5>
+      <p>
+        Na determinação de limites por pacotes, são contabilizadas as
+        requisições por dia, onde pode ou não haver um bloqueio ao atingir a
+        quota diária.
+      </p>
+      <h4 class="title">Pacotes de APIs</h4>
+      <p>
+        Neste caso, um usuário pode requisitar quantos endpoints achar
+        necessário respeitando este limite..
+      </p>
+      <table class="greyGridTable">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Free</th>
+            <th>Start</th>
+            <th>Special</th>
+            <th>Essencial</th>
+            <th>Enterprise</th>
+            <th>Business</th>
+            <th>Ultimate</th>
+            <th>Infinity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="9" align="center">Requisições Diárias</td>
+          </tr>
+          <tr>
+            <td>REST</td>
+            <td>100*</td>
+            <td>1.000</td>
+            <td>2.500</td>
+            <td>5.000</td>
+            <td>10.000</td>
+            <td>30.000</td>
+            <td>75.000</td>
+            <td>200.000</td>
+          </tr>
+          <tr>
+            <td>BULK</td>
+            <td>10*</td>
+            <td>20*</td>
+            <td>50*</td>
+            <td>100*</td>
+            <td>200*</td>
+            <td>600*</td>
+            <td>28.800*</td>
+            <td>40.000*</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <i
+          >* Volumes com bloqueio - Ao atingir o limite receberá o retorno 429 :
+          To Many Requests</i
+        >
+      </p>
+      <h4 class="title">Autenticação</h4>
+      <p>
+        Para utilizar os recursos das APIs do Sienge Plataforma é necessário se
+        autenticar utilizando o
+        <strong
+          ><a
+            href="https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/Authorization"
+            target="_blank"
+            >Basic Authorization</a
+          ></strong
+        >
+        com as credenciais cadastradas no Painel de Integrações da Plataforma.
+      </p>
+      <pre>
+Se você não tem esse acesso. Contate o Administrador da sua conta Sienge Plataforma.</pre
+      >
+      <p>
+        As diretivas de tipo Basic e credenciais devem ser informadas no Header
+        da requisição <strong>Authorization</strong>.
+      </p>
+      <p>As credenciais devem ser construídas da forma a seguir:</p>
+      <ul>
+        <li>
+          O nome de usuário com a senha combinados por dois pontos
+          (usuario-api:senha).
+        </li>
+        <li>
+          A cadeia de caracteres resultante é uma codificação base64
+          (dXN1YXJpby1hcGk6c2VuaGE=).
+        </li>
+      </ul>
+      <pre>Authorization: Basic dXN1YXJpby1hcGk6c2VuaGE=</pre>
+    </div>
+  </body>
+</html>

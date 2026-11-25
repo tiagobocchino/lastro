@@ -1,0 +1,151 @@
+swagger: '2.0'
+info:
+  description: API de categorias de suprimentos.
+  version: 1.0.0
+  title: Categorias de Suprimentos
+host: api.sienge.com.br
+basePath: '/{subdominio-do-cliente}/public/api/v1'
+tags:
+  - name: Categorias
+    description: API para consulta de categorias de suprimentos
+schemes:
+  - https
+securityDefinitions:
+  basicAuth:
+    type: basic
+    description: HTTP Basic Authentication. Works over `HTTP` and `HTTPS`
+security:
+  - basicAuth: []
+
+paths:
+  '/supply-categories':
+    get:
+      tags:
+        - Categorias
+      summary: Busca categorias de suprimentos no Sienge
+      operationId: getSupplyCategories
+      parameters:
+        - name: onlyActive
+          in: query
+          description: Filtra apenas categorias ativas (`true`) ou inativas (`false`). Quando não informado, lista todas.
+          required: false
+          type: boolean
+        - name: limit
+          in: query
+          description: Quantidade de registros por página
+          required: false
+          type: integer
+          format: int32
+          default: 200
+        - name: offset
+          in: query
+          description: Deslocamento inicial para paginação
+          required: false
+          type: integer
+          format: int32
+          default: 0
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Categorias encontradas
+          schema:
+            $ref: '#/definitions/SupplyCategoryPaginationResponse'
+        '500':
+          description: Erro interno no servidor
+          schema:
+            $ref: '#/definitions/ResponseMenssage'
+
+  '/supply-categories/{categoryId}':
+    get:
+      tags:
+        - Categorias
+      summary: Busca uma categoria de suprimentos por código
+      operationId: getSupplyCategoryById
+      parameters:
+        - name: categoryId
+          in: path
+          description: Código da categoria
+          required: true
+          type: integer
+          format: int32
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Categoria encontrada
+          schema:
+            $ref: '#/definitions/SupplyCategory'
+        '404':
+          description: Categoria não encontrada
+          schema:
+            $ref: '#/definitions/ResponseMenssage'
+        '500':
+          description: Erro interno no servidor
+          schema:
+            $ref: '#/definitions/ResponseMenssage'
+
+definitions:
+  SupplyCategory:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: Código da categoria
+      description:
+        type: string
+        description: Descrição da categoria
+      status:
+        type: string
+        description: Situação da categoria
+        enum: [ACTIVE, INACTIVE]
+
+  SupplyCategoryPaginationResponse:
+    type: object
+    properties:
+      results:
+        type: array
+        items:
+          $ref: '#/definitions/SupplyCategory'
+      resultSetMetadata:
+        type: object
+        properties:
+          count:
+            type: integer
+            format: int32
+            description: Total de registros da consulta
+          limit:
+            type: integer
+            format: int32
+            description: Limite de registros por página
+          offset:
+            type: integer
+            format: int32
+            description: Offset aplicado na consulta
+      links:
+        type: array
+        items:
+          type: object
+          properties:
+            rel:
+              type: string
+              description: Relação do link (self, next, previous)
+            href:
+              type: string
+              description: URL do link
+
+  ResponseMenssage:
+    type: object
+    properties:
+      status:
+        type: integer
+        description: Status HTTP
+      developerMessage:
+        type: string
+        description: Mensagem de resposta para análise do desenvolvedor
+        example: Developer description message
+      clientMessage:
+        type: string
+        description: Mensagem de resposta para o usuário
+        example: Client description message.

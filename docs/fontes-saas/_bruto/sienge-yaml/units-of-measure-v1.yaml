@@ -1,0 +1,123 @@
+swagger: "2.0"
+info:
+  title: Unidades de Medidas
+  description: API de Unidades de Medidas.
+  version: "1.0"
+  license:
+    name: Softplan - Todos os direitos reservados
+host: api.sienge.com.br
+basePath: "/{subdominio-do-cliente}/public/api/v1"
+paths:
+  "/units-of-measure":
+    get:
+      tags:
+        - Unidades de Medidas
+      summary: Retorna lista de unidades de medidas.
+      operationId: getUnitOfMeasure
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: unitOfMeasureId
+          description: Código da Unidade de Medida
+          required: false
+          type: integer
+        - in: query
+          name: unitOfMeasureDescription
+          description: Descrição da Unidade de Medida
+          required: false
+          type: string
+        - in: query
+          name: unitOfMeasureSymbol
+          description: Símbolo da Unidade de Medida
+          required: false
+          type: string
+        - in: query
+          name: unitOfTime
+          description: Indica se é unidade de tempo
+          required: false
+          type: boolean
+        - in: query
+          name: status
+          description: Status da Unidade de Medida. Indica se a Unidade de Medida está ativa (ACTIVE) ou inativa (INACTIVE).
+          required: false
+          type: string
+          default: ACTIVE
+        - in: query
+          name: offset
+          description: Deslocamento inicial
+          required: false
+          type: integer
+        - in: query
+          name: limit
+          description: Limite de registros
+          required: false
+          type: integer
+          default: 100
+          maximum: 200
+      responses:
+        "200":
+          description: >-
+            Requisição bem-sucedida, retorna um array com todas as unidades de medidas.
+          schema:
+            $ref: "#/definitions/UnitOfTimeResponseDTO"
+        "400":
+          description: Requisição mal formada
+          schema:
+            $ref: "#/definitions/ApiError"
+        "500":
+          description: Erro interno no servidor
+          schema:
+            $ref: "#/definitions/ApiError"
+definitions:
+  UnitOfTimeResponseDTO:
+    type: object
+    properties:
+      id:
+        description: Código da Unidade de Medida
+        type: integer
+        example: 10
+      symbol:
+          description: Símbolo da Unidade de Medida
+          type: string
+          example: m²
+      description:
+          description: Descrição da Unidade de Medida
+          type: string
+          example: Metro quadrado
+      magnitude:
+          description: Grandeza da Unidade de Medida
+          type: string
+          example: Área
+      isUnitOfTime:
+          description: Indica se é unidade de tempo
+          type: boolean
+          example: FALSE
+      numberOfHours:
+          description: Número de horas
+          type: integer
+          example: 6
+      status:
+          description: Status da Unidade de Medida
+          type: string
+          enum: [ ACTIVE, INACTIVE ]
+  ApiError:
+    type: object
+    required:
+      - developerMessage
+      - status
+    properties:
+      status:
+        type: string
+        description: Status http
+      developerMessage:
+        type: string
+        description: >-
+          Mensagem de erro pertinente a ser reportada ao developer consumidor da
+          API.
+      clientMessage:
+        type: array
+        description: Lista contendo mensagem de errors relavantes para o utilizador final
+        items:
+          type: string
+    description: Objeto que encapsula os atributos de erros da API

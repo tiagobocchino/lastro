@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ploomes API — Documentação</title>
+    <meta name="description" content="Documentação pública da API do Ploomes CRM: autenticação, OData, limites e referência de todos os endpoints, com playground para testar requisições.">
+    <meta name="theme-color" id="theme_color" content="#843CFF">
+    <link rel="icon" href="img/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="img/icon-purple.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/theme-init.js"></script>
+</head>
+
+<body>
+    <a class="skip-link" href="#main" data-i18n="skip">Pular para o conteúdo</a>
+
+    <header class="topbar">
+        <button class="icon-btn topbar__menu" type="button" id="menu_toggle" aria-controls="sidebar" aria-expanded="false" data-i18n-aria="menu_open"></button>
+
+        <a class="topbar__brand" href="#" id="brand_link">
+            <img class="logo logo--light" src="img/ploomes-horizontal-color.svg" alt="Ploomes" width="182" height="26">
+            <img class="logo logo--dark" src="img/ploomes-horizontal-color-negative.svg" alt="Ploomes" width="182" height="26">
+            <span class="topbar__divider" aria-hidden="true"></span>
+            <span class="topbar__title" data-i18n="app_title">Documentação da API</span>
+        </a>
+
+        <div class="topbar__actions">
+            <div class="lang">
+                <button class="lang__btn" type="button" id="lang_button" aria-haspopup="listbox" aria-expanded="false" aria-controls="lang_menu" data-i18n-aria="lang_label">
+                    <span id="lang_icon" class="lang__inner"></span>
+                </button>
+                <ul class="menu" id="lang_menu" role="listbox" hidden>
+                    <li class="menu__item" role="option" data-lang="pt" aria-selected="false">Português <small>PT</small></li>
+                    <li class="menu__item" role="option" data-lang="en" aria-selected="false">English <small>EN</small></li>
+                    <li class="menu__item" role="option" data-lang="es" aria-selected="false">Español <small>ES</small></li>
+                </ul>
+            </div>
+
+            <button class="icon-btn theme-toggle" type="button" id="theme_toggle" aria-label="Alternar tema"></button>
+
+            <button class="key-pill" type="button" id="key_button" data-opens-key aria-haspopup="dialog" aria-expanded="false" aria-controls="key_popover">
+                <span class="dot" id="key_dot"></span>
+                <span id="key_icon" class="row"></span>
+                <span class="key-pill__label" id="key_label"></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="popover" id="key_popover" role="dialog" aria-labelledby="key_title" hidden>
+        <div class="popover__head">
+            <h3 id="key_title" data-i18n="key_title">Sua User-Key</h3>
+            <button class="icon-btn" type="button" id="key_close" data-i18n-aria="menu_close"></button>
+        </div>
+        <p class="popover__help" data-i18n="key_help"></p>
+        <input class="input input--mono" type="password" id="key_input" autocomplete="off" spellcheck="false" data-i18n-placeholder="key_placeholder">
+        <div class="popover__row">
+            <button class="btn btn--primary" type="button" id="key_save" data-i18n="key_save">Validar e usar</button>
+            <button class="btn btn--ghost" type="button" id="key_clear" data-i18n="key_clear">Remover</button>
+        </div>
+        <div class="popover__status" id="key_status"></div>
+        <button class="popover__link" type="button" id="key_where"><span id="key_where_icon"></span><span data-i18n="key_where"></span></button>
+    </div>
+
+    <div class="layout">
+        <div class="backdrop" id="backdrop"></div>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar__search">
+                <div class="input-icon">
+                    <span id="search_icon"></span>
+                    <input class="input" type="search" id="search" autocomplete="off" data-i18n-placeholder="search_placeholder">
+                    <kbd>/</kbd>
+                </div>
+            </div>
+            <nav class="sidebar__nav" aria-label="Endpoints">
+                <a class="nav-home" href="#" id="nav_home"><span id="nav_home_icon"></span><span data-i18n="nav_intro">Introdução</span></a>
+                <div class="sidebar__section" data-i18n="nav_endpoints">Endpoints</div>
+                <div id="nav_groups"></div>
+            </nav>
+            <div class="sidebar__footer">
+                <span data-i18n="sidebar_server">Servidor</span>
+                <code id="sidebar_server"></code>
+            </div>
+        </aside>
+
+        <main class="main" id="main">
+            <div class="container">
+                <section id="view_home"></section>
+                <section id="view_endpoint" hidden></section>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

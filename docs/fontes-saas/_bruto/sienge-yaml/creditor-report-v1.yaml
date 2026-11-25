@@ -1,0 +1,250 @@
+swagger: '2.0'
+info:
+  description: API para geração e obtenção da URL do relatório de extrato de credores em PDF.
+  version: '1.0.0'
+  title: API de relatório de extrato de credores
+host: api.sienge.com.br
+basePath: '/{subdominio-do-cliente}/public/api/v1'
+tags:
+  - name: API de relatório de extrato de credores
+    description: API para geração e obtenção da URL do relatório de extrato de credores em PDF
+schemes:
+  - https
+securityDefinitions:
+  basicAuth:
+    type: basic
+    description: HTTP Basic Authentication. Works over `HTTP` and `HTTPS`
+security:
+  - basicAuth: []
+paths:
+  /creditor-report/pdf:
+    get:
+      tags:
+      - API de relatório de extrato de credores
+      summary: Gera e retorna a URL do relatório de extrato de credores em PDF. O link expira em 5 minutos.
+      description: Gera um relatório de extrato de credores conforme os filtros informados e retorna a URL para visualização do PDF.
+      operationId: findCreditorReportUrlPdf
+      parameters:
+        - name: companyId
+          in: query
+          type: integer
+          required: false
+          description: Código da empresa.
+        - name: billId
+          in: query
+          type: integer
+          required: false
+          description: Código do título.
+        - name: dueStartDate
+          in: query
+          type: string
+          format: 'date (Formato ISO 8601 yyyy-MM-dd | Exemplo: 2025-01-01)'
+          required: false
+          description: Data inicial de vencimento no formato yyyy-MM-dd.
+        - name: dueEndDate
+          in: query
+          type: string
+          format: 'date (Formato ISO 8601 yyyy-MM-dd | Exemplo: 2025-01-01)'
+          required: false
+          description: Data final de vencimento no formato yyyy-MM-dd.
+        - name: issueStartDate
+          in: query
+          type: string
+          format: 'date (Formato ISO 8601 yyyy-MM-dd | Exemplo: 2025-01-01)'
+          required: false
+          description: Data inicial de emissão no formato yyyy-MM-dd.
+        - name: issueEndDate
+          in: query
+          type: string
+          format: 'date (Formato ISO 8601 yyyy-MM-dd | Exemplo: 2025-01-01)'
+          required: false
+          description: Data final de emissão no formato yyyy-MM-dd.
+        - name: documentId
+          in: query
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+          required: false
+          description: Lista de identificadores de documentos.
+        - name: creditorId
+          in: query
+          type: array
+          items:
+            type: integer
+          collectionFormat: multi
+          required: false
+          description: Lista de códigos de credores.
+        - name: creditorClassId
+          in: query
+          type: array
+          items:
+            type: integer
+          collectionFormat: multi
+          required: false
+          description: Lista de códigos de classe de credor.
+        - name: costCenterId
+          in: query
+          type: integer
+          required: false
+          description: Código do centro de custo.
+        - name: departmentId
+          in: query
+          type: array
+          items:
+            type: integer
+          collectionFormat: multi
+          required: false
+          description: Lista de códigos de departamento.
+        - name: monetaryCorrectionDate
+          in: query
+          type: string
+          format: 'date (Formato ISO 8601 yyyy-MM-dd | Exemplo: 2025-01-01)'
+          required: false
+          description: Data de correção monetária no formato yyyy-MM-dd.
+        - name: sortBy
+          in: query
+          type: string
+          enum: [V, E, T, D, P]
+          default: V
+          required: false
+          description: |
+            Ordenação do relatório.  
+            V: Vencimento,  
+            E: Emissão,  
+            T: Título,  
+            D: Documento,  
+            P: Departamento.
+        - name: indexerId
+          in: query
+          type: integer
+          required: false
+          description: Código do indexador para correção dos valores das baixas por pagamento
+        - name: valuesPresentation
+          in: query
+          type: string
+          enum: [C, N]
+          default: C
+          required: false
+          description: |
+            Forma de apresentação dos valores.  
+            C: Conforme valor total dos títulos,  
+            N: Conforme apropriação financeira para o centro de custo.
+        - name: forecastDocument
+          in: query
+          type: string
+          enum: [S, N]
+          default: S
+          required: false
+          description: Apresentar documento de previsão (S/N).
+        - name: obsBill
+          in: query
+          type: string
+          enum: [S, N]
+          default: N
+          required: false
+          description: Apresentar observação do título (S/N).
+        - name: includeObsPayment
+          in: query
+          type: string
+          enum: [S, N]
+          default: N
+          required: false
+          description: Apresentar observação da baixa (S/N).
+        - name: includePaymentInfo
+          in: query
+          type: string
+          enum: [S, N]
+          default: N
+          required: false
+          description: Apresentar informações de pagamento escritural (S/N).
+        - name: printPaymentMethod
+          in: query
+          type: string
+          enum: [S, N]
+          default: N
+          required: false
+          description: Apresentar forma de pagamento (S/N).
+        - name: printOriginalDueDate
+          in: query
+          type: string
+          enum: [S, N]
+          default: N
+          required: false
+          description: Apresentar vencimento original da parcela (S/N).
+        - name: showTaxes
+          in: query
+          type: string
+          enum: [S, N]
+          default: N
+          required: false
+          description: Apresentar impostos retidos (S/N).
+        - name: showDepartment
+          in: query
+          type: string
+          enum: [S, N]
+          default: N
+          required: false
+          description: Apresentar departamento (S/N).
+        - name: includePaymentAdvance
+          in: query
+          type: string
+          enum: [S, N]
+          default: N
+          required: false
+          description: Apresentar apenas baixas de pagamento e adiantamento para as parcelas baixadas (S/N).
+        - name: creditorTypeEmployee
+          in: query
+          type: string
+          enum: [S, N]
+          default: S
+          required: false
+          description: Incluir credores do tipo funcionário (S/N).
+        - name: creditorTypeBroker
+          in: query
+          type: string
+          enum: [S, N]
+          default: S
+          required: false
+          description: Incluir credores do tipo corretor (S/N).
+        - name: creditorTypeSupplier
+          in: query
+          type: string
+          enum: [S, N]
+          default: S
+          required: false
+          description: Incluir credores do tipo fornecedor (S/N).
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Extrato do credor carregado com sucesso
+          schema:
+            $ref: "#/definitions/Results"
+        "404":
+          description: Saldo devedor presente não gerado
+          schema:
+            $ref: "#/definitions/ResponseMessage"
+        "500":
+          description: Erro interno no servidor
+          schema:
+            $ref: "#/definitions/ResponseMessage"
+definitions:
+  ResponseMessage:
+    type: object
+    properties:
+      status:
+        type: integer
+        description: Status Http
+      developerMessage:
+        type: string
+        description: Mensagem de resposta para análise do desenvolvedor
+      clientMessage:
+        type: string
+        description: Mensagem de resposta para o usuário
+  Results:
+    type: object
+    properties:
+      urlReport:
+        type: string
+        description: Url para download do PDF referente ao Extrado do Credor.

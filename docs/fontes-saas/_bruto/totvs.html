@@ -1,0 +1,2332 @@
+    
+<!DOCTYPE html>
+<html>
+<head>
+<script >
+
+if (window.location.href == "http://tdn.totvs.com/" ||
+    window.location.href == "http://tdn.totvs.com.br/" ||
+    window.location.href == "http://tdn.totvs.com/display/home/TDN+-+TOTVS+Developer+Network") {
+    window.location = "https://totvscst.zendesk.com/hc/pt-br/#home";
+} else
+if (window.location.href == "http://tdninterno.totvs.com/") {
+    // NOVO ESTILO - MUDAR AQUI PARA A NOVA URL 
+    window.location = "http://tdn.totvs.com/pages/viewpage.action?pageId=331851568";
+} 
+
+</script>
+                            <title>REST - Frameworksp - TDN</title>
+    
+        
+
+                        
+    
+                        
+    
+
+                
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=EDGE,chrome=IE7">
+<meta charset="UTF-8">
+<meta id="confluence-context-path" name="confluence-context-path" content="">
+<meta id="confluence-base-url" name="confluence-base-url" content="https://tdn.totvs.com">
+
+    <meta id="atlassian-token" name="atlassian-token" content="79d5c5f6255799be8654776ee1a8169393481161">
+
+
+<meta id="confluence-space-key" name="confluence-space-key" content="framework">
+<script type="text/javascript">
+        var contextPath = '';
+</script>
+
+    
+
+    <meta name="confluence-request-time" content="1795570662831">
+        
+    
+        
+            <style>.ia-fixed-sidebar, .ia-splitter-left {width: 285px;}.theme-default .ia-splitter #main {margin-left: 285px;}.ia-fixed-sidebar {visibility: hidden;}</style>
+            <meta name="ajs-use-keyboard-shortcuts" content="true">
+            <meta name="ajs-discovered-plugin-features" content="$discoveredList">
+            <meta name="ajs-keyboardshortcut-hash" content="b62d4cd2595e4334dcf381c096ad2b09">
+            
+
+
+
+
+<meta name="translated-title" content="">
+
+                        <script type="application/javascript">
+    window.Bitvoodoo = window.Bitvoodoo || {};
+    window.Bitvoodoo.Language = window.Bitvoodoo.Language || {};
+
+    window.Bitvoodoo.Language.PageTree = {
+	                "confluenceDefaultLanguage": "pt_BR",
+	                                "isBlog": false,
+            "hierarchy": [
+                                                      null
+                                      ,                                                      null
+                                      ,                                                      null
+                                      ,                                                      null
+                                      ,                                                      null
+                                      ,                                                      null
+                                                                  ]
+            }
+</script>
+            <meta name="ajs-is-confluence-admin" content="false">
+            <meta name="ajs-connection-timeout" content="10000">
+            
+    
+    
+            <meta name="ajs-page-title" content="REST">
+            <meta name="ajs-latest-published-page-title" content="REST">
+            <meta name="ajs-space-name" content="Frameworksp">
+            <meta name="ajs-page-id" content="165282017">
+            <meta name="ajs-latest-page-id" content="165282017">
+            <meta name="ajs-content-type" content="page">
+            <meta name="ajs-parent-page-title" content="Classes">
+            <meta name="ajs-parent-page-id" content="22480491">
+            <meta name="ajs-space-key" content="framework">
+            <meta name="ajs-max-number-editors" content="12">
+            <meta name="ajs-macro-placeholder-timeout" content="5000">
+            <meta name="ajs-from-page-title" content="">
+            <meta name="ajs-can-remove-page" content="false">
+            <meta name="ajs-can-remove-page-hierarchy" content="false">
+            <meta name="ajs-browse-page-tree-mode" content="view">
+            <meta name="ajs-shared-drafts" content="false">
+            <meta name="ajs-context-path" content="">
+            <meta name="ajs-base-url" content="https://tdn.totvs.com">
+            <meta name="ajs-version-number" content="7.19.17">
+            <meta name="ajs-build-number" content="8804">
+            <meta name="ajs-remote-user" content="">
+            <meta name="ajs-remote-user-key" content="">
+            <meta name="ajs-remote-user-has-licensed-access" content="false">
+            <meta name="ajs-remote-user-has-browse-users-permission" content="false">
+            <meta name="ajs-current-user-fullname" content="">
+            <meta name="ajs-current-user-avatar-url" content="">
+            <meta name="ajs-current-user-avatar-uri-reference" content="/images/icons/profilepics/anonymous.svg">
+            <meta name="ajs-static-resource-url-prefix" content="/s/-tmomrz/8804/xgjkrn/_">
+            <meta name="ajs-global-settings-attachment-max-size" content="52428800">
+            <meta name="ajs-global-settings-quick-search-enabled" content="true">
+            <meta name="ajs-user-locale" content="pt_BR">
+            <meta name="ajs-user-timezone-offset" content="-10800000">
+            <meta name="ajs-enabled-dark-features" content="site-wide.synchrony.disable,site-wide.shared-drafts.disable,com.atlassian.profiling.ita.metrics.deny,clc.quick.create,confluence.view.edit.transition,cql.search.screen,confluence-inline-comments-resolved,frontend.editor.v4,http.session.registrar,nps.survey.inline.dialog,confluence.efi.onboarding.new.templates,frontend.editor.v4.compatibility,atlassian.cdn.static.assets,pdf-preview,previews.sharing,previews.versions,file-annotations,confluence.efi.onboarding.rich.space.content,collaborative-audit-log,confluence.reindex.improvements,previews.conversion-service,editor.ajax.save,read.only.mode,graphql,previews.trigger-all-file-types,attachment.extracted.text.extractor,lucene.caching.filter,confluence.table.resizable,notification.batch,previews.sharing.pushstate,confluence-inline-comments-rich-editor,tc.tacca.dacca,site-wide.synchrony.opt-in,atlassian.webresource.twophase.js.i18n.disabled,confluence.denormalisedpermissions,file-annotations.likes,gatekeeper-ui-v2,v2.content.name.searcher,mobile.supported.version,confluence.editor.tinymce.tables,pulp,confluence-inline-comments,confluence-inline-comments-dangling-comment,quick-reload-inline-comments-flags,confluence.retention.rules">
+            <meta name="ajs-atl-token" content="79d5c5f6255799be8654776ee1a8169393481161">
+            <meta name="ajs-confluence-flavour" content="VANILLA">
+            <meta name="ajs-user-date-pattern" content="dd/MM/yyyy">
+            <meta name="ajs-access-mode" content="READ_WRITE">
+            <meta name="ajs-render-mode" content="READ_WRITE">
+            <meta name="ajs-date.format" content="dd MMM, yyyy">
+    
+    <link rel="shortcut icon" href="/s/-tmomrz/8804/xgjkrn/61/_/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/s/-tmomrz/8804/xgjkrn/61/_/favicon.ico">
+
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch/osd.action" title="TDN"/>
+    
+                    
+            <meta name="ajs-create-issue-metadata-show-discovery" content="false">
+            
+
+    <script>
+window.WRM=window.WRM||{};window.WRM._unparsedData=window.WRM._unparsedData||{};window.WRM._unparsedErrors=window.WRM._unparsedErrors||{};
+WRM._unparsedData["com.atlassian.applinks.applinks-plugin:applinks-common-exported.entity-types"]="{\u0022singular\u0022:{\u0022refapp.charlie\u0022:\u0022Charlie\u0022,\u0022fecru.project\u0022:\u0022Projeto Crucible\u0022,\u0022fecru.repository\u0022:\u0022Reposit\u00f3rio do FishEye\u0022,\u0022stash.project\u0022:\u0022Projeto Stash\u0022,\u0022generic.entity\u0022:\u0022Projeto gen\u00e9rico\u0022,\u0022confluence.space\u0022:\u0022Espa\u00e7o Confluence\u0022,\u0022bamboo.project\u0022:\u0022Projeto no Bamboo\u0022,\u0022jira.project\u0022:\u0022Projeto do Jira\u0022},\u0022plural\u0022:{\u0022refapp.charlie\u0022:\u0022Charlies\u0022,\u0022fecru.project\u0022:\u0022Projetos Crucible\u0022,\u0022fecru.repository\u0022:\u0022Reposit\u00f3rios do FishEye\u0022,\u0022stash.project\u0022:\u0022Projetos Stash\u0022,\u0022generic.entity\u0022:\u0022Projetos gen\u00e9ricos\u0022,\u0022confluence.space\u0022:\u0022Espa\u00e7os Confluence\u0022,\u0022bamboo.project\u0022:\u0022Projetos do Bamboo\u0022,\u0022jira.project\u0022:\u0022Projetos do Jira\u0022}}";
+WRM._unparsedData["com.atlassian.confluence.plugins.confluence-license-banner:confluence-license-banner-resources.license-details"]="{\u0022daysBeforeLicenseExpiry\u0022:0,\u0022daysBeforeMaintenanceExpiry\u0022:0,\u0022showLicenseExpiryBanner\u0022:false,\u0022showMaintenanceExpiryBanner\u0022:false,\u0022renewUrl\u0022:null,\u0022salesUrl\u0022:null}";
+WRM._unparsedData["com.atlassian.plugins.atlassian-plugins-webresource-plugin:context-path.context-path"]="\u0022\u0022";
+WRM._unparsedData["com.atlassian.applinks.applinks-plugin:applinks-common-exported.authentication-types"]="{\u0022com.atlassian.applinks.api.auth.types.BasicAuthenticationProvider\u0022:\u0022Acesso B\u00e1sico\u0022,\u0022com.atlassian.applinks.api.auth.types.TrustedAppsAuthenticationProvider\u0022:\u0022Aplica\u00e7\u00f5es confi\u00e1veis\u0022,\u0022com.atlassian.applinks.api.auth.types.CorsAuthenticationProvider\u0022:\u0022CORS\u0022,\u0022com.atlassian.applinks.api.auth.types.OAuthAuthenticationProvider\u0022:\u0022OAuth\u0022,\u0022com.atlassian.applinks.api.auth.types.TwoLeggedOAuthAuthenticationProvider\u0022:\u0022OAuth\u0022,\u0022com.atlassian.applinks.api.auth.types.TwoLeggedOAuthWithImpersonationAuthenticationProvider\u0022:\u0022OAuth\u0022}";
+WRM._unparsedData["com.atlassian.confluence.plugins.confluence-search-ui-plugin:confluence-search-ui-plugin-resources.i18n-data"]="{\u0022search.ui.recent.link.text\u0022:\u0022Ver conte\u00fados mais visitados recentemente\u0022,\u0022search.ui.search.results.empty\u0022:\u0022N\u00e3o foi poss\u00edvel encontrar nenhum resultado para \u005C\u0022{0}\u005C\u0022.\u0022,\u0022search.ui.filter.clear.selected\u0022:\u0022Limpar elementos selecionados\u0022,\u0022search.ui.content.name.search.items.panel.load.all.top.items.button.text\u0022:\u0022Mostrar mais resultados de app...\u0022,\u0022search.ui.filter.contributor.button.text\u0022:\u0022Colaborador\u0022,\u0022search.ui.filter.space.current.label\u0022:\u0022ATUAL\u0022,\u0022search.ui.clear.input.button.text\u0022:\u0022Apagar texto\u0022,\u0022search.ui.search.results.clear.button\u0022:\u0022limpar seus filtros.\u0022,\u0022help.search.ui.link.title\u0022:\u0022Dicas de pesquisa\u0022,\u0022search.ui.container.close.text\u0022:\u0022Fechar\u0022,\u0022search.ui.filter.date.month.text\u0022:\u0022M\u00eas passado\u0022,\u0022search.ui.infinite.scroll.button.text\u0022:\u0022Mais resultados\u0022,\u0022search.ui.filter.date.button.text\u0022:\u0022Data\u0022,\u0022search.ui.filter.date.week.text\u0022:\u0022Semana passada\u0022,\u0022search.ui.result.subtitle.calendar\u0022:\u0022Calend\u00e1rio da equipe\u0022,\u0022search.ui.filter.date.heading\u0022:\u0022\u00daltima modifica\u00e7\u00e3o dentro de\u0022,\u0022search.ui.filter.space.input.label\u0022:\u0022Encontrar espa\u00e7os...\u0022,\u0022search.ui.generic.error\u0022:\u0022Algo deu errado. Atualize a p\u00e1gina ou entre em contato com o administrador se isso continuar acontecendo.\u0022,\u0022search.ui.recent.spaces\u0022:\u0022Espa\u00e7os recentes\u0022,\u0022search.ui.result.subtitle.space\u0022:\u0022Espa\u00e7o\u0022,\u0022search.ui.filter.space.category.input.label\u0022:\u0022Encontrar categorias de espa\u00e7o...\u0022,\u0022search.ui.filter.space.archive.label\u0022:\u0022Pesquisar em espa\u00e7os arquivados\u0022,\u0022search.ui.filter.label\u0022:\u0022filtro\u0022,\u0022search.ui.filter.date.all.text\u0022:\u0022Qualquer data\u0022,\u0022search.ui.filter.date.hour.text\u0022:\u0022Dia anterior\u0022,\u0022search.ui.filters.heading\u0022:\u0022Filtrar por\u0022,\u0022search.ui.filter.label.input.label\u0022:\u0022Encontrar r\u00f3tulos...\u0022,\u0022search.ui.recent.items.anonymous\u0022:\u0022Comece a explorar. Os resultados das suas pesquisas ser\u00e3o exibidos aqui.\u0022,\u0022search.ui.input.label\u0022:\u0022Pesquisar\u0022,\u0022search.ui.input.aria.label\u0022:\u0022Pesquisa: quando voc\u00ea digitar, os resultados v\u00e3o ser exibidos abaixo.\u0022,\u0022search.ui.search.result\u0022:\u0022{0,choice,1#{0} resultado de pesquisa|1\u003c{0} resultados de pesquisa}\u0022,\u0022search.ui.filter.label.button.text\u0022:\u0022R\u00f3tulo\u0022,\u0022search.ui.container.clear.ariaLabel\u0022:\u0022Limpar\u0022,\u0022search.ui.input.alert\u0022:\u0022Digite enter para pesquisar\u0022,\u0022search.ui.filter.no.result.text\u0022:\u0022N\u00e3o encontramos nenhum resultado para sua pesquisa\u0022,\u0022search.ui.result.subtitle.user\u0022:\u0022Perfil de usu\u00e1rio\u0022,\u0022search.ui.filter.contributor.input.label\u0022:\u0022Encontrar pessoas...\u0022,\u0022search.ui.filter.content.type.button.text\u0022:\u0022Tipo\u0022,\u0022search.ui.filter.date.year.text\u0022:\u0022Ano passado\u0022,\u0022search.ui.advanced.search.link.text\u0022:\u0022Pesquisa avan\u00e7ada\u0022,\u0022search.ui.filter.space.button.text\u0022:\u0022Espa\u00e7o\u0022,\u0022search.ui.search.results.clear.line2\u0022:\u0022Tente usar um termo de pesquisa diferente ou\u0022,\u0022search.ui.filter.space.category.button.text\u0022:\u0022Categoria de espa\u00e7o\u0022,\u0022search.ui.search.results.clear.line1\u0022:\u0022N\u00e3o encontramos nenhum resultado para sua pesquisa.\u0022,\u0022search.ui.content.name.search.items.panel.load.all.top.items.admin.button.text\u0022:\u0022Mostrar mais configura\u00e7\u00f5es e resultados de app...\u0022,\u0022search.ui.recent.pages\u0022:\u0022Visitado recentemente\u0022,\u0022search.ui.search.result.anonymous\u0022:\u0022{0,choice,1#{0} resultado de pesquisa|1\u003c{0} resultados de pesquisa}. J\u00e1 tem uma conta? {1}Fa\u00e7a login{2} para expandir sua pesquisa.\u0022,\u0022search.ui.recent.items.empty\u0022:\u0022Comece a explorar. As p\u00e1ginas e os espa\u00e7os que voc\u00ea visitou recentemente ser\u00e3o exibidos aqui.\u0022,\u0022search.ui.filter.space.init.heading\u0022:\u0022espa\u00e7os recentes\u0022}";
+WRM._unparsedData["com.atlassian.applinks.applinks-plugin:applinks-common-exported.applinks-types"]="{\u0022crowd\u0022:\u0022Crowd\u0022,\u0022confluence\u0022:\u0022Confluence\u0022,\u0022fecru\u0022:\u0022Fisheye / Crucible\u0022,\u0022stash\u0022:\u0022Stash\u0022,\u0022jira\u0022:\u0022Jira\u0022,\u0022refapp\u0022:\u0022Aplica\u00e7\u00e3o de refer\u00eancia\u0022,\u0022bamboo\u0022:\u0022Bamboo\u0022,\u0022generic\u0022:\u0022Aplica\u00e7\u00e3o gen\u00e9rica\u0022}";
+WRM._unparsedData["com.atlassian.confluence.plugins.synchrony-interop:synchrony-status-banner-loader.synchrony-status"]="false";
+WRM._unparsedData["com.atlassian.applinks.applinks-plugin:applinks-common-exported.applinks-help-paths"]="{\u0022entries\u0022:{\u0022applinks.docs.root\u0022:\u0022https://confluence.atlassian.com/display/APPLINKS-082/\u0022,\u0022applinks.docs.diagnostics.troubleshoot.sslunmatched\u0022:\u0022SSL+and+application+link+troubleshooting+guide\u0022,\u0022applinks.docs.diagnostics.troubleshoot.oauthsignatureinvalid\u0022:\u0022OAuth+troubleshooting+guide\u0022,\u0022applinks.docs.diagnostics.troubleshoot.oauthtimestamprefused\u0022:\u0022OAuth+troubleshooting+guide\u0022,\u0022applinks.docs.delete.entity.link\u0022:\u0022Create+links+between+projects\u0022,\u0022applinks.docs.adding.application.link\u0022:\u0022Link+Atlassian+applications+to+work+together\u0022,\u0022applinks.docs.administration.guide\u0022:\u0022Application+Links+Documentation\u0022,\u0022applinks.docs.oauth.security\u0022:\u0022OAuth+security+for+application+links\u0022,\u0022applinks.docs.troubleshoot.application.links\u0022:\u0022Troubleshoot+application+links\u0022,\u0022applinks.docs.diagnostics.troubleshoot.unknownerror\u0022:\u0022Network+and+connectivity+troubleshooting+guide\u0022,\u0022applinks.docs.configuring.auth.trusted.apps\u0022:\u0022Configuring+Trusted+Applications+authentication+for+an+application+link\u0022,\u0022applinks.docs.diagnostics.troubleshoot.authlevelunsupported\u0022:\u0022OAuth+troubleshooting+guide\u0022,\u0022applinks.docs.diagnostics.troubleshoot.ssluntrusted\u0022:\u0022SSL+and+application+link+troubleshooting+guide\u0022,\u0022applinks.docs.diagnostics.troubleshoot.unknownhost\u0022:\u0022Network+and+connectivity+troubleshooting+guide\u0022,\u0022applinks.docs.delete.application.link\u0022:\u0022Link+Atlassian+applications+to+work+together\u0022,\u0022applinks.docs.adding.project.link\u0022:\u0022Configuring+Project+links+across+Applications\u0022,\u0022applinks.docs.link.applications\u0022:\u0022Link+Atlassian+applications+to+work+together\u0022,\u0022applinks.docs.diagnostics.troubleshoot.oauthproblem\u0022:\u0022OAuth+troubleshooting+guide\u0022,\u0022applinks.docs.diagnostics.troubleshoot.migration\u0022:\u0022Update+application+links+to+use+OAuth\u0022,\u0022applinks.docs.relocate.application.link\u0022:\u0022Link+Atlassian+applications+to+work+together\u0022,\u0022applinks.docs.administering.entity.links\u0022:\u0022Create+links+between+projects\u0022,\u0022applinks.docs.upgrade.application.link\u0022:\u0022OAuth+security+for+application+links\u0022,\u0022applinks.docs.diagnostics.troubleshoot.connectionrefused\u0022:\u0022Network+and+connectivity+troubleshooting+guide\u0022,\u0022applinks.docs.configuring.auth.oauth\u0022:\u0022OAuth+security+for+application+links\u0022,\u0022applinks.docs.insufficient.remote.permission\u0022:\u0022OAuth+security+for+application+links\u0022,\u0022applinks.docs.configuring.application.link.auth\u0022:\u0022OAuth+security+for+application+links\u0022,\u0022applinks.docs.diagnostics\u0022:\u0022Application+links+diagnostics\u0022,\u0022applinks.docs.configured.authentication.types\u0022:\u0022OAuth+security+for+application+links\u0022,\u0022applinks.docs.adding.entity.link\u0022:\u0022Create+links+between+projects\u0022,\u0022applinks.docs.diagnostics.troubleshoot.unexpectedresponse\u0022:\u0022Network+and+connectivity+troubleshooting+guide\u0022,\u0022applinks.docs.configuring.auth.basic\u0022:\u0022Configuring+Basic+HTTP+Authentication+for+an+Application+Link\u0022,\u0022applinks.docs.diagnostics.troubleshoot.authlevelmismatch\u0022:\u0022OAuth+troubleshooting+guide\u0022}}";
+WRM._unparsedData["com.atlassian.confluence.plugins.confluence-feature-discovery-plugin:confluence-feature-discovery-plugin-resources.test-mode"]="false";
+if(window.WRM._dataArrived)window.WRM._dataArrived();</script>
+<link rel="stylesheet" href="/s/d71acb937770f936d512732497a20d53-CDN/-tmomrz/8804/xgjkrn/004fea3af171bcbf8e59c62867f092d8/_/download/contextbatch/css/_super,-com.atlassian.plugins.atlassian-plugins-webresource-rest:data-collector-perf-observer/batch.css" data-wrm-key="_super,-com.atlassian.plugins.atlassian-plugins-webresource-rest:data-collector-perf-observer" data-wrm-batch-type="context" media="all">
+<link rel="stylesheet" href="/s/8b577fab6ee6f33703cdb18ffcd6d38a-CDN/-tmomrz/8804/xgjkrn/587663cf39f6ae0a0e80aec80a49fce3/_/download/contextbatch/css/atl.confluence.plugins.pagetree-desktop,main,viewcontent,atl.general,page,atl.comments,-_super/batch.css?gatekeeper-ui-v2=true&amp;highlightactions=true" data-wrm-key="atl.confluence.plugins.pagetree-desktop,main,viewcontent,atl.general,page,atl.comments,-_super" data-wrm-batch-type="context" media="all">
+<link rel="stylesheet" href="/s/40f2feef8860f8d4b30996e4dcd6d8ca-CDN/-tmomrz/8804/xgjkrn/17.19.0/_/download/batch/confluence.extra.livesearch:livesearch-macro-web-resources/confluence.extra.livesearch:livesearch-macro-web-resources.css" data-wrm-key="confluence.extra.livesearch:livesearch-macro-web-resources" data-wrm-batch-type="resource" media="all">
+<link rel="stylesheet" href="/s/-tmomrz/8804/xgjkrn/61/_/styles/custom.css" media="all">
+<script data-wrm-key="com.atlassian.plugins.atlassian-plugins-webresource-rest:data-collector-perf-observer" data-wrm-batch-type="resource" data-initially-rendered>
+!function(){"use strict";if("PerformanceObserver"in window){const e=[];window.__observedResources=e;const r=e=>"script"===e?"script":"css";new PerformanceObserver((n=>{n.getEntries().filter((({initiatorType:e,name:r})=>{const n="script"===e||((e,r)=>"link"===e&&"css"===new URL(r).pathname.split(".").pop())(e,r),i=new URL(location.href).origin===new URL(r).origin;return n&&i})).forEach((({name:n,transferSize:i,encodedBodySize:s,initiatorType:o})=>{e.push([i,s,n,r(o)])}))})).observe({type:"resource"})}}();
+
+</script>
+<script src="/s/830f5e61098ef34339668d8ee01a40c1-CDN/-tmomrz/8804/xgjkrn/004fea3af171bcbf8e59c62867f092d8/_/download/contextbatch/js/_super,-com.atlassian.plugins.atlassian-plugins-webresource-rest:data-collector-perf-observer/batch.js?locale=pt-BR" data-wrm-key="_super,-com.atlassian.plugins.atlassian-plugins-webresource-rest:data-collector-perf-observer" data-wrm-batch-type="context" data-initially-rendered></script>
+<script src="/s/33b348e40a66405b37b2157e0fc0a69a-CDN/-tmomrz/8804/xgjkrn/587663cf39f6ae0a0e80aec80a49fce3/_/download/contextbatch/js/atl.confluence.plugins.pagetree-desktop,main,viewcontent,atl.general,page,atl.comments,-_super/batch.js?gatekeeper-ui-v2=true&amp;highlightactions=true&amp;locale=pt-BR" data-wrm-key="atl.confluence.plugins.pagetree-desktop,main,viewcontent,atl.general,page,atl.comments,-_super" data-wrm-batch-type="context" data-initially-rendered></script>
+<script src="/s/a2f30c73cf8746dac2703c89ba23e74b-CDN/-tmomrz/8804/xgjkrn/17.19.0/_/download/batch/confluence.extra.livesearch:livesearch-macro-web-resources/confluence.extra.livesearch:livesearch-macro-web-resources.js?locale=pt-BR" data-wrm-key="confluence.extra.livesearch:livesearch-macro-web-resources" data-wrm-batch-type="resource" data-initially-rendered></script>
+<script type="module">WRM.requireLazily(["wr!com.atlassian.plugins.atlassian-plugins-webresource-rest:data-collector-async"])</script>
+    
+
+        
+    
+
+        
+
+
+    
+    <script type="text/javascript">
+  AJS.toInit(function () {
+    var URL = document.location.pathname;
+
+    URL + "";
+
+    console.log("URL full: " + window.location.href);
+
+    if (window.location.href == "https://tdn.totvs.com/" || window.location.href == "https://tdn.totvs.com.br/" || window.location.href == "https://tdn.totvs.com/display/home/TDN+-+TOTVS+Developer+Network") {
+      //$('body').hide();
+      window.location = "https://suporte.totvs.com/portal/10098/customer-portal/";
+    } else
+      if (window.location.href == "https://tdninterno.totvs.com/") {
+        // NOVO ESTILO - MUDAR AQUI PARA A NOVA URL 
+        //$('body').hide();
+        window.location.href = "https://tdn.totvs.com/pages/viewpage.action?pageId=331851568";
+        return false;
+      }
+
+    console.log(URL);
+    if (URL.indexOf("DISPLAY") > 0) {
+      document.location.replace(URL.toLowerCase());
+    }
+  });
+</script>
+
+<!-- Google Tag Manager -->
+
+<script>(function (w, d, s, l, i) {
+    w[l] = w[l] || []; w[l].push({
+      'gtm.start':
+        new Date().getTime(), event: 'gtm.js'
+    }); var f = d.getElementsByTagName(s)[0],
+      j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+        'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+  })(window, document, 'script', 'dataLayer', 'GTM-TCMTF2Q');</script>
+<!-- End Google Tag Manager -->
+
+<script>
+  (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r;
+    i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date();
+    a = s.createElement(o),
+      m = s.getElementsByTagName(o)[0];
+    a.async = 1;
+    a.src = g;
+    m.parentNode.insertBefore(a, m)
+  })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+  ga('create', 'UA-32143331-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+<script type="text/javascript">
+
+  function getQueryParams(qs) {
+    qs = qs.split('+').join(' ');
+
+    var params = {},
+      tokens,
+      re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+      params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
+  }
+
+  var conta = 0;
+  var tempo;
+
+
+  function isthisie() {
+
+    var ua = window.navigator.userAgent;
+    var msie = ua.indexOf("MSIE ");
+
+    console.log(msie);
+
+    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) // If Internet Explorer, return version number
+      return true;
+    else // If another browser, return 0
+      return false;
+
+  }
+
+  $(document).ready(function () {
+    // ** INÍCIO CUSTOM TRANSLATE ** //
+
+    var body = document.body;
+    /*
+    if ($.browser.webkit) {
+ 
+        try {
+ 
+    var fnCallback = function (mutations) {
+      mutations.forEach(attrModified);
+    };
+ 
+    var observer = new MutationObserver(fnCallback);
+    observer.observe(body, { attributes: true });
+ 
+    function attrModified(mutation) {
+      var name = mutation.attributeName,
+        newValue = mutation.target.getAttribute(name),
+        oldValue = mutation.oldValue;
+        document.getElementById("header").style.top = document.body.style.top;
+      console.log(name, newValue, oldValue);
+    }
+        } catch (err) {
+            console.log("browser não usa webkit");
+        }
+    }
+    */
+    arrayPaginhasEspanhol = ['mpes', 'LMPESP', 'TAFESP', 'TSSESP', 'INTESP'];
+    arrayPaginhasIngles = ['InternalAccess', 'TSSING', 'INTING', 'LMPING', 'TAFING'];
+
+    try {
+      xSK = document.querySelector('meta[name="confluence-space-key"]');
+
+      if (!xSK) {
+        newMeta = document.createElement("meta");
+        newMeta.content = "none";
+        xSK = newMeta;
+      }
+    } catch (err) {
+
+      newMeta = document.createElement("meta");
+      newMeta.content = "none";
+      xSK = newMeta;
+    }
+
+    try {
+      if ($.inArray(xSK.content, arrayPaginhasEspanhol) != -1 || $('head > title').text().indexOf('Espanol') > -1) {
+        console.log("Montando translate para Spaces em Espanhol >  " + xSK.content);
+
+        googleTranslateElementInit = function () {
+
+          console.log("googleTranslateElementInit - origem espanhol");
+
+          new google.translate.TranslateElement({
+            pageLanguage: 'es',
+            includedLanguages: 'pt,en,ko,ru',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            multilanguagePage: true
+          }, 'google_translate_element');
+        }
+
+      } else if ($.inArray(xSK.content, arrayPaginhasIngles) != -1 || $('head > title').text().indexOf('English') > -1) {
+
+        console.log("Montando translate para Spaces em Ingles >  " + xSK.content);
+
+        googleTranslateElementInit = function () {
+
+          console.log("googleTranslateElementInit - origem ingles");
+
+          new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'pt,es,ko,ru',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            multilanguagePage: true
+          }, 'google_translate_element');
+        };
+      } else {
+
+        console.log("Montando translate para Spaces em Portugues (ou que nao estejam em nenhum dos arrays) >  " + xSK.content);
+
+        googleTranslateElementInit = function () {
+
+          console.log("googleTranslateElementInit - origem portugues");
+
+          new google.translate.TranslateElement({
+            pageLanguage: 'pt',
+            includedLanguages: 'es,en,ko,ru',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            multilanguagePage: true
+          }, 'google_translate_element');
+
+
+        }
+
+      }
+
+    } catch (err) {
+      console.log("Erro ao montar Tradutor: " + err);
+
+      googleTranslateElementInit = function () {
+
+        console.log("googleTranslateElementInit - origem portugues");
+
+        new google.translate.TranslateElement({
+          pageLanguage: 'pt',
+          includedLanguages: 'en,es,ko,ru',
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          multilanguagePage: true
+        }, 'google_translate_element');
+
+
+      }
+    }
+
+    // ** FIM CUSTOM TRANSLATE ** //
+    /*
+        NOVO ESTILO - NÃO VAI MAIS REMOVER A LOGO
+ 
+        $("#logo").remove();
+ 
+    */
+    if (!$('meta[name=ajs-remote-user]').attr("content")) {
+      //$("#help-menu-link").remove();
+    }
+
+    $('#help-menu-link-leading > li:nth-child(1)').remove();
+    $('#help-menu-link-leading > li:nth-child(1)').remove();
+    $('#help-menu-link-leading > li:nth-child(2)').remove();
+    $('#help-menu-link-leading > li:nth-child(2)').remove();
+    $('#help-menu-link-leading > li:nth-child(2)').remove();
+
+    $('#help-menu-link-content > div > strong').remove();
+
+    var userLang = navigator.language || navigator.userLanguage;
+    if ($("#workflow_page_not_permitted").length) {
+      $('#action-view-source-link').parent().hide();
+      if (userLang == 'pt-BR' || userLang == 'pt') {
+        $('#workflow_page_not_permitted .title strong').text("Esta página está em construção e em breve você terá acesso às informações.")
+      } else if (userLang == 'en-US' || userLang == 'en') {
+        $('#workflow_page_not_permitted .title strong').text("This page is under construction and soon you will have access to information.")
+      } else if (userLang == 'es') {
+        $('#workflow_page_not_permitted .title strong').text("Estamos construyendo esta página y pronto usted podrá acceder a su información.")
+      }
+    }
+
+    $('<button class="aui-button" type="button" data-tooltip="Gerar Visualização para PDFs" id="rte-button-previewpdf" original-title="" onclick="javascript:gerarPDFs();"><span class="aui-icon aui-icon-small aui-iconfont-devtools-file"></span><span class="trigger-text"> Pré-visualizar PDFs</span></button>').insertAfter("#rte-button-attachments");
+
+    var pathname = window.location.pathname;
+    if (pathname.indexOf('login.action') > -1) {
+      $('#action-messages').addClass('aui-message info');
+      $('#action-messages').append('<p id=\"msglogin\" style=\"margin-left:-5px;\"></p>');
+      $('#msglogin').html('Acesso utilizado somente para participantes.<br>Para clientes, não é necessário fazer login.');
+      $("#main").css({
+        "margin-left": "auto",
+        "margin-right": "auto"
+      });
+
+    }
+    /*remove o menu do plugin de nuvem de tags da barra do menu do topo*/
+    AJS.$('.aui-nav').find('li a[id=tagcloud-link]').remove();
+
+    if (AJS.params.spaceKey != "NPROC") {
+
+      /*$("#header > nav > div > div.aui-header-secondary > ul").css('width', '300px');*/
+      $("#header > nav > div > div.aui-header-primary > ul").css('margin-left', '80px');
+
+      /*
+          $("#quick-search").css('margin-top', '-50px');
+      */
+
+      // NOVO ESTILO
+      $("#quick-search").css('margin-top', '-40px');
+
+    } else {
+
+      $("#header > nav > div > div.aui-header-primary > ul").css('margin-left', '10px');
+
+      /* modificação no link de menu ajuda */
+
+      AJS.$('.aui-header-secondary').find('#help-menu-link').removeClass("aui-dropdown2-trigger");
+      AJS.$('.aui-header-secondary').find('#help-menu-link').removeAttr("aria-haspopup");
+      AJS.$('.aui-header-secondary').find('#help-menu-link').removeAttr("aria-owns");
+      AJS.$('.aui-header-secondary').find('#help-menu-link').removeAttr("aria-controls");
+
+      if (AJS.params.contextPath != "") {
+        var link_cp = AJS.params.contextPath + "/";
+      } else {
+        var link_cp = "";
+      }
+
+      var faqlink = AJS.params.baseUrl + "/" + link_cp + "display/" + AJS.params.spaceKey + "/FAQ+Home";
+      AJS.$('.aui-header-secondary').find('#help-menu-link').attr("href", faqlink);
+      /* Adicionar texto FAQ */
+      AJS.$('.aui-header-secondary').find('#help-menu-link').append("FAQ");
+      AJS.$('.aui-header-secondary').find('#help-menu-link').css('font-size', '14px');
+
+      AJS.$('#navigation').find('ul[class=ajs-menu-bar]').prepend("<li class='ajs-button normal'> <span id='cw-status-lozenge' class='cw-state'>" + AJS.$('#cw-status-lozenge').html() + '</span></li>');
+      AJS.$('#cw-status-lozenge').remove();
+    }
+
+    $("#add-menu-link").removeClass("hidden");
+
+    //$("#create-page-button").remove();
+
+    $(window).bind("load", function () {
+
+      $("#footer").height(1);
+      $(window).trigger('resize');
+
+      if (window.location.href.indexOf("dosearchsite.action") > -1) {
+        $("#main-header").remove();
+        pesquisa = $('#query-string').val();
+        $('#quick-search-query').val(pesquisa);
+
+      }
+    });
+
+    $(footer).hide();
+
+    $('a[href*="tdn.totvs.com"]').each(function () {
+      url = $(this).attr('href');
+      url = url.replace('tdn.totvs.com', 'tdn.totvs.com');
+      $(this).attr("href", url);
+    });
+
+
+    arspaces = ['home'];
+
+    if ($.inArray($("meta[name=confluence-space-key]").attr("content"), arspaces) != -1) {
+      console.log("Removido menu da space por estar no array " + $("meta[name=confluence-space-key]").attr("content"));
+      if ($("#splitter-button").hasClass("collapsed") == false) {
+        $("#doctheme-anchor").click();
+      }
+      $("#doctheme-anchor").remove();
+      $("#splitter-sidebar").remove();
+      $(".vsplitbar").remove();
+      //$("#main").css({
+      //    "margin-left": "7%",
+      //    "margin-right": "7%"
+      //});
+
+    } else {
+      if ($("#splitter-button").hasClass("collapsed") == true) {
+        $("#doctheme-anchor").click();
+      }
+
+    }
+
+    if (window.location.href.indexOf("login.action") > -1) {
+      $('#main').each(function () {
+        this.style.setProperty('margin-right', '0', 'important');
+        this.style.setProperty('margin-left', '30%', 'important');
+        this.style.setProperty('min-width', '0', 'important');
+        this.style.setProperty('padding-top', '20px', 'important');
+      });
+    }
+
+
+    arfluig = ['fluig', 'fluigeng', 'fluigesp', 'FS', 'TF', 'SDKF', 'FL'];
+    helpfluig = ['HF', 'HFE', 'HOE', 'FF', 'AF'];
+    fluigBoard = ['FB'];
+    totvsHome = ['home'];
+
+
+    if ($("meta[name=confluence-space-key]").attr("content") != "fluig" && $("meta[name=confluence-space-key]").attr("content") != "HF" && $("meta[name=confluence-space-key]").attr("content") != "FL" && $("meta[name=confluence-space-key]").attr("content") != "fluigeng" && $("meta[name=confluence-space-key]").attr("content") != "fluigesp" && $("meta[name=confluence-space-key]").attr("content") != "TF" && $("meta[name=confluence-space-key]").attr("content") != "FS" && $("meta[name=confluence-space-key]").attr("content") != "SDKF" && $("meta[name=confluence-space-key]").attr("content") != "FL" &&
+      $("meta[name=confluence-space-key]").attr("content") != "FLE" &&
+      $("meta[name=confluence-space-key]").attr("content") != "HFE" &&
+      $("meta[name=confluence-space-key]").attr("content") != "HOE" &&
+      $("meta[name=confluence-space-key]").attr("content") != "FLESP") {
+      $("#footer").append(`
+    <style>
+      footer{  
+            background: #F4F5F7;  
+            display: flex;  
+            padding: 19px 150px;  
+            color: #000;  
+        }  
+      
+        .infos ul {  
+            list-style: none;  
+            display: flex;  
+      
+        }  
+      
+        .totvs-icon {  
+            width: 130px;  
+        }  
+      
+        footer .infos {  
+            width: 90%;  
+            display: flex;  
+            justify-content: flex-end;  
+            align-items: center;  
+        }  
+      
+        .infos ul li {  
+            margin-left: 20px;  
+            cursor: pointer;  
+        }  
+      
+    .infos ul li a, .infos ul li a:hover, .infos ul li a:active {  
+        color: black;  
+    text-decoration: none;  
+    }  
+    </style><footer>
+        <div class="totvs-icon">
+            <img src="https://tdn.totvs.com/download/attachments/331851568/logo-totvs-azul-escuro.png" style="height: 35px;">
+        </div>
+        <div class="infos">
+            <ul>
+                <li><a href="https://www.totvs.com/politica-de-privacidade" target="_blank">Política de privacidade</li>
+                <li><a href="https://www.totvs.com/termos-de-uso" target="_blank">Termos de uso</a></li>
+            </ul>
+        </div>
+    </footer>`);
+      $("#footer").show();
+      $(footer).show();
+      $("#footer .footer-body").remove();
+    }
+
+    // NOVO ESTILO - DEIXAR A LOGO DA GOOGLE P&B
+    $(".aui-avatar-inner img").css("filter", "grayscale(100)");
+
+    if ($.inArray($("meta[name=confluence-space-key]").attr("content"), arfluig) != -1 || getUrlParameter("searchQuery.spaceKey") == "fluig") {
+      if (AJS.params.editorMode != "richtext") {
+        $(footer).show();
+      }
+
+      /*
+                  tempo = window.setInterval(function() {
+                      verificaURL();
+                  }, 1000);
+ 
+                  //URL dev.fluig.com
+ 
+                  $(window).bind("load", function() {
+ 
+                      var urlcanonical = $('link[rel~="canonical"]').attr('href');
+                      urlcanonical = urlcanonical.replace('tdn.totvs.com', 'dev.fluig.com/#');
+                      $('link[rel~="canonical"]').attr('href', urlcanonical);
+ 
+                      var urlshortlink = $('link[rel~="shortlink"]').attr('href');
+                      urlshortlink = urlshortlink.replace('tdn.totvs.com', 'dev.fluig.com/#');
+                      $('link[rel~="shortlink"]').attr('href', urlshortlink);
+ 
+ 
+                  });
+      */
+      //$("#logo > a > img").attr("src", "https://tdn.totvs.com/download/attachments/66618185/fluig_login_logo_white.png");
+      //$("#logo > a ").attr("href", "http://dev.fluig.com/");
+      //$("#splitter").attr("position", "absolute");
+      //$("#quick-search").remove();
+      //$('#quick-search > fieldset').prepend('<input type="hidden" name="searchQuery.ancestorId" value="66618245"><input type="hidden" name="searchQuery.spaceKey" value="fluig">');
+      //$("#space-menu-link").remove();
+
+      if ($.inArray(getUrlParameter("searchQuery.spaceKey"), arfluig) == 0) {
+        /*
+        $("#header").prepend("<div style='background-color: #fff;'><a href='http://dev.fluig.com' target='_parent'><img data-aui-responsive-header-index='0' alt='TDN' src='http://tdn.totvs.com/download/attachments/63865179/fluig-developer.png' style='margin-left: 100px;max-width: 250px;'></a></div>");
+ 
+        $('#header > nav > div > div.aui-header-secondary > ul').attr('style', 'width:420px');
+        $('#header > nav > div > div.aui-header-secondary > ul').prepend('<li><a href="http://tdn.totvs.com/display/fluig/DEV+fluig" rel="nofollow"><img class="confluence-embedded-image confluence-thumbnail image-right" width="20" src="/download/thumbnails/66618185/br.jpg?version=1&amp;modificationDate=1426278864000&amp;api=v2" data-image-src="/download/attachments/66618185/br.jpg?version=1&amp;modificationDate=1426278864000&amp;api=v2"></a></li><li><a href="http://tdn.totvs.com/display/fluigesp/home" rel="nofollow"><img class="confluence-embedded-image confluence-thumbnail confluence-external-resource image-right" width="20" src="http://tdn.totvs.com/download/thumbnails/181966041/espanhol.png?version=2&amp;modificationDate=1422628076000&amp;api=v2" data-image-src="http://tdn.totvs.com/download/thumbnails/181966041/espanhol.png?version=2&amp;modificationDate=1422628076000&amp;api=v2"></a></li><li><a href="http://tdn.totvs.com/display/fluigeng/home" rel="nofollow"><img class="confluence-embedded-image confluence-thumbnail confluence-external-resource image-right" width="20" src="http://tdn.totvs.com/download/thumbnails/181966041/ingles.png?version=2&amp;modificationDate=1422628093000&amp;api=v2" data-image-src="http://tdn.totvs.com/download/thumbnails/181966041/ingles.png?version=2&amp;modificationDate=1422628093000&amp;api=v2"></a></li>');
+        $('#header').append('<style>.aui-header .aui-header-logo img {max-height: 30px !important;padding: 5px 0 !important;}.aui-header {background: #BFD24F !important;border-bottom: 1px solid #607925 !important;}#header .aui-header, #header {background-color: #BFD24F !important;}.aui-header .aui-dropdown2-trigger:hover, .aui-header .aui-dropdown2-trigger.active, #header .aui-header .aui-nav-link.active, #header .aui-header .aui-nav-imagelink.active, #header .aui-header .aui-nav-imagelink:focus, #header .aui-header .aui-nav-imagelink:hover, #header .aui-header a:focus, #header .aui-header a:hover, #header .aui-header a:active {background-color: #6B8E23 !important;border-color: #6B8E23 !important;}.aui-dropdown2.aui-style-default a:focus, .aui-dropdown2.aui-style-default a:hover, .aui-dropdown2.aui-style-default a.active {background-color: #6B8E23 !important;border-color: #6B8E23 !important;}#quick-search > fieldset > div {display:none !important;}</style>');
+        var spacesearch="";
+        spacesearch += "<ul data-key=\"where\" class=\"aui-nav __skate\">";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"fluig\">Documentação técnica<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"HF\">Ajuda<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"FF\">FAQ<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"AF\">Aprendizado<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"TF\">Time Fluig<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "<\/ul>";
+        AJS.$('.filter-wrapper.space-filter').after(spacesearch);
+        AJS.$('.filter-wrapper.space-filter').remove();
+        if(getQueryParams(document.location.search)['searchQuery.spaceKey'] != null){
+            AJS.$('#quick-search fieldset').append('<input type=\"hidden\" name=\"searchQuery.spaceKey\" value=\"'+getQueryParams(document.location.search)['searchQuery.spaceKey']+'\">')
+        }
+        if(getQueryParams(document.location.search)['where'] != null){
+            AJS.$('#quick-search fieldset').append('<input type=\"hidden\" name=\"where\" value=\"'+getQueryParams(document.location.search)['where']+'\">')
+        }*/
+      }
+
+      //$('#content > div.page-metadata').remove();
+      /*if (!$('meta[name=ajs-remote-user]').attr("content")) {
+          $('#action-view-history-link').remove();
+      }*/
+
+
+    } else if ($.inArray($("meta[name=confluence-space-key]").attr("content"), helpfluig) != -1 || $.inArray(getUrlParameter("searchQuery.spaceKey"), helpfluig) != -1) {
+
+      if (AJS.params.editorMode != "richtext") {
+        $(footer).show();
+      }
+
+      $("#logo > a > img").attr("src", "http://tdn.totvs.com/download/attachments/66618185/fluig_login_logo_white.png");
+      $("#logo > a ").attr("href", "http://help.fluig.com/");
+      $("#splitter").attr("position", "absolute");
+      //$("#quick-search").remove();
+
+      //$('#quick-search > fieldset').prepend('<input type="hidden" name="searchQuery.ancestorId" value="66618245"><input type="hidden" name="searchQuery.spaceKey" value="HF">');
+
+      $("#space-menu-link").remove();
+
+      if ($.inArray(getUrlParameter("searchQuery.spaceKey"), helpfluig) != -1) {
+        /*
+        $("#header").prepend("<div style='background-color: #fff;'><a href='http://help.fluig.com' target='_parent'><img data-aui-responsive-header-index='0' alt='Help fluig' src='http://tdn.totvs.com/download/attachments/63865179/fluig-help.png' style='margin-left: 100px;max-width: 200px;'></a></div>");
+        $('#content > div.page-metadata').remove();
+        //$('#header > nav > div > div.aui-header-secondary > ul').prepend('<li><a href="http://tdn.totvs.com/display/fluig/DEV+fluig" rel="nofollow"><img class="confluence-embedded-image confluence-thumbnail image-right" width="20" src="/download/thumbnails/66618185/br.jpg?version=1&amp;modificationDate=1426278864000&amp;api=v2" data-image-src="/download/attachments/66618185/br.jpg?version=1&amp;modificationDate=1426278864000&amp;api=v2"></a></li><li><a href="http://tdn.totvs.com/display/fluigesp/home" rel="nofollow"><img class="confluence-embedded-image confluence-thumbnail confluence-external-resource image-right" width="20" src="http://tdn.totvs.com/download/thumbnails/181966041/espanhol.png?version=2&amp;modificationDate=1422628076000&amp;api=v2" data-image-src="http://tdn.totvs.com/download/thumbnails/181966041/espanhol.png?version=2&amp;modificationDate=1422628076000&amp;api=v2"></a></li><li><a href="http://tdn.totvs.com/display/fluigeng/home" rel="nofollow"><img class="confluence-embedded-image confluence-thumbnail confluence-external-resource image-right" width="20" src="http://tdn.totvs.com/download/thumbnails/181966041/ingles.png?version=2&amp;modificationDate=1422628093000&amp;api=v2" data-image-src="http://tdn.totvs.com/download/thumbnails/181966041/ingles.png?version=2&amp;modificationDate=1422628093000&amp;api=v2"></a></li>');
+        $('#header').append('<style>.aui-header .aui-header-logo img {max-height: 30px !important;padding: 5px 0 !important;}.aui-header {background: #FAC065 !important;border-bottom: 1px solid #cccccc !important;}#header .aui-header, #header {background-color: #FAC065 !important;}.aui-header .aui-dropdown2-trigger:hover, .aui-header .aui-dropdown2-trigger.active, #header .aui-header .aui-nav-link.active, #header .aui-header .aui-nav-imagelink.active, #header .aui-header .aui-nav-imagelink:focus, #header .aui-header .aui-nav-imagelink:hover, #header .aui-header a:focus, #header .aui-header a:hover, #header .aui-header a:active {background-color: #FAC065 !important;border-color: #FAC065 !important;}.aui-dropdown2.aui-style-default a:focus, .aui-dropdown2.aui-style-default a:hover, .aui-dropdown2.aui-style-default a.active {background-color: #FAC065 !important;border-color: #FAC065 !important;}#quick-search > fieldset > div {display:none !important;}</style>');
+        var spacesearch="";
+        spacesearch += "<ul data-key=\"where\" class=\"aui-nav __skate\">";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"fluig\">Documentação técnica<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"HF\">Ajuda<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"FF\">FAQ<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"AF\">Aprendizado<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "   <li class=\"\">";
+        spacesearch += "      <a data-value=\"TF\">Time Fluig<\/a>";
+        spacesearch += "   <\/li>";
+        spacesearch += "<\/ul>";
+        AJS.$('.filter-wrapper.space-filter').after(spacesearch);
+        AJS.$('.filter-wrapper.space-filter').remove();
+        if(getQueryParams(document.location.search)['searchQuery.spaceKey'] != null){
+            AJS.$('#quick-search fieldset').append('<input type=\"hidden\" name=\"searchQuery.spaceKey\" value=\"'+getQueryParams(document.location.search)['searchQuery.spaceKey']+'\">')
+        }
+        if(getQueryParams(document.location.search)['where'] != null){
+            AJS.$('#quick-search fieldset').append('<input type=\"hidden\" name=\"where\" value=\"'+getQueryParams(document.location.search)['where']+'\">')
+        }*/
+      }
+
+
+      //$('#content > div.page-metadata').remove();
+      /*
+      if (!$('meta[name=ajs-remote-user]').attr("content")) {
+          $('#action-view-history-link').remove();
+      }*/
+
+    }/* else if ($.inArray($("meta[name=confluence-space-key]").attr("content"), fluigBoard) != -1) {
+                $("#logo > a > img").attr("src", "http://tdn.totvs.com/download/attachments/63865179/logo_fluig_boards.png");
+                $("#logo > a ").attr("href", "http://tdn.totvs.com/display/FB/fluig+Boards+Home");
+                $("#splitter").attr("position", "absolute");
+    
+                $("#header").prepend("<div style='background-color: #607d8b;'><a href='http://tdn.totvs.com/display/FB/fluig+Boards+Home' target='_parent'><img data-aui-responsive-header-index='0' alt='fluig Boards' src='http://tdn.totvs.com/download/attachments/63865179/logo_fluig_boards.png' style='margin-left: 100px;max-width: 200px;'></a></div>");
+    
+                $("#space-menu-link").remove();
+                $('#content > div.page-metadata').remove();
+    
+            }*/  else {
+      /*
+          $("#header").prepend("<style>.goog-te-gadget-simple .goog-te-menu-value { color: #000 !important; }</style><div style='background-color: #fff;'><div class='containerX' style='width: 20%;position:relative;top: 15px;margin-left: 37%;'><div class='txX' style='position: absolute;text-align: center;'><div id='google_translate_element'></div></div></div><a href='http://tdninterno.totvs.com'><img data-aui-responsive-header-index='0' alt='TDN' src='https://suporte.totvs.com/customer-portal-layout-home/resources/images/logo.png' style='margin-top:10px; margin-left: 100px;'></a></div>");
+      */
+      // NOVO ESTILO
+      $("#header").prepend("<style>.goog-te-gadget-simple .goog-te-menu-value { color: #000 !important; }</style><div style='background-color: #fff;'><div class='containerX' style='width: 20%;position:relative;top: 14px;margin-left: 37%;float: right;right: 263px;'><div class='txX' style='position: absolute;text-align: center;'><div id='google_translate_element'></div></div></div><a href=''http://tdninterno.totvs.com'></a></div>");
+
+      // NOVO ESTILO - MUDANÇAS NO #HEADER
+      setTimeout(function () {
+        $(".containerX").css("position", "absolute");
+        $(".containerX").css("top", "7px");
+        $(".containerX").css("left", "-25pxpx");
+        $(".containerX").css("filter", "grayscale(1)");
+        $(".containerX").css("margin-left", "0px");
+        $(".top-logo-header").css("height", "0px");
+      }, 100)
+    }
+
+    espacos_margin = ['display/home', '64651411', 'InternalAccess', 'viewinfo.action?pageId', 'createpage-choosetemplate.action', 'createpagetemplate.action'];
+    espacos_search = ['display/home'];
+
+    espacos_margin.forEach(function (entry) {
+      if ($.inArray($("meta[name=confluence-space-key]").attr("content"), totvsHome) != -1) {
+        //$("#main").css('margin-top', '80px');
+        //$("#main").css({
+        //    "margin-left": "7%",
+        //    "margin-right": "7%"
+        //}); 
+        $('body#com-atlassian-confluence.theme-default.aui-layout.aui-theme-default div#page div#full-height-container div.ia-splitter div.ia-fixed-sidebar').hide();
+        $('body#com-atlassian-confluence.theme-default.aui-layout.aui-theme-default div#page div#full-height-container div.ia-splitter div#main.aui-page-panel').css('margin-left', '0');
+
+      }
+
+      var conta = 0;
+
+      for (var i = 0; i < espacos_search.length; i++) {
+        if (window.location.href.indexOf(espacos_search[i]) > -1) {
+          console.log("your url contains " + espacos_search[i]);
+          conta = conta + 1;
+        }
+      }
+
+      if (conta == 0) {
+        //$('#quick-search').attr('style', 'width: 320px !important; margin-top: -50px;margin-left: -165px;');
+        //$('#quick-search-query').attr('style', 'width: 320px !important;');
+      } else {
+        //$('#quick-search').attr('style', 'width: 320px !important; margin-top: -50px;margin-left: -165px;');
+        //$('#quick-search-query').attr('style', 'width: 320px !important;');
+      }
+
+    });
+
+
+  });
+
+
+  function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) {
+      var sParameterName = sURLVariables[i].split('=');
+      if (sParameterName[0] == sParam) {
+        return sParameterName[1];
+      }
+    }
+  }
+
+
+
+  function gerarPDFs() {
+    var textBox = document.getElementById('wysiwygTextarea_ifr').contentWindow.document.getElementById("tinymce");
+    var nodes = textBox.childNodes;
+    var novoElemento = document.createElement('p');
+    var fonteP1 = '<table class="wysiwyg-macro" style="background-image: url(/plugins/servlet/confluence/placeholder/macro-heading?definition=e2h0bWx9&amp;locale=pt_BR&amp;version=2); background-repeat: no-repeat;" data-macro-name="html" data-macro-body-type="PLAIN_TEXT" data-mce-style="background-image: url(\'http://tdn.totvs.com/plugins/servlet/confluence/placeholder/macro-heading?definition=e2h0bWx9&amp;locale=pt_BR&amp;version=2\'); background-repeat: no-repeat;"><tbody><tr><td class="wysiwyg-macro-body"><pre>&lt;iframe width="100%" height="940px" frameBorder=0 src="';
+    var fonteP2 = '"&gt;&lt;/iframe&gt;&nbsp;</pre></td></tr></tbody></table>';
+
+    for (i = 0; i < nodes.length; i++) {
+      try {
+        if (nodes[i].innerText.indexOf("iframe") > -1)
+          nodes[i].remove();
+
+        if (nodes[i].innerText.indexOf(".pdf") > -1 && nodes[i].innerText.indexOf("http") <= 0 && nodes[i].innerHTML.indexOf("attachment") > -1) {
+          console.log(i);
+          var elementoChild = document.createElement('p');
+          if (parseInt($("meta[name=ajs-page-id]").attr("content")) == 0) {
+            var pageID = parseInt($("meta[name=ajs-attachment-source-content-id]").attr("content")) + 1;
+            console.log("id=0 pageID:" + pageID);
+          } else {
+            var pageID = parseInt($("meta[name=ajs-page-id]").attr("content"));
+            console.log("id!=0 pageID:" + pageID);
+          }
+
+          elementoChild.innerHTML = fonteP1 + "http://tdn.totvs.com/plugins/servlet/pdf-viewer?file=http://tdn.totvs.com/download/attachments/" + pageID + "/" + nodes[i].innerText + fonteP2;
+          novoElemento.appendChild(elementoChild);
+        }
+      } catch (e) {
+        // statements to handle any exceptions
+        //console.log(e); // pass exception object to error handler
+      }
+
+    }
+
+    textBox.appendChild(novoElemento);
+
+  }
+
+  /*
+  function verificaURL() {
+      $('a[href]').each(function() {
+          url = $(this).attr('href');
+ 
+          if (url.indexOf('http://tdn.totvs.com') > -1 || url.indexOf('https://tdn.totvs.com') > -1) {
+              url = url.replace('http://tdn.totvs.com', '');
+              url = url.replace('https://tdn.totvs.com', '');
+              console.log('removendo tdn.totvs.com da URL');
+          }
+ 
+          if (url.indexOf('http') > -1 || url.indexOf('https') > -1) {
+              console.log("change not needed");
+              $(this).attr("target", "_parent");
+          } else if (url.indexOf('#') > -1) {
+              console.log("has hash so do nothing");
+          } else {
+              url = 'http://dev.fluig.com/#' + url;
+              $(this).attr("href", url);
+              console.log("changing url >>" + url);
+              $(this).attr("target", "_parent");
+          }
+ 
+ 
+          if (conta = 10) {
+              clearInterval(tempo);
+          }
+ 
+          conta = conta + 1;
+ 
+      });
+ 
+  }*/
+</script>
+
+<script type="text/javascript"
+  src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script type="text/javascript">
+  $(window).load(function () {
+    if (isthisie()) {
+      googleTranslateElementInit();
+      document.getElementById("header").style.top = document.body.style.top;
+    }
+    const url = window.location.href
+    const changePasswordUrl = 'https://tdn.totvs.com/forgotuserpassword.action'
+    if (url === changePasswordUrl) {
+      window.location.href = 'https://portalpass.totvs.com.br/autenticacao/reset'
+    }
+
+    /*
+    $("body").attrchange({
+        trackValues: true,
+        /* Default to false, if set to true the event object is
+            updated with old and new value.
+        callback: function(event) {
+            document.getElementById("header").style.top = document.body.style.top;
+        }
+    });
+    */
+  });
+</script>
+
+<meta name="google-site-verification" content="wrePBMntSyizUXFFUgaywLiheblvG1skNn4h0JzHlpg" />
+
+<script type="text/javascript">
+  AJS.toInit(function () {
+    if (AJS.params.remoteUser == '') {
+      AJS.$('.page-metadata-modification-info').hide();
+      AJS.$('.content-navigation').hide();
+      AJS.$('#space-tools-menu-trigger').hide();
+      AJS.$('.ajs-menu-bar').hide();
+    }
+  });
+</script>
+
+    
+                <link rel="canonical" href="https://tdn.totvs.com/display/framework/REST">
+        <link rel="shortlink" href="https://tdn.totvs.com/x/4QDaCQ">
+    <meta name="wikilink" content="[framework:REST]">
+    <meta name="page-version" content="2">
+    <meta name="ajs-page-version" content="2">
+
+</head>
+
+    
+<body      id="com-atlassian-confluence" class="theme-default  aui-layout aui-theme-default">
+
+        
+            <div id='stp-licenseStatus-banner'></div>
+            <fieldset class="parameters hidden">
+        </fieldset>
+            
+            <div id='workflow-page-status' style='display: none;'><fieldset class="hidden parameters">
+<input type="hidden" id="hoverDescription" value="null"/><input type="hidden" id="finalState" value="false"/><input type="hidden" id="hasFinalState" value="false"/><input type="hidden" id="publishedView" value="true"/><input type="hidden" id="taskable" value="false"/><input type="hidden" id="activeTasks" value="0"/><input type="hidden" id="pageAssignable" value="false"/><input type="hidden" id="workflowAdmin" value="false"/><input type="hidden" id="anonymous" value="true"/><input type="hidden" id="activityVisible" value="false"/><input type="hidden" id="approvalMinQuery" value="2"/><input type="hidden" id="showDocumentActivity" value="false"/><input type="hidden" id="alternateViewTitle" value="Visualizar a versão publicada da página"/></fieldset></div>
+<div style='display: none;'></div><fieldset class="parameters hidden">
+<input type="hidden" id="isWorkflowsLiteApp" value="false"/>
+<input type="hidden" id="isWorkflowsApp" value="true"/>
+<input type="hidden" id="parametersLabel" value="Parâmetros"/>
+<input type="hidden" id="hasWorkflow" value="true"/>
+<input type="hidden" id="isPageReadAck" value="false"/>
+<input type="hidden" id="cwConfluenceLocale" value="pt"/>
+<input type="hidden" id="pluginKey" value="com.comalatech.workflow"/>
+<input type="hidden" id="cwConfluenceTimeFormat" value="h:mm a"/>
+<input type="hidden" id="isComalaAppLicensed" value="true"/>
+<input type="hidden" id="cwIsSpaceAdmin" value="false"/>
+<input type="hidden" id="cwIsConfluenceAdmin" value="false"/>
+<input type="hidden" id="hasReadAck" value="false"/>
+<input type="hidden" id="cwSpaceWorkflowAllowed" value="true"/>
+<input type="hidden" id="cwConfluenceDateTimeFormat" value="dd MMM, yyyy HH:mm"/>
+<input type="hidden" id="tasksLabel" value="Tarefas"/>
+<input type="hidden" id="approvalsLabel" value="Aprovações"/>
+<input type="hidden" id="cwConfluenceDateFormat" value="dd MMM, yyyy"/>
+<input type="hidden" id="statesLabel" value="Estado"/>
+<input type="hidden" id="workflowVersion" value="7.0.3"/>
+<input type="hidden" id="isApprovalsApp" value="false"/>
+</fieldset><script type="text/x-template" title="adhocworkflows-loading">
+    <div class="progress-messages-icon"></div>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-user">
+    <li class="preset"><img src="{pictureUrl}"><a name="{name}"><span>({name}) {shortName}</span></a></li>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-assignee">
+    <li class="assignee" name="{name}">
+        <div>
+            <img src="{pictureUrl}"/>{fullName}
+            <span class="remove-assignee"></span>
+        </div>
+    </li>
+</script>
+
+<script type="text/x-template" title="adhoc-action">
+    <span class="workflow-action {id}" name="{id}"></span>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-approvals">
+    <div class="progress-messages-icon"></div>
+    <div id="workflow-main">
+        <div class="approvals">
+        </div>
+        <form class="aui adhocworkflows">
+            <div class="button-panel dialog">
+                <a href="#" class="parameters">Parâmetros...</a>
+                <a href="#" class="cancel-dialog">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-approval-action-default">
+    <span class="approval-name">{defaultAction.name}</span>
+    <a name="{defaultAction.id}" class="approve workflow-action" href="#"><span>{defaultAction.shortName}</span></a>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-approval-duedate">
+    <div class="task-duedate">prazo {friendlyDueDate}</div>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-approval">
+    <div id="{id}" class="approval {separator}">
+        <div class="approval-header clr">
+            <div class="name {mark}">
+            </div>
+            <div class="approval-duedate">
+            </div>
+            <div class="workflow-actions">
+            </div>
+        </div>
+        <div class="approval-edit">
+            <div class="adhoc-message">
+            </div>
+            <form class="aui approval {signatureType}">
+                <input type="hidden" name="name" value="{name}"/>
+                <fieldset>
+                    <div class="credential-username"><label for="username">Nome de Usuário</label></div>
+                    <input class="credential-username" type="text" name="username" id="username" width="10" >
+                    <div class="credential-password"><label for="password">Senha</label></div>
+                    <input class="credential-password" type="password" name="password" id="password" width="10">
+                                        <input  type="text"
+                            class="text assignee-user"
+                            name="assignee"
+                            placeholder="Atribuir a..."/>
+                                        <input  type="text"
+                            class="text autocomplete-filtered-user"
+                            users="{filterUsers}"
+                            groups="{filterGroups}"
+                            name="assignee"
+                            data-max="10"
+                            data-template="{username}"
+                            data-none-message="Nenhum usuário correspondente encontrado"
+                            placeholder="Atribuir a..."/>
+                    <div class="usersdropdown aui-dd-parent">
+                        <a href="" class="aui-dd-trigger" style="display:none;"></a>
+                        <div class="aui-dropdown aui-dropdown-left hidden">
+                            <ol>
+                            </ol>
+                        </div>
+                    </div>
+                    <ol class="assignees select">
+                    </ol>
+                    <textarea class="textarea" placeholder="Adicionar uma observação opcional"/>
+                </fieldset>
+                <div class="button-panel">
+                    <input type="submit" name="approve" class="approve" value="Aprovar">
+                    <input type="submit" name="reject" class="reject" value="Rejeitar">
+                    <input type="submit" name="assign" class="assign" disabled="disabled" value="Atribuir">
+                    <a href="#" class="cancel-approval">Cancelar</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-assignee-option">
+    <option class="assigneename" value="{name}">
+        <img src="{pictureUrl}" title="{fullName}"/>{fullName}
+    </option>
+</script>
+
+
+<script type="text/x-template" title="adhocworkflows-approver">
+    <div id="{id}" class="approval approver">
+        <div class="approval-header clr">
+            <div class="name {mark}">
+                <img src="{user.pictureUrl}" title="{user.fullName}">
+            </div>
+            <div class="workflow-actions">
+            </div>
+        </div>
+        <div class="approval-edit">
+            <form class="aui approval {signatureType}">
+                <input type="hidden" name="name" value="{name}"/>
+                <fieldset>
+                    <div class="credential-username"><label for="username">Nome de Usuário</label></div>
+                    <input class="credential-username" type="text" name="username" id="username" width="10" >
+                    <div class="credential-password"><label for="password">Senha</label></div>
+                    <input class="credential-password" type="password" name="password" id="password" width="10">
+                    <ol class="assignees assignee">
+                    <li style="display:none" name="{user.name}"></li>
+                    </ol>
+                    <textarea class="textarea" placeholder="Adicionar uma observação opcional"/>
+                </fieldset>
+                <div class="button-panel">
+                    <input type="submit" name="approve" class="approve" value="Aprovar">
+                    <input type="submit" name="reject" class="reject" value="Rejeitar">
+                    <input type="submit" name="assign" class="assign" value="Atribuir">
+                    <input type="submit" name="unassign" class="delete" value="Cancelar atribuição">
+                    <a href="#" class="cancel-approval">Cancelar</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</script>
+
+<script type="text/x-template" title="adhoctasks-tasks">
+    <div class="progress-messages-icon"></div>
+    <div id="tasks-main">
+        <div class="tasks">
+        </div>
+        <form class="aui adhocworkflows addtask">
+            <input type="hidden" name="id" value=""/>
+            <fieldset>
+                <span class="workflow-action assign-new-task" name="assign"></span>
+                <input  id="taskName0"
+                        name="taskName0"
+                        class="text taskName active"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="taskName1"
+                        name="taskName1"
+                        class="text taskName"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="taskName2"
+                        name="taskName2"
+                        class="text taskName"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="taskName3"
+                        name="taskName3"
+                        class="text taskName"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="taskName4"
+                        name="taskName4"
+                        class="text taskName"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="taskName5"
+                        name="taskName5"
+                        class="text taskName"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="taskName6"
+                        name="taskName6"
+                        class="text taskName"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="taskName7"
+                        name="taskName7"
+                        class="text taskName"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="taskName8"
+                        name="taskName8"
+                        class="text taskName"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="taskName9"
+                        name="taskName9"
+                        class="text taskName"
+                        type="text"
+                        placeholder="Nome da tarefa..."/>
+                <input  id="newTaskAssignee"
+                        type="text"
+                        class="text autocomplete-user"
+                        name="assignee"
+                        data-max="10"
+                        data-template="{username}"
+                        data-none-message="Nenhum usuário correspondente encontrado"
+                        placeholder="Atribuir a..."/>
+                <div class="usersdropdown aui-dd-parent">
+                    <a href="" class="aui-dd-trigger" style="display:none;"></a>
+                    <ul class="aui-dropdown aui-dropdown-left hidden">
+                    </ul>
+                </div>
+                <ol class="assignees select single">
+                </ol>
+                <textarea class="textarea" placeholder="Adicionar uma observação opcional"/>
+            </fieldset>
+            <div class="button-panel">
+                <a href="#" class="add-task">Adicionar tarefa...</a>
+                <input type="submit" name="create" class="create" value="Criar">
+                <a href="#" class="cancel-addtask">Cancelar</a>
+                <a href="#" class="cancel-dialog">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</script>
+
+<script type="text/x-template" title="adhoctasks-tasks-count">
+    {count} Tarefas
+</script>
+
+<script type="text/x-template" title="adhoctasks-tasks-count0">
+    Tarefas
+</script>
+
+<script type="text/x-template" title="adhoctasks-tasks-count1">
+    1 Tarefa
+</script>
+
+<script type="text/x-template" title="adhoctasks-task-action-default">
+    <span class="task-name">{name}</span>
+        <a name="{action.id}" class="workflow-action" title="{hint}" href="#">{shortName}</a>
+</script>
+
+<script type="text/x-template" title="adhoctasks-task-name">
+    <span class="task-name">{name}</span>
+</script>
+
+<script type="text/x-template" title="adhoctasks-task-assignee">
+    <img src="{user.pictureUrl}" title="{user.fullName}"> {user.fullName}
+</script>
+
+<script type="text/x-template" title="adhoctasks-task-duedate">
+    <span class="task-duedate">prazo {friendlyDueDate}</span>
+</script>
+
+<script type="text/x-template" title="adhoctasks-task-completed">
+    <div>
+        {actor.fullName} {lastAction} {date}
+    </div>
+    <blockquote class="note">
+        {comment}
+    </blockquote>
+</script>
+
+<script type="text/x-template" title="adhoctasks-task">
+    <div id="task-{id}" class="task {toggle}">
+        <div class="task-header">
+            <div class="name {completed}">
+            </div>
+            <div class="workflow-actions">
+            </div>
+        </div>
+        <div class="task-edit">
+            <div class="task-caption">
+            </div>
+            <form class="aui">
+                <input type="hidden" name="id" value="{id}"/>
+                <fieldset>
+                    <input  type="text"
+                            class="text autocomplete-user"
+                            name="assignee"
+                            data-max="10"
+                            data-template="{username}"
+                            data-none-message="Nenhum usuário correspondente encontrado"
+                            placeholder="Atribuir a..."/>
+                    <div class="usersdropdown aui-dd-parent">
+                        <a href="" class="aui-dd-trigger" style="display:none;"></a>
+                        <ul class="aui-dropdown aui-dropdown-left hidden">
+                        </ul>
+                    </div>
+                    <ol class="assignees select single">
+                    </ol>
+                    <textarea class="textarea" placeholder="Adicionar uma observação opcional"/>
+                </fieldset>
+                <div class="button-panel">
+                    <input type="submit" name="remove" class="remove" value="Excluir">
+                    <input type="submit" name="complete" class="complete" value="Concluir">
+                    <input type="submit" name="assign" class="assign" value="Atribuir">
+                    <a href="#" class="cancel-task">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</script>
+<script type="text/x-template" title="adhocworkflows-states">
+    <div class="progress-messages-icon"></div>
+    <div id="workflow-main">
+        <form class="aui state">
+            <fieldset>
+                <span class="workflow-action assign-page" name="assign"></span>
+                <select id="select-workflow-state" name="state">
+                </select>
+                <ol class="assignees assigned">
+                </ol>
+                <input type="text "
+                            class="text newstatename"
+                            placeholder="Nome do novo estado"/>
+                <input type="text"
+                            class="text autocomplete-user"
+                            name="assignee"
+                            data-max="10"
+                            data-template="{username}"
+                            data-none-message="Nenhum usuário correspondente encontrado"
+                            placeholder="Atribuir a..."
+                            placeholder2="Reatribuir a..."/>
+                <div class="usersdropdown aui-dd-parent">
+                    <a href="" class="aui-dd-trigger" style="display:none;"></a>
+                    <ul class="aui-dropdown aui-dropdown-left hidden">
+                    </ul>
+                </div>
+                <ol class="assignees select single">
+                </ol>
+                <textarea class="textarea" placeholder="Adicionar uma observação opcional"></textarea>
+            </fieldset>
+            <div class="button-panel">
+                <input type="submit" name="change" class="accept" value="Aceitar">
+                <input type="submit" name="unassign" class="unassign" value="Cancelar atribuição">
+                <a href="#" class="parameters">Parâmetros...</a>
+                <a href="#" class="cancel-dialog">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-state">
+    <option>{name}</option>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-state-adhoc">
+    <optgroup label="Fluxo de trabalho ad hoc">
+        <option value="0">Criar um novo estado...</option>
+    </optgroup>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-select">
+    <div class="progress-messages-icon"></div>
+    <form class="aui adhocworkflows">
+        <fieldset>
+            <label for="select-workflow-templates">Fluxo de trabalho</label>
+            <select id="select-workflow-templates" name="workflowTemplate" class="select">
+            </select>
+            <div class="adhoc-states">
+                <label for="adhoc-state-names">Nomes dos estados</label>
+                <input id="adhoc-state-names" type="text" class="state-names" value="Em andamento, aprovado"/>
+                <span class="description">
+                    Esta é apenas uma lista inicial, será possível alterar mais tarde
+                </span>
+            </div>
+
+            <span class="description">
+                Saiba mais sobre
+                <a target="_blank" href="https://apps.appf.re/cdmdc/doc/featuretour/xcvbJg">
+                    trabalhando com fluxos de trabalho
+                </a>
+            </span>
+        </fieldset>
+        <div class="button-panel">
+            <input type="submit" name="confirm" value="Adicionar">
+            <a href="#" class="close-dialog">Cancelar</a>
+        </div>
+
+    </form>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-adhoc-template">
+    <optgroup label="Fluxo de trabalho ad hoc">
+        <option value="0" title="Utilize isso para definir o fluxo de trabalho à medida que avança: em cada etapa, permita que os participantes criem tarefas e decidam para onde encaminhar o documento. Todos os estados e tarefas serão gravados e será possível reutilizar o fluxo de trabalho.">Comece com um fluxo de trabalho em branco</option>
+    </optgroup>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-select-template">
+    <option value="{id}" title="{description}">{name}</option>
+</script>
+
+
+<script type="text/x-template" title="adhocworkflows-form">
+    <div class="progress-messages-icon"></div>
+    <div id="workflow-form">
+        <form class="aui ahoc-form">
+            <fieldset>
+                <table>
+
+                </table>
+            </fieldset>
+            <div class="button-panel">
+                <input type="submit" name="accept" class="accept" value="Aceitar">
+                <a href="#" class="edit-form"><span class="value">Editar</span></a>
+                <a href="#" class="cancel-dialog">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-inputfield">
+    <tr>
+        <td class="field-name">
+            {name}
+        </td>
+        <td id="{id}" class="value">
+        </td>
+    </tr>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-inputfield-text">
+    <span class="value">{value}</span>
+    <input name="{id}" type="text" class="text" value="{value}"/>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-inputfield-user">
+    <span class="user value" title="{value}">{value}</span>
+    <input  type="text"
+            class="text autocomplete-user"
+            name="{id}"
+            data-max="10"
+            data-template="{username}"
+            data-none-message="Nenhum usuário correspondente encontrado"
+            placeholder="Atribuir a..."
+            value="{value}"/>
+    <div class="usersdropdown aui-dd-parent">
+        <a href="" class="aui-dd-trigger" style="display:none;"></a>
+        <ul class="aui-dropdown aui-dropdown-left">
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-inputfield-decorated-user">
+    <img src="{user.pictureUrl}" title="{user.fullName}">
+    <span>{user.fullName}</span>
+</script>
+
+
+<script type="text/x-template" title="adhocworkflows-inputfield-list">
+    <span class="value">
+        {value}
+    </span>
+    <select name="{id}">
+    </select>
+</script>
+
+<script type="text/x-template" title="adhocworkflows-inputfield-list-option">
+    <option {selected}>{option}</option>
+</script>
+
+            <fieldset class="parameters hidden">
+<input type="hidden" id="showPageOnboarding" value="false"/>
+<input type="hidden" id="showDashboardOnboarding" value="false"/>
+</fieldset>
+    <ul id="assistive-skip-links" class="assistive">
+    <li><a href="#title-heading">Ir para o conteúdo principal</a></li>
+    <li><a href="#breadcrumbs">assistive.skiplink.to.breadcrumbs</a></li>
+    <li><a href="#header-menu-bar">assistive.skiplink.to.header.menu</a></li>
+    <li><a href="#navigation">assistive.skiplink.to.action.menu</a></li>
+    <li><a href="#quick-search-query">assistive.skiplink.to.quick.search</a></li>
+</ul>
+<div id="page">
+<div id="full-height-container">
+    <div id="header-precursor">
+        <div class="cell">
+            <!-- GoogleTag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TCMTF2Q"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<!-- Global site tag (gtag.js) - Google Analytics G4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8RWQ11H2P1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-8RWQ11H2P1');
+</script>
+<!-- End Google Tag Manager G4 -->
+
+<!--<div id = "alertMsg" class="aui-message closeable" style="display:none;">
+    <p class="title">
+        <strong>[MANUTENÇÃO]</strong>
+    </p>
+    <p>A partir do dia 28/08 após às 20hs, o acesso ao TDN nas páginas logadas será integrado ao Identity Fluig, seguindo o mesmo padrão já adotado em outras ferramentas, como o Jira Produção. <br> 
+Essa mudança tem como objetivo aprimorar a segurança e a gestão de acessos a ferramenta.  Atenciosamente, equipe TOTVS.
+</div>-->
+                            </div>
+    </div>
+            
+
+
+
+
+
+<header id="header" role="banner">
+            <a class="aui-skip-link" href="https://tdn.totvs.com/login.action?os_destination=%2Fdisplay%2Fpublic%2Fframework%2FREST">Autenticação</a>
+            <a class="aui-skip-link" href="#nav-sidebar">Ir para a barra lateral</a>
+        <a class="aui-skip-link" href="#main">Ir para o conteúdo principal</a>
+    <nav class="aui-header aui-dropdown2-trigger-group" aria-label="Site"><div class="aui-header-inner"><div class="aui-header-before"><button class=" aui-dropdown2-trigger app-switcher-trigger aui-dropdown2-trigger-arrowless" aria-controls="app-switcher" aria-haspopup="true" role="button" data-aui-trigger href="#app-switcher"><span class="aui-icon aui-icon-small aui-iconfont-appswitcher">Aplicações Vinculadas</span></button><div id="app-switcher" class="aui-dropdown2 aui-style-default" role="menu" hidden data-is-user-admin="false" data-is-switcher="true"><div class="app-switcher-loading">Carregando...</div></div></div><div class="aui-header-primary"><span id="logo" class="aui-header-logo aui-header-logo-custom"><a href="/" aria-label="Ir para a página principal"><img src="/download/attachments/327682/atl.site.logo?version=3&amp;modificationDate=1784579696503&amp;api=v2" alt="TDN" /></a></span><ul class="aui-nav">
+                            <li>
+            
+        
+        
+<a  id="space-directory-link" href="/spacedirectory/view.action"  class=" aui-nav-imagelink"   title="Espaços">
+            <span>Espaços</span>
+    </a>
+        </li>
+                                <li class="aui-buttons">
+            </li>
+</ul>
+</div><div class="aui-header-secondary"><ul class="aui-nav">
+                        <li>
+        <div id="search-ui" class="aui-quicksearch dont-default-focus header-quicksearch"><button id="quick-search-query-button" aria-label="Pesquisar" aria-haspopup= "dialog" aria-controls="search_drawer" ></button><input id="quick-search-query" aria-label="Pesquisar" placeholder="Pesquisar" type="text" aria-haspopup= "dialog" aria-controls="search_drawer" /><div id="quick-search-alert" role="alert">Digite enter para pesquisar</div><aui-spinner size="small"></aui-spinner></div>
+    </li>
+        <li>
+            
+        <a id="help-menu-link" class="aui-nav-link aui-dropdown2-trigger aui-dropdown2-trigger-arrowless" href="#" aria-haspopup="true" aria-owns="help-menu-link-content" title="Ajuda">
+        <span class="aui-icon aui-icon-small aui-iconfont-question-filled">Ajuda</span>
+    </a>
+    <nav id="help-menu-link-content" class="aui-dropdown2 aui-style-default">
+                    <div class="aui-dropdown2-section">
+                                <ul  id="help-menu-link-leading" class="aui-list-truncate section-leading first">
+                                            <li>
+        
+            
+<a  id="confluence-help-link" href="https://docs.atlassian.com/confluence/docs-719/" class="    "      title="Veja a documentação do Confluence"  target="_blank"
+>
+        Ajuda on-line
+</a>
+</li>
+                                            <li>
+    
+                
+<a  id="keyboard-shortcuts-link" href="#" class="    "      title="Ver atalhos do teclado disponíveis" >
+        Atalhos de Teclado
+</a>
+</li>
+                                            <li>
+    
+            
+<a  id="whats-new-menu-link" href="https://confluence.atlassian.com/display/DOC/Confluence+7.19+Release+Notes" class="    "      title="" >
+        O que há de novo
+</a>
+</li>
+                                            <li>
+    
+                
+<a  id="gadget-directory-link" href="#" class="   user-item administration-link "      title="Navegue pelos gadgets providos pelo Confluence" >
+        Gadgets disponíveis
+</a>
+</li>
+                                            <li>
+    
+            
+<a  id="confluence-about-link" href="/aboutconfluencepage.action" class="    "      title="Mais informações sobre o Confluence" >
+        Sobre o Confluence
+</a>
+</li>
+                                    </ul>
+            </div>
+            </nav>
+    
+    </li>
+        <li>
+                
+    
+    </li>
+        <li>
+            
+    </li>
+        <li>
+                                            <li>
+        
+            
+<a  id="login-link" href="/login.action?os_destination=%2Fdisplay%2Fpublic%2Fframework%2FREST" class="   user-item login-link "      title="" >
+        Autenticação
+</a>
+</li>
+                        
+    </li>
+    </ul>
+</div></div><!-- .aui-header-inner--></nav><!-- .aui-header -->
+    <br class="clear">
+</header>
+    
+
+    
+        <div class="ia-splitter">
+            <div class="ia-splitter-left">
+                <div class="ia-fixed-sidebar">
+                                            
+                            <div class="acs-side-bar ia-scrollable-section"><div class="acs-side-bar-space-info tipsy-enabled" data-configure-tooltip="Editar detalhes do espaço"><div class="avatar"><div class="space-logo" data-key="framework" data-name="Frameworksp" data-entity-type="confluence.space"><div class="avatar-img-container"><div class="avatar-img-wrapper"><a href="/display/framework/Framework" title="Frameworksp"><img class="avatar-img" src="/images/logo/default-space-logo.svg" alt="Frameworksp"></a></div></div></div></div><div class="space-information-container"><div class="name"><a href="/display/framework/Framework" title="Frameworksp">Frameworksp</a></div><div class="flyout-handle icon aui-icon aui-icon-small aui-iconfont-edit"></div></div></div><div class="acs-side-bar-content"><div class="acs-nav-wrapper"><div class="acs-nav" data-has-create-permission="false" data-quick-links-state="hide" data-page-tree-state="show" data-nav-type="pages"><div class="acs-nav-sections"><div class="custom-sidebar"><div class="custom-sidebar-content"><div class="content"><p>    
+    
+
+
+<div class="search-macro search-macro-medium">
+    <div class="aui-dd-parent"></div>
+    <form class="aui aui-dd-parent" name="livesearchForm" method="GET" action="/dosearchsite.action" role="search">
+        <fieldset class="search-macro-fields">
+            <div class="search-macro-query">
+                <input class="text" type="text" name="queryString" autocomplete="off" placeholder="Buscar na estrutura de pagina" aria-label="Buscar na estrutura de pagina">
+                            </div>
+                        <button type="submit" class="search-macro-button aui-button">
+                <span class="aui-icon aui-icon-small aui-iconfont-search">Pesquisa</span>
+            </button>
+                        <input type="hidden" name="where" value="framework">
+            <input type="hidden" name="additional" value="space name">
+            <input type="hidden" name="labels" value="">
+            <input type="hidden" name="contentType" value="">
+        </fieldset>
+    </form>
+</div>
+</p></div></div></div></div></div></div><div class="ia-secondary-container tipsy-enabled" data-tree-type="pages"><div class="ia-secondary-header"><h5 class="ia-secondary-header-title pages"><span class="label">Páginas filhas</span></h5></div><div class="ia-secondary-parent-content"><ul class="parent ia-secondary-header-title wiki"><li class="parent-item"><a class="parent-item-link" href="/display/framework/Classes" title="Classes"><span class="icon"></span><span class="label">Classes</span></a></li></ul></div><div class="ia-secondary-current-content"><ul class="ia-secondary-currentPage-title wiki current-item"><li><span class="icon"></span><span class="label">REST</span></li></ul></div><div class="ia-secondary-content"><div class="contextual-nav-child-pages"><ul class="children"><li class="child-item" data-page-id="274302076"><span class="icon"></span><a href="/display/framework/FWHttpHeaderResponse" title="FWHttpHeaderResponse"><span class="label">FWHttpHeaderResponse</span></a></li><li class="child-item" data-page-id="165282029"><span class="icon"></span><a href="/display/framework/FWHttpHeaderResponseParser" title="FWHttpHeaderResponseParser"><span class="label">FWHttpHeaderResponseParser</span></a></li><li class="child-item" data-page-id="165282031"><span class="icon"></span><a href="/display/framework/FWRest" title="FWRest"><span class="label">FWRest</span></a></li></ul></div></div></div></div><div class="hidden"><a href="/collector/pages.action?key=framework" id="space-pages-link"></a><script type="text/x-template" title="logo-config-content"><h2>Detalhes do Espaço</h2><div class="personal-space-logo-hint">A sua foto de perfil é usada como logotipo do seu espaço pessoal. <a href="/users/profile/editmyprofilepicture.action" target="_blank">Alterar a sua foto de perfil</a>.</div></script></div></div><div class="space-tools-section"><div id="space-tools-menu-additional-items" class="hidden"><div data-label="Navegar nas páginas" data-class="" data-href="/pages/reorderpages.action?key=framework">Navegar nas páginas</div></div><button id="space-tools-menu-trigger"  class=" aui-dropdown2-trigger aui-button aui-button-subtle tipsy-enabled aui-dropdown2-trigger-arrowless " aria-controls="space-tools-menu" aria-haspopup="true" role="button" data-aui-trigger><span class="aui-icon aui-icon-small aui-iconfont-configure">Configurar</span><span class="aui-button-label">Ferramentas do espaço</span><span class="aui-icon "></span></button><div id="space-tools-menu" class="aui-dropdown2 aui-style-default space-tools-dropdown" role="menu" hidden data-aui-alignment="top left"></div><a href="#" role="button" class="expand-collapse-trigger aui-icon aui-icon-small aui-iconfont-chevron-double-left" aria-expanded="true"></a></div>
+                    
+                                    </div>
+            </div>
+        <!-- \#header -->
+
+            
+    
+        <div id="main" class=" aui-page-panel">
+                        <div id="main-header">
+                        
+    <div id="navigation" class="content-navigation view" role="region" aria-label="Ferramentas da página">
+                    <ul class="ajs-menu-bar">
+                                            
+        <li class="normal ajs-menu-item">
+        <a id="action-menu-link" class="action aui-dropdown2-trigger-arrowless aui-button aui-button-subtle ajs-menu-title aui-dropdown2-trigger" href="#" aria-haspopup="true" aria-label="Mais opções" aria-owns="action-menu" data-container="#navigation">
+            <span>
+                                    <span class="aui-icon aui-icon-small aui-iconfont-more" aria-label="Mais opções"></span>
+                                
+            </span>
+        </a>         <div id="action-menu" class="aui-dropdown2 aui-style-default" aria-hidden="true">
+                            <div class="aui-dropdown2-section">
+                    <ul  id="action-menu-workflowToolsActions"                         class="section-workflowToolsActions first">
+                                                    <li>
+
+    
+            
+    
+                                                        
+    
+    
+            <a  id="removePageReadConfirmation" href="#" rel="nofollow" class=""   title="" >
+                        <span>
+                                Remover confirmação de leitura
+            </span>        </a>
+    </li>
+                                        </ul>
+                </div>
+                            <div class="aui-dropdown2-section">
+                    <ul  id="action-menu-primary"                         class="section-primary">
+                                                    <li>
+
+    
+        
+    
+                                                        
+    
+    
+            <a  id="view-attachments-link" href="/pages/viewpageattachments.action?pageId=165282017" rel="nofollow" class="action-view-attachments"  accessKey="t"  title="Mostrar anexos" >
+                        <span>
+                                A<u>n</u>exos (0)
+            </span>        </a>
+    </li>
+                                                <li>
+
+    
+        
+    
+                                                        
+    
+    
+            <a  id="action-view-history-link" href="/pages/viewpreviousversions.action?pageId=165282017" rel="nofollow" class="action-view-history"   title="" >
+                        <span>
+                                Histórico da Página
+            </span>        </a>
+    </li>
+                                        </ul>
+                </div>
+                            <div class="aui-dropdown2-section">
+                    <ul  id="action-menu-secondary"                         class="section-secondary">
+                                                    <li>
+
+    
+        
+    
+                                                        
+    
+    
+            <a  id="view-page-info-link" href="/pages/viewinfo.action?pageId=165282017" rel="nofollow" class="action-view-info"   title="" >
+                        <span>
+                                Informações da Página
+            </span>        </a>
+    </li>
+                                                <li>
+
+    
+            
+    
+                                                        
+    
+    
+            <a  id="view-resolved-comments" href="#" rel="nofollow" class=""   title="" >
+                        <span>
+                                Comentários resolvidos
+            </span>        </a>
+    </li>
+                                                <li>
+
+    
+        
+    
+                                                        
+    
+    
+            <a  id="view-in-hierarchy-link" href="/pages/reorderpages.action?key=framework&amp;openId=165282017#selectedPageInHierarchy" rel="nofollow" class=""   title="" >
+                        <span>
+                                Exibir em hierarquia
+            </span>        </a>
+    </li>
+                                                <li>
+
+    
+        
+    
+                                                        
+    
+    
+            <a  id="action-view-source-link" href="/plugins/viewsource/viewpagesrc.action?pageId=165282017" rel="nofollow" class="action-view-source popup-link"   title="" >
+                        <span>
+                                Ver Fonte
+            </span>        </a>
+    </li>
+                                                <li>
+
+    
+        
+    
+                                                        
+    
+    
+            <a  id="action-export-word-link" href="/exportword?pageId=165282017" rel="nofollow" class="action-export-word"   title="" >
+                        <span>
+                                Exportar para Word
+            </span>        </a>
+    </li>
+                                        </ul>
+                </div>
+                    </div>
+    </li>
+            </ul>
+    </div>
+
+            
+            <div id="title-heading" class="pagetitle with-breadcrumbs">
+                
+                                    <div id="breadcrumb-section">
+                        
+    
+    
+    <nav aria-label="Trilhas">
+        <ol id="breadcrumbs">
+                                                            
+                                
+            <li class="first" >
+                                
+                                    <span class=""><a href="/collector/pages.action?key=framework">Páginas</a></span>
+                                                                                                                                                <li id="ellipsis" title="Mostrar todos os breadcrumbs" aria-expanded="false" aria-label="Mostrar todos os breadcrumbs" tabindex="0" role="button"><span><strong>&#8230;</strong></span></li>
+                                                            
+                                
+            <li class="hidden-crumb" >
+                                
+                                    <span class=""><a href="/display/framework/Framework">Framework</a></span>
+                                                                                                                                        
+                                
+            <li class="hidden-crumb" >
+                                
+                                    <span class=""><a href="/display/framework/Framework+Microsiga+Protheus">Framework Microsiga Protheus</a></span>
+                                                                                                                                        
+                                
+            <li class="hidden-crumb" >
+                                
+                                    <span class=""><a href="/display/framework/Framework+%7C+Base+de+Conhecimento">Framework | Base de Conhecimento</a></span>
+                                                                                                                                        
+                                
+            <li class="hidden-crumb" >
+                                
+                                    <span class=""><a href="/display/framework/Framework+%7C+AdvPL">Framework | AdvPL</a></span>
+                                                                                                                                        
+                                
+            <li class="hidden-crumb" >
+                                
+                                    <span class=""><a href="/display/framework/SDK+Microsiga+Protheus">SDK Microsiga Protheus</a></span>
+                                                                                                                    
+                                
+            <li>
+                                
+                                    <span class=""><a href="/display/framework/Classes">Classes</a></span>
+                                                                                                    </ol>
+    </nav>
+
+
+                    </div>
+                
+                
+                
+            <div id="page-metadata-banner"><ul class="banner"><li id="system-content-items" class="noprint"><a href="" title="Sem restrições" id="content-metadata-page-restrictions-hidden" class="hidden"></a></li><li class="page-metadata-item noprint"  id="adhocWorkflowsInfoBanner-wrapper"><a href="" title="Informações do fluxo de trabalho" id="adhocWorkflowsInfoBanner" class="cw-inactive"><span>Fluxo de trabalho</span></a></li><li class="page-metadata-item noprint"  id="readackInfoBanner-wrapper"><a href="" title="Confirmação de leitura" id="readackInfoBanner" class="cw-inactive"><span>Confirmação de leitura</span></a></li><li class="page-metadata-item noprint"  id="languages-dropdown-wrapper"><a href="/" title="" id="languages-dropdown" class="bv-languages-dropdown"><span>Languages</span></a></li></ul></div>
+        
+
+                <h1 id="title-text" class="with-breadcrumbs">
+                                                <a href="/display/framework/REST">REST</a>
+                                    </h1>
+            </div>
+        </div><!-- \#main-header -->
+        
+        
+
+        <div id="sidebar-container">
+                                                </div><!-- \#sidebar-container -->
+
+        
+    
+
+        
+
+
+
+
+            
+    
+
+                                
+    
+
+    
+    
+        
+    
+    
+                    
+    
+
+    
+
+    
+            
+        
+
+    
+    
+
+    
+            
+        
+
+
+
+    
+<div id="content" class="page view">
+    
+
+
+<div id="action-messages">
+                        </div>
+
+
+
+            <script type="text/x-template" title="searchResultsGrid">
+    <table class="aui">
+        <thead>
+            <tr class="header">
+                <th class="search-result-title">Título da Página</th>
+                <th class="search-result-space">Espaço</th>
+                <th class="search-result-date">Atualizado</th>
+            </tr>
+        </thead>
+    </table>
+</script>
+<script type="text/x-template" title="searchResultsGridCount">
+    <p class="search-result-count">{0}</p>
+</script>
+<script type="text/x-template" title="searchResultsGridRow">
+    <tr class="search-result">
+        <td class="search-result-title"><a href="{1}" class="content-type-{2}"><span>{0}</span></a></td>
+        <td class="search-result-space"><a class="space" href="/display/{4}/" title="{3}">{3}</a></td>
+        <td class="search-result-date"><span class="date" title="{6}">{5}</span></td>
+    </tr>
+</script>
+        
+    
+            
+
+        
+                            
+    
+
+                    
+
+        
+        <div class="page-metadata">
+    <ul>
+        <li class="page-metadata-modification-info">
+            
+        
+    
+    
+        
+    
+        
+            
+            Criado por <span class='author'>     <a href="    /display/~rodrigo.antonio
+"
+            aria-label="criado por Rodrigo Antonio Godinho Moura"                       class="url fn"
+                            >Rodrigo Antonio Godinho Moura</a></span>, última alteração em <a class='last-modified' aria-label='modificado em 30 set, 2014, selecione para exibir as mudanças' title='Mostrar alterações' href='/pages/diffpagesbyversion.action?pageId=165282017&amp;selectedPageVersions=1&amp;selectedPageVersions=2'>30 set, 2014</a>
+            </li>
+    </ul>
+</div>
+        
+                                            
+        <div id="main-content" class="wiki-content">
+                           
+            <div class="wiki-content">
+                
+            </div>
+        
+    
+        </div>
+
+                        
+    
+
+
+
+<div id="labels-section" class="pageSection group">
+    <div class="labels-section-content content-column" entityid="165282017" entitytype="page">
+	<div class="labels-content">
+		
+    <ul class="label-list label-list-right ">
+            <li class="no-labels-message">
+            Sem rótulos
+        </li>
+            </ul>
+
+    </div>
+</div>
+</div>
+        
+		
+            
+
+
+
+
+            
+        
+
+
+
+
+
+
+
+
+                        
+    
+<div id="comments-section" class="pageSection group">
+        
+    
+
+
+
+</div>
+        
+
+
+                
+    
+            
+</div>
+
+    
+
+    
+
+
+
+
+    
+    
+
+    
+    
+    
+
+
+    
+<div id="space-tools-web-items" class="hidden">
+                <div data-label="Visão Geral" data-href="/spaces/viewspacesummary.action?key=framework">Visão Geral</div>
+            <div data-label="Import HTML Content" data-href="/legacyhtml/htmlConverter.action?key=framework">Import HTML Content</div>
+            <div data-label="Conteúdo das Ferramentas" data-href="/pages/reorderpages.action?key=framework">Conteúdo das Ferramentas</div>
+            <div data-label="Tarefas" data-href="/spaces/tasksreport.action?key=framework">Tarefas</div>
+    </div>
+        
+
+
+
+            </div><!-- \#main -->
+            
+    
+    
+        
+            
+            
+
+<div id="footer" role="contentinfo">
+    <section class="footer-body">
+
+                                                    
+        
+
+        <ul id="poweredby">
+            <li class="noprint">Desenvolvido por <a href="https://www.atlassian.com/software/confluence" class="hover-footer-link" rel="nofollow">Confluence da Atlassian</a> <span id='footer-build-information'>7.19.17</span></li>
+            <li class="print-only">Impresso pelo Confluence da Atlassian 7.19.17</li>
+            <li class="noprint"><a href="https://support.atlassian.com/confluence-server/" class="hover-footer-link" rel="nofollow">Reportar um problema</a></li>
+            <li class="noprint"><a href="https://www.atlassian.com/company" class="hover-footer-link" rel="nofollow">Notícias da Atlassian</a></li>
+        </ul>
+
+        
+
+        <div id="footer-logo"><a href="https://www.atlassian.com/" rel="nofollow">Atlassian</a></div>
+
+                    <script type="text/javascript">
+  var msgAtiva = true;
+
+  if (
+    $('meta[name="ajs-remote-user-has-licensed-access"]').attr("content") ==
+      "true" &&
+    msgAtiva
+  ) {
+    $("#alertMsg").show();
+  }
+</script>
+
+<script type="text/javascript">
+  var URL = document.URL;
+  //if(URL.indexOf("315229561") > 0){
+  $("nav div.aui-header-inner div.aui-header-primary ul.aui-nav").prepend(
+    '<li><a id="produto-menu-link" class="aui-dropdown2-trigger aui-nav-link aui-alignment-target aui-alignment-abutted aui-alignment-abutted-left aui-alignment-element-attached-top aui-alignment-element-attached-left aui-alignment-target-attached-bottom aui-alignment-target-attached-left" aria-controls="produto-menu-link-content" aria-haspopup="true" role="button" title="Lugares" tabindex="0" data-aui-trigger="" resolved="" aria-expanded="false" href="#produto-menu-link-content"><strong>Produtos/Área</strong><span class="icon aui-icon-dropdown"></span></a>		   <div id="produto-menu-link-content" class="aui-dropdown2 aui-style-default aui-dropdown2-in-header aui-layer aui-alignment-element aui-alignment-side-bottom aui-alignment-snap-left aui-alignment-abutted aui-alignment-abutted-left aui-alignment-element-attached-top aui-alignment-element-attached-left aui-alignment-target-attached-bottom aui-alignment-target-attached-left" role="menu" aria-hidden="true" resolved="" data-aui-alignment="bottom auto" data-aui-alignment-static="true" style="width:950px; max-width:950px; z-index: 4000!important; top: 0px; left: 0px; position: absolute; transform: translateX(90px) translateY(94px) translateZ(0px);">			  <div class="aui-dropdown2-section" id="recent-produtos-section">				 <strong>Produtos</strong>				 <ul>					<li style="display: flex;flex-wrap: wrap;width: 950px;">						<a style="width: 30%;" href="/pages/viewpage.action?pageId=187531295" rel="nofollow">TOTVS Linha Protheus</a><a style="width: 30%;" href="/pages/viewpage.action?pageId=189305613" rel="nofollow">TOTVS Linha Datasul</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189305597" rel="nofollow">TOTVS Linha Logix</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189305605" rel="nofollow">TOTVS Linha RM</a>		<a style="width: 30%;" href="/pages/viewpage.action?pageId=189305632" rel="nofollow">TOTVS Distribuição e Varejo - Linha Winthor</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=66618245"  rel="nofollow">TOTVS Fluig Plataforma</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189305992" rel="nofollow">TOTVS Moda</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=612246529" rel="nofollow">TOTVS CRM Automação da Força de Vendas (SFA)</a> <a style="width: 30%;" href="/pages/viewpage.action?pageId=612245184" rel="nofollow">TOTVS CRM Gestão de Clientes</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189309902" rel="nofollow">TOTVS Logística Recintos Aduaneiros</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=269440975" rel="nofollow">Consultoria de Segmentos</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189305674" rel="nofollow">TOTVS Financial Services Core Banking</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189314925" rel="nofollow">TOTVS Agro Bioenergia</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=190513284" rel="nofollow">TOTVS Agro Multicultivo</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=444610314" rel="nofollow">TOTVS Agro</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=315911089" rel="nofollow">TOTVS Analytics</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189305767" rel="nofollow">TOTVS Integrações</a>   <a style="width: 30%;" href="https://tdn.totvs.com/display/TRH/TOTVS+RH" rel="nofollow">TOTVS RH</a>   <a style="width: 30%;" href="https://tdn.totvs.com/x/HpicHQ" rel="nofollow">TOTVS RH Performance e Metas</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189305621" rel="nofollow">Série 1</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189305641" rel="nofollow">TOTVS Varejo Supermercados (Linha RMS)</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=273977799" rel="nofollow">TOTVS Soluções Saúde</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=203771195" rel="nofollow">TSS</a>												<a style="width: 30%;" href="/pages/viewpage.action?pageId=203771174" rel="nofollow">Automação Fiscal</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=266981761" rel="nofollow">TOTVS Linha CMNet</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=194512340" rel="nofollow">TSA</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=454851655" rel="nofollow">TOTVS Varejo Franquias e Redes</a> <a style="width: 30%;" href="/pages/viewpage.action?pageId=806759305" rel="nofollow">TOTVS Varejo PDV Omni</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=824913461" rel="nofollow">TOTVS Food Service</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=439696375" rel="nofollow">TOTVS Varejo Home Center (Linha Gemco)</a>		<a style="width: 30%;" href="/pages/viewpage.action?pageId=24348451" rel="nofollow">MPN Eleve</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=394224465" rel="nofollow">TOTVS Food Service - Linha Chef</a>   <a style="width: 30%;" href="/pages/viewpage.action?pageId=553330284" rel="nofollow">TOTVS Consignado</a><a style="width: 30%;" href="/pages/viewpage.action?pageId=244722824" rel="nofollow">TOTVS Gestão Jurídica - Linha SISJURI</a>		<a style="width: 30%;" href="/pages/viewpage.action?pageId=778788456" rel="nofollow">Gestão De Documentos Jurídicos By Legal Desk</a>			</li>					<li style="display: flex;flex-wrap: wrap;width: 950px;padding-top:30px;">						<a style="width: 30%;" href="/pages/viewpage.action?pageId=164003874" rel="nofollow">TOTVS Fluig Plataforma ENG</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=235595995" rel="nofollow">Aprendizado fluig</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=234457027" rel="nofollow">Help Fluig</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=236428080" rel="nofollow">Help Fluig - ESP</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=235595982" rel="nofollow">FAQ Fluig</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=236601232" rel="nofollow">Guia Cloud TOTVS</a>							<a style="width: 30%;" href="/pages/viewpage.action?pageId=185732324" rel="nofollow">Framework JOI</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=150634637" rel="nofollow">Framework SP</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=284473118" rel="nofollow">Meu RH</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=189305693" rel="nofollow">TOTVS Linha Protheus - ESP</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=196807871" rel="nofollow">TOTVS Linha Protheus - ENG</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=271184641" rel="nofollow">TNF</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=851300831" rel="nofollow">TOTVS TECHFIN</a>						<a s/tyle="width: 30%;" href="/pages/viewpage.action?pageId=39683028"  rel="nofollow">TOTVS Technology</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=39683030"  rel="nofollow">TOTVS Tecnología - ESP</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=6062824"   rel="nofollow">TOTVS Tecnologia</a>						<a style="width: 30%;" href="/pages/viewpage.action?pageId=236433621" rel="nofollow">TOTVS HTML Framework</a><a style="width: 30%;" href="/pages/viewpage.action?pageId=547225988" rel="nofollow">TOTVS Varejo Supermercados (Linha Consinco)</a>	<a style="width: 30%;" href="/pages/viewpage.action?pageId=558262888" rel="nofollow">TOTVS Varejo Supermercados e-Commerce (Linha Consinco)</a>	<a style="width: 30%;" href="/pages/viewpage.action?pageId=556862092" rel="nofollow">TOTVS Varejo Supermercados Monitor de Banco de Dados (Linha Consinco)</a>	<a style="width: 30%;" href="/pages/viewpage.action?pageId=547225964" rel="nofollow">TOTVS Varejo Supermercados PDV (Linha Consinco)</a>	<a style="width: 30%;" href="/pages/viewpage.action?pageId=547225957" rel="nofollow">TOTVS Varejo Supermercados WMS (Linha Consinco)</a>		<a style="width: 30%;" href="/pages/viewpage.action?pageId=557342664" rel="nofollow">Home TOTVS Varejo Supermercados</a>    <a style="width: 30%;" href="/pages/viewpage.action?pageId=777267847" rel="nofollow">TOTVS iPaaS</a></li>				 </ul>			  </div>		   </div>		</li>		'
+  );
+  
+  //}
+
+  var usersPdf = ["paulo.rsouza", "bucci.luana"];
+  var userPdf = $("#user-menu-link").attr("data-username");
+  var data = new Date();
+
+  console.info("vai desativar pdf export");
+  if (data.getHours() > 4 && data.getHours() < 19) {
+    $("#k15t-exp-pdf-export-dialog-web-item").remove();
+    console.info("desativou pdf export");
+  }
+  //PD 44	Scrip para Inclusão de contador de estimativa de tempo de leitura em template
+  var textContent = $("#main-content")
+    .text()
+    .replace(/<[^>]*>/g, "")
+    .trim();
+  function tempoDeLeitura(text) {
+    const palavrasPorMinuto = 200;
+    const noDePalavras = text.split(/\s/g).length;
+
+    const minutos = noDePalavras / palavrasPorMinuto;
+    const tempoTotal = Math.ceil(minutos);
+
+    //Incluir o contador somente nas paginas que tiverem a estimativa de leitura superior a 1 minuto
+    let counterMessage =
+      "Tempo aproximado para leitura: <b>" + tempoTotal + " minutos</b>";
+
+    if (tempoTotal === 1) {
+      counterMessage = "Tempo aproximado para leitura: <b>1 minuto</b>";
+    } else if (tempoTotal > 15) {
+      counterMessage =
+        "Tempo aproximado para leitura: <b>superior a 15 minutos</b>";
+    }
+    $(".page-metadata").append(
+      '<div style="float: right;line-height: 1.42857142857143; with:100%; display: block; margin: 15px;"><img src="https://tdn.totvs.com/download/thumbnails/676587899/relogio.png?version=1&modificationDate=1658774000687&api=v2" style="width: 20px; height: 20px; float: left;margin-right: 5px;">' +
+        counterMessage +
+        "</b></div>"
+    );
+  }
+
+  function removeContadorFixo() {
+    let hasFixedCounter = $(".innerCell");
+    hasFixedCounter.each(function (index) {
+      if (
+        hasFixedCounter[index] &&
+        hasFixedCounter[index].textContent.indexOf(
+          "Tempo aproximado para leitura:"
+        ) > -1
+      ) {
+        hasFixedCounter[index].remove();
+      }
+    });
+  }
+
+  //ID das paginas que não deverão conter o contador (Obtido atraves da meta informação ajs-page-id)
+  let idPagesWithNoCounter = [
+    "327912",
+    "27676420",
+    "39682456",
+    "41353770",
+    "41353802",
+    "36307112",
+    "46076769",
+    "32571401",
+    "65208567",
+    "90277537",
+    "461909161",
+    "146968114",
+    "185738361",
+    "185756016",
+    "271402067",
+    "187535109",
+    "189306296",
+    "217841666",
+    "274651913",
+    "24348445",
+    "248581334",
+    "270085478",
+    "271673282",
+    "248582772",
+    "248580989",
+    "248582377",
+    "248582750",
+    "249266854",
+    "248582864",
+    "267801744",
+    "267806733",
+    "64652588",
+    "274844139",
+    "284854863",
+    "221547311",
+    "421377289",
+    "284867686",
+    "189305726",
+    "351376710",
+    "357601353",
+    "359468085",
+    "279166393",
+    "274308974",
+    "36309029",
+    "31948846",
+    "379307890",
+    "42042845",
+    "370606120",
+    "273295655",
+    "364928157",
+    "185740753",
+    "306846204",
+    "286029423",
+    "95027226",
+    "403747022",
+    "273973615",
+    "393354919",
+    "65208555",
+    "390405357",
+    "274320781",
+    "220889431",
+    "286012694",
+    "198941150",
+    "357601379",
+    "88899779",
+    "284481540",
+    "201727394",
+    "187827735",
+    "185741060",
+    "394224465",
+    "34570261",
+    "23200775",
+    "273977700",
+    "189313322",
+    "315903401",
+    "307855152",
+    "187827035",
+    "220890002",
+    "53772327",
+    "244723114",
+    "272705010",
+    "51253955",
+    "187535083",
+    "393355973",
+    "427041765",
+    "63865205",
+    "185761486",
+    "287070135",
+    "287068813",
+    "187531297",
+    "439681322",
+    "42795628",
+    "327697",
+    "41353768",
+    "30016356",
+    "271876045",
+    "273983704",
+    "284353767",
+    "281983298",
+    "187831433",
+    "155582967",
+    "371622975",
+    "274638150",
+    "274001398",
+    "345539886",
+    "187827057",
+    "185756021",
+    "49283933",
+    "35389447",
+    "286220261",
+    "284879426",
+    "187828268",
+    "382559952",
+    "185755631",
+    "237385894",
+    "185755835",
+    "187828275",
+    "185740524",
+    "361452293",
+    "329026981",
+    "244448471",
+    "22479037",
+    "36307739",
+    "187831415",
+    "286204494",
+    "450143576",
+    "200903526",
+    "185756342",
+    "375229192",
+    "271184641",
+    "41353797",
+    "58097684",
+    "203771214",
+    "32210959",
+    "272416916",
+    "233762136",
+    "267795084",
+    "315911089",
+    "185747821",
+    "189305621",
+    "42042306",
+    "267795681",
+    "273313933",
+    "273994577",
+    "201727242",
+    "189311241",
+    "189305665",
+    "185751862",
+    "439700380",
+    "353273765",
+    "267795649",
+    "35029002",
+    "272424319",
+    "274328361",
+    "185760648",
+    "224125891",
+    "452719147",
+    "284157515",
+    "286196410",
+    "144411418",
+    "271844992",
+    "237386151",
+    "108659284",
+    "187531304",
+    "236601232",
+    "185758851",
+    "4810736",
+    "273991360",
+    "348292749",
+    "335350136",
+    "348294856",
+    "419530590",
+    "348293309",
+    "348294872",
+    "348294860",
+    "348294864",
+    "340366677",
+    "348293069",
+    "348293050",
+    "348293053",
+    "340366672",
+    "348293403",
+    "348293758",
+    "348291963",
+    "348293246",
+    "348292881",
+    "348293439",
+    "348292673",
+    "348293473",
+    "425442858",
+    "439704393",
+    "444611305",
+  ];
+
+  let spaceKeyPagesWithNoCounter = [
+    "epc",
+    "gape",
+    "IntegracaoAplicativo",
+    "mpen",
+    "CLOUDTDI",
+    "IDM",
+    "HOS",
+    "SDM",
+  ];
+
+  let pageId = document.getElementsByTagName("meta")["ajs-page-id"];
+  let spaceKey = document.getElementsByTagName("meta")["ajs-space-key"];
+
+  removeContadorFixo();
+
+  if (
+    pageId &&
+    idPagesWithNoCounter.indexOf(pageId.content) === -1 &&
+    spaceKey &&
+    spaceKeyPagesWithNoCounter.indexOf(spaceKey.content) === -1 &&
+    document.location.href.indexOf("~admin") === -1
+  ) {
+    tempoDeLeitura(textContent);
+  }
+</script>
+
+<script>
+  function displayDicaPermissao() {
+    AJS.messages.info("#main-header", {
+      title: "Dica TDN",
+      body:
+        '<p> Para obter permissão de visualização ou edição você precisa entrar em contato com um dos administradores deste espaço. Você pode consultar a lista destas pessoas ao final da página <a href="https://tdn.totvs.com/spaces/viewspacesummary.action?key=' +
+        AJS.params.spaceKey +
+        '&showAllAdmins=true"> neste link.</p>',
+    });
+  }
+  if (AJS.$("#editPageLink").length == 0 && AJS.params.anonymous != true) {
+    AJS.$("#navigation")
+      .find("ul[class=ajs-menu-bar]")
+      .prepend(
+        '<li class="ajs-button normal"><a id="dica-permissao" onclick="displayDicaPermissao()" href="#" rel="nofollow" class="aui-button aui-button-subtle action-page-favourite selected ie-page-favourite-selected" accesskey="f" title="Remover">Precisa de permissões nesta página?</span></a></li>'
+      );
+  }
+</script>
+<style>
+  .line-bottom,
+  .line-top,
+  p.page-description,
+  #title-text {
+    z-index: 10 !important;
+  }
+</style>
+        
+    </section>
+</div>
+
+    
+</div>
+
+</div><!-- \#full-height-container -->
+</div><!-- \#page -->
+
+    <span style="display:none;" id="confluence-server-performance">{"serverDuration": 171, "requestCorrelationId": "9c245faa858c6528"}</span>
+
+
+<script type="text/javascript">
+    AJS.BigPipe = AJS.BigPipe || {};
+    AJS.BigPipe.metrics = AJS.BigPipe.metrics || {};
+    AJS.BigPipe.metrics.pageEnd = typeof window.performance !== "undefined" && typeof window.performance.now === "function"
+                                    ? Math.ceil(window.performance.now()) : 0;
+    AJS.BigPipe.metrics.isBigPipeEnabled = '${isBigPipeEnabled}' === 'true';
+</script>
+</body>
+</html>
+    
+
+
+<script type="text/javascript">

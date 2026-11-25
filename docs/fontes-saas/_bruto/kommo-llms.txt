@@ -1,0 +1,329 @@
+# Kommo API Documentation
+
+> Kommo API is a powerful tool that allows developers to access client data and other important information within the CRM and use it to create unique solutions.
+
+## Documentation: Introduction
+- [Kommo for developers](https://developers.kommo.com/docs/kommo-for-developers.md)
+- [Subject area](https://developers.kommo.com/docs/subject-area.md)
+- [Limitations](https://developers.kommo.com/docs/limitations.md)
+- [HTTP status codes](https://developers.kommo.com/docs/http-codes.md): HTTP response status codes are three-digit numbers returned by a server in response to a client's request made to the server
+- [Technology Partnership](https://developers.kommo.com/docs/technology-partnership.md): Build once. Reach thousands of businesses globally.
+
+## Documentation: Get Started
+- [Private integration](https://developers.kommo.com/docs/private-integration.md)
+- [Webhooks](https://developers.kommo.com/docs/webhooks-general.md)
+
+## Documentation: Start Building
+- Authorization
+  - [OAuth 2.0](https://developers.kommo.com/docs/oauth-20.md)
+  - [Button on Site](https://developers.kommo.com/docs/button-on-site.md)
+  - [Permissions](https://developers.kommo.com/docs/permissions.md)
+  - [Long-lived token](https://developers.kommo.com/docs/long-lived-token.md)
+  - [One-time tokens](https://developers.kommo.com/docs/one-time-tokens.md)
+- [Widget](https://developers.kommo.com/docs/widget.md)
+  - [Structure of widget](https://developers.kommo.com/docs/structure-widget.md)
+    - [manifest.json](https://developers.kommo.com/docs/manifest-json.md)
+    - [i18n/](https://developers.kommo.com/docs/i18n.md)
+    - [script.js](https://developers.kommo.com/docs/script-js.md)
+    - [images/](https://developers.kommo.com/docs/images.md)
+    - [templates/](https://developers.kommo.com/docs/system-templates.md)
+    - [style.css](https://developers.kommo.com/docs/style-css.md)
+  - [Settings field types](https://developers.kommo.com/docs/field-types.md)
+  - [Widget locations](https://developers.kommo.com/docs/widget-locations.md)
+- [VoIP ](https://developers.kommo.com/docs/voip.md): Here you are getting started with integrating Kommo and your VoIP service
+  - [Use cases](https://developers.kommo.com/docs/use-cases.md)
+  - [Authorization and configuring](https://developers.kommo.com/docs/installing-and-configuring.md)
+  - [Call logging](https://developers.kommo.com/docs/call-logging.md)
+  - [Call data from VoIP](https://developers.kommo.com/docs/call-from-webhook.md)
+  - [Call result](https://developers.kommo.com/docs/call-result.md)
+  - [Caller ID](https://developers.kommo.com/docs/caller-id.md)
+  - [Call event](https://developers.kommo.com/docs/call-event.md)
+  - [Call list](https://developers.kommo.com/docs/call-list.md)
+  - [Assign phone extensions to managers](https://developers.kommo.com/docs/assign-extensions-to-managers.md)
+  - [Smart forwarding](https://developers.kommo.com/docs/smart-forwarding.md)
+  - [Making calls inside Kommo](https://developers.kommo.com/docs/making-calls-inside-kommo.md)
+  - [Click-to-call ](https://developers.kommo.com/docs/click-to-call.md)
+
+## Documentation: Go to Marketplace
+- [Technical workspace](https://developers.kommo.com/docs/technical-account.md)
+- [Create a public integration](https://developers.kommo.com/docs/get-started-public.md)
+- [Public integration checklist](https://developers.kommo.com/docs/getting-listed.md): So, you’ve decided to publish a widget in our marketplace. Great!
+- [Authorization for public Integrations](https://developers.kommo.com/docs/authorization-public.md)
+- [Get approved](https://developers.kommo.com/docs/moderation-process.md)
+- [Dictionary for developers](https://developers.kommo.com/docs/dictionary-for-developers.md)
+
+## Documentation: WEB SDK
+- [Modules and packages](https://developers.kommo.com/docs/modules.md)
+- [Environment variables](https://developers.kommo.com/docs/environment-variables.md)
+- [JS SDK](https://developers.kommo.com/docs/js-sdk.md): JS methods and objects for working with Kommo
+- [Card SDK](https://developers.kommo.com/docs/card-sdk.md)
+- [Lists SDK](https://developers.kommo.com/docs/lists-sdk.md): This section describes the functions and workflow for working with the SDK lists
+- [Left menu bar](https://developers.kommo.com/docs/left-menu.md)
+- [Notification center](https://developers.kommo.com/docs/notification-center.md)
+  - [Adding notifications](https://developers.kommo.com/docs/add-notifications.md)
+  - [Notifications subscription](https://developers.kommo.com/docs/notifications-subscription.md)
+- [Salesbot SDK](https://developers.kommo.com/docs/salesbot-sdk.md)
+- [Website Chat Button API ](https://developers.kommo.com/docs/api-crm-plugin.md)
+- [Webforms API](https://developers.kommo.com/docs/webforms-api.md)
+- [Dark Theme](https://developers.kommo.com/docs/dark-theme.md)
+
+## Documentation: Digital pipeline
+- [Webhooks in Digital Pipeline](https://developers.kommo.com/docs/webhooks-dp.md)
+- [Salesbot](https://developers.kommo.com/docs/salesbot-dp.md)
+- [Widgets in Digital Pipeline](https://developers.kommo.com/docs/widgets-dp.md)
+
+## Documentation: Tutorials
+- [Lead Capture](https://developers.kommo.com/docs/lead-capture.md): Level : Basic/ Private Integration without a widget
+- [Simple Widget Development](https://developers.kommo.com/docs/widgets-tutorial.md)
+- [Guidelines for recipes in Python](https://developers.kommo.com/docs/guidelines-recipes.md): We provide these guidelines to make the process clear and smooth.
+- [Private Chatbot integration](https://developers.kommo.com/docs/private-chatbot-integration.md)
+
+## Documentation: Tools
+- [React hooks](https://developers.kommo.com/docs/react-hooks.md)
+- [Skeleton](https://developers.kommo.com/docs/skeleton.md)
+
+## Documentation: Get certified
+- [Certificates](https://developers.kommo.com/docs/certificates.md): Here, you can find information about certificates and submit your application for them.
+
+## API Reference: API V4 GENERAL METHODS
+- [About Kommo API](https://developers.kommo.com/reference/kommo-api-reference.md)
+- [Account](https://developers.kommo.com/reference/account.md)
+  - [Account parameters](https://developers.kommo.com/reference/account-parameters.md): The method allows getting the account information.
+- [OAuth 2.0](https://developers.kommo.com/reference/oauth20.md)
+  - [Get/refresh access token](https://developers.kommo.com/reference/get-token.md): The method allows you to exchange an authorization code to access token and refresh token
+- [Incoming leads](https://developers.kommo.com/reference/incoming-leads.md): In this section, we will describe all available methods for working with Incoming leads via API
+  - [Incoming leads list](https://developers.kommo.com/reference/incoming-leads-list.md): This method allows getting a list of the incoming leads in the account
+  - [Get incoming lead by UID](https://developers.kommo.com/reference/incoming-lead-uid.md): This method allows getting a particular incoming lead data by its UID
+  - [Add incoming leads of type sip (call)](https://developers.kommo.com/reference/incoming-leads-call.md): The method allows adding incoming leads of type sip in batches.
+  - [Add incoming leads of type form](https://developers.kommo.com/reference/incoming-leads-form.md): The method allows adding incoming leads of type form in batches.
+  - [Accept incoming lead](https://developers.kommo.com/reference/accepting-incoming-leads.md): The method allows accepting an incoming lead.
+  - [Decline incoming lead](https://developers.kommo.com/reference/declining-incoming-leads.md): The method allows declining an incoming lead.
+  - [Link incoming lead](https://developers.kommo.com/reference/linking-incoming-leads.md): This method allows linking an incoming lead of type `chats` to an existing lead.
+  - [Incoming leads summary information](https://developers.kommo.com/reference/incoming-leads-summary.md): The method allows getting summary information about all incoming leads in the account.
+  - [Incoming leads metadata ](https://developers.kommo.com/reference/metadata.md)
+- [Leads](https://developers.kommo.com/reference/leads.md): In this section, we will describe all available methods for the Lead entity.
+  - [Get leads](https://developers.kommo.com/reference/leads-list.md): This method allows getting a list of leads in the account
+  - [Get lead by ID](https://developers.kommo.com/reference/getting-a-lead-by-its-id.md): This method allows getting a particular lead data by its ID.
+  - [Add leads](https://developers.kommo.com/reference/adding-leads.md): This method allows adding multiple or singular leads into the account.
+  - [Update leads](https://developers.kommo.com/reference/updating-leads.md): This method allows updating multiple leads. When updating multiple leads, an array of lead objects is passed.
+  - [Update lead](https://developers.kommo.com/reference/updating-single-lead.md): This method allows updating a single lead. Pass an object to update a single lead.
+  - [Complex addition of leads with contact and company](https://developers.kommo.com/reference/complex-leads.md): The method allows you to add leads with contacts and a company to your account in batches. The added data can be checked in the duplicate control.
+  - [Get loss reasons](https://developers.kommo.com/reference/loss-reasons.md)
+  - [Get loss reason by ID](https://developers.kommo.com/reference/loss-reason-by-id.md)
+  - [Get lead subscribers](https://developers.kommo.com/reference/get-lead-subscribers.md): The method allows to get lead subscribers
+- [Leads pipelines and stages](https://developers.kommo.com/reference/leads-pipelines-and-stages.md): In this section, we will describe all available methods for working with Pipelines and Stages via API
+  - [Get pipelines](https://developers.kommo.com/reference/pipelines-list.md): The method allows to get a list of pipelines on the account.
+  - [Get pipeline by ID](https://developers.kommo.com/reference/get-pipeline-by-id.md): This method allows getting a single pipeline object by its ID.
+  - [Add pipelines](https://developers.kommo.com/reference/add-pipelines.md): This method allows adding multiple pipelines
+  - [Edit pipeline](https://developers.kommo.com/reference/edit-pipeline.md): This method allows editing the pipeline on the account
+  - [Delete pipeline](https://developers.kommo.com/reference/delete-pipeline.md): This method allows to delete a pipeline from the account
+  - [Pipeline stages list](https://developers.kommo.com/reference/stages-list.md): This method allows to get a list of pipeline stages on the account.
+  - [Get pipeline stage by ID](https://developers.kommo.com/reference/get-stage.md): This method allows to get a pipeline stage object by its ID
+  - [Add stages to pipeline](https://developers.kommo.com/reference/add-stages.md): This method allows adding multiple stages. You can pass stage descriptions (optional).
+  - [Pipeline stage edit](https://developers.kommo.com/reference/edit-stage.md): This method allows editing a pipeline stage. You can pass stage descriptions (optional).
+  - [Delete pipeline stage](https://developers.kommo.com/reference/deleting-stage.md): This method allows deleting a stage
+  - [Available stage colors](https://developers.kommo.com/reference/stage-colors.md): This is a list of colors that can be passed in a request to set a stage color
+- Contacts
+  - [Contacts list](https://developers.kommo.com/reference/contacts-list.md): This method allows to get a list of contacts in the account
+  - [Get contact by ID](https://developers.kommo.com/reference/get-contact.md): This method allows to get a particular contact data by its ID
+  - [Add contacts](https://developers.kommo.com/reference/add-contacts.md): This method allows adding multiple or singular contacts into the account
+  - [Update contacts](https://developers.kommo.com/reference/update-contacts.md): This method allows updating multiple contacts. When updating multiple contacts, an array of contact objects is passed.
+  - [Update contact](https://developers.kommo.com/reference/update-contact.md): This method allows updating a contact. The contact object is passed.
+- [Companies](https://developers.kommo.com/reference/companies.md)
+  - [Companies list](https://developers.kommo.com/reference/companies-list.md): The method allows you to get a list of companies
+  - [Get company by ID](https://developers.kommo.com/reference/get-company.md): This method allows to get a particular company data by its ID
+  - [Add companies](https://developers.kommo.com/reference/add-companies.md): This method allows adding one or more companies into the account
+  - [Update companies](https://developers.kommo.com/reference/update-companies.md): This method allows updating multiple companies. An array of objects is passed.
+  - [Update company](https://developers.kommo.com/reference/updating-company.md): This method allows updating a singular company (an object is passed)
+- [Lists](https://developers.kommo.com/reference/lists.md): In this section we will describe all available API methods for working with Lists
+  - [Get lists](https://developers.kommo.com/reference/get-lists.md): The method allows getting a list of available lists.
+  - [Get list](https://developers.kommo.com/reference/get-list.md): The method allows getting a particular list of data by its ID.
+  - [Add lists](https://developers.kommo.com/reference/add-lists.md): The method allows adding multiple lists
+  - [Edit lists](https://developers.kommo.com/reference/editing-lists.md): This method allows editing multiple lists. An array of list objects is passed.
+  - [Edit list](https://developers.kommo.com/reference/editing-list.md): This method allows editing a singular list. The list object is passed.
+  - [Get list elements](https://developers.kommo.com/reference/get-list-elements.md): This method allows getting available list elements.
+  - [Get list element](https://developers.kommo.com/reference/get-list-element.md): This method allows to get a list element data by its ID
+  - [Add list elements](https://developers.kommo.com/reference/add-list-elements.md): This method allows adding multiple list elements
+  - [Edit list elements](https://developers.kommo.com/reference/edit-list-elements.md): This method allows editing multiple list elements. An array of element objects is passed.
+  - [Edit list element](https://developers.kommo.com/reference/edit-list-element.md): This method allows editing multiple list elements. An object is passed.
+- [Custom fields and field groups](https://developers.kommo.com/reference/custom-fields.md)
+  - [Custom fields list](https://developers.kommo.com/reference/custom-field-by-entity.md): This method allows to get a list of custom fields in the account (leads, companies, contacts)
+  - [Get entity field by ID](https://developers.kommo.com/reference/custom-fields-by-id.md): This method allows to get a list of custom fields in the account (leads, companies, contacts)
+  - [Add custom fields](https://developers.kommo.com/reference/add-custom-fields.md): This method allows to add singular or multiple custom fields to an entity(leads, companies, contacts)
+  - [Update custom fields](https://developers.kommo.com/reference/update-custom-fields.md): This method allows updating multiple custom fields of an entity (leads/contacts/companies)
+  - [Update custom field](https://developers.kommo.com/reference/update-custom-field.md): This method allows to update a singular custom field of an entity(leads/contacts/companies)
+  - [Custom fields list of a catalog](https://developers.kommo.com/reference/custom-fields-list-of-list.md): This method allows to get a list of list custom fields .
+  - [Get a catalog field by its ID](https://developers.kommo.com/reference/get-list-custom-field.md): This method allows to get a list of custom fields in the account.
+  - [Adding a custom field to a list](https://developers.kommo.com/reference/adding-custom-field.md): This method allows adding singular or multiple custom fields to a list
+  - [Update custom fields of a catalog](https://developers.kommo.com/reference/update-custom-fields-list.md): This method allows updating multiple custom fields of a list
+  - [Update a custom field of a catalog](https://developers.kommo.com/reference/updating-custom-field-list.md): This method allows updating a custom field of a list.
+  - [Delete a custom field](https://developers.kommo.com/reference/delete-custom-field.md): This method allows you to delete a custom field of an entity on the account
+  - [List of entity field groups](https://developers.kommo.com/reference/list-of-entity-field-groups.md): The method allows you to get a list of entity field groups in the account.
+  - [Get an entity field group by ID](https://developers.kommo.com/reference/get-a-fields-group-by-id.md): The method allows you to get a field group of the entity in the account.
+  - [Add field groups](https://developers.kommo.com/reference/add-field-groups.md): The method allows you to add groups of entity fields to an account.
+  - [Edit a field group](https://developers.kommo.com/reference/edit-field-groups.md): The method allows you to edit field group in an account by the group ID.
+  - [Delete a field group](https://developers.kommo.com/reference/delete-a-field-group.md): The method allows you to delete a group of fields from an entity in the account.
+- [Users and roles](https://developers.kommo.com/reference/users-and-roles.md): In this section we will describe all available methods for working with Users and their Roles via API
+  - [Users list](https://developers.kommo.com/reference/users-list.md): This method allows to get the data of the user on the account by user’s ID
+  - [Get user by ID](https://developers.kommo.com/reference/get-user-by-id.md): This method allows to get the data of the user on the account by user’s ID
+  - [Add users](https://developers.kommo.com/reference/add-users.md): This method allows to add multiple users to the account
+  - [Activate users](https://developers.kommo.com/reference/activate-users.md): This method allows to activate users in the account in bulk
+  - [Deactivate users](https://developers.kommo.com/reference/deactivate-users.md): This method allows to deactivate users in the account in bulk
+  - [User roles list](https://developers.kommo.com/reference/user-roles-list.md): This method allows getting a list of user roles on the account
+  - [Get role by ID](https://developers.kommo.com/reference/get-role-data-by-id.md): This method allows getting a particular role data by its ID
+  - [Add roles](https://developers.kommo.com/reference/adding-roles.md): This method allows to add multiple roles to the account
+  - [Edit roles](https://developers.kommo.com/reference/edit-roles.md): This method allows editing user roles.
+  - [Delete role](https://developers.kommo.com/reference/deleting-role.md): This method allows deleting a user role from the account
+- [Tasks](https://developers.kommo.com/reference/tasks.md): In this section we will describe how to work with tasks via API
+  - [Tasks list](https://developers.kommo.com/reference/tasks-list.md)
+  - [Get task by ID](https://developers.kommo.com/reference/task-id.md): This method allows to get a particular task data by its ID.
+  - [Add tasks](https://developers.kommo.com/reference/add-tasks.md): This method allows adding multiple tasks.
+  - [Edit task](https://developers.kommo.com/reference/edit-task.md): To edit a singular task, you can add the task ID into the method URL. The task object is passed.
+  - [Edit tasks](https://developers.kommo.com/reference/edit-tasks.md): This method allows to edit multiple tasks. When updating multiple tasks, an array of task objects is passed.
+- [Events](https://developers.kommo.com/reference/events.md): In this section we will describe how to work with events via API
+  - [Events list](https://developers.kommo.com/reference/events-list.md): This method allows getting the events list
+  - [Get event by ID](https://developers.kommo.com/reference/get-event.md): This method allows getting a particular event data by its ID.
+  - [Get events types](https://developers.kommo.com/reference/get-events-types.md): This method allows getting all available events types
+  - [Events types](https://developers.kommo.com/reference/events-types.md): Available event types
+  - [Events filtration](https://developers.kommo.com/reference/events-filtration.md)
+- [Notes](https://developers.kommo.com/reference/notes.md)
+  - [Get notes list of entity](https://developers.kommo.com/reference/notes-by-entity-id.md): This method allows getting a notes list by the ID of the parent entity
+  - [Get notes list by entity type](https://developers.kommo.com/reference/notes-list-entity.md): This method allows getting a list of notes by the entity type
+  - [Get note by ID](https://developers.kommo.com/reference/note-by-id.md): This method allows getting a particular note data by its ID
+  - [Add notes](https://developers.kommo.com/reference/add-notes.md): This method allows adding multiple notes
+  - [Edit notes](https://developers.kommo.com/reference/edit-notes.md): This method allows to edit multiple notes. An array of objects is passed.
+  - [Edit note](https://developers.kommo.com/reference/edit-note.md): This method allows to edit multiple notes. An array of objects is passed.
+  - [Pin note](https://developers.kommo.com/reference/pin-note.md)
+  - [Unpin note](https://developers.kommo.com/reference/unpin-note.md)
+  - [Notes types](https://developers.kommo.com/reference/notes-types.md)
+- [Tags](https://developers.kommo.com/reference/tags.md): In this section we will describe how to work with tags via API
+  - [List of entity tags](https://developers.kommo.com/reference/list-of-entity-tags.md): This method allows to get the list of entity tags on the account
+  - [Create tags for a particular entity type](https://developers.kommo.com/reference/add-tags.md): This method allows adding multiple tags for a particular entity specified in the method URL
+  - [Add tags to entities](https://developers.kommo.com/reference/update-tags.md): This method allows updating multiple entities. An array of entity objects is passed.
+  - [Add tags to a single entity](https://developers.kommo.com/reference/update-tags-single-entity.md): This method allows updating tags of a single entity. An object should be passed.
+  - [Tag colors](https://developers.kommo.com/reference/tag-colors.md): Available tag colors for leads
+- [Links between entities](https://developers.kommo.com/reference/link-entities.md): In this section, we will describe all available methods for working with links between entities (leads, contacts, and companies).
+  - [Linked entities list](https://developers.kommo.com/reference/linked-entities.md): This method allows getting a list of entities linked to a lead/contact/company by the ID of the lead, contact or company.
+  - [Link entities](https://developers.kommo.com/reference/linking-entities.md): This method allows linking entities to a lead, contact or company.
+  - [Unlink entities](https://developers.kommo.com/reference/unlinking-entities.md): This method allows unlinking entities from a lead, contact or company.
+- [Salesbot](https://developers.kommo.com/reference/salesbot.md)
+  - [Salesbots list](https://developers.kommo.com/reference/salesbots-list.md): The method allows getting a list of Salesbots in the account
+  - [Get a Salesbot by ID](https://developers.kommo.com/reference/get-salesbot-by-id.md): The method allows to obtain a Salesbot by its ID
+  - [Launch Salesbot](https://developers.kommo.com/reference/launch-a-salesbot.md)
+  - [Launch Salesbots](https://developers.kommo.com/reference/launch-salesbots.md)
+  - [Stop a Salesbot](https://developers.kommo.com/reference/stop-salesbot.md)
+  - [SalesBot widget block execution confirmation](https://developers.kommo.com/reference/salesbot-widget-block-execution-confirmation.md)
+- [Sources](https://developers.kommo.com/reference/sources.md): This functionality allows you to choose the sources of the incoming leads.
+  - [Get sources](https://developers.kommo.com/reference/get-sources.md): The method allows you to get a list of the integration sources
+  - [Get source by ID](https://developers.kommo.com/reference/get-source.md): The method returns a source object.
+  - [Add sources](https://developers.kommo.com/reference/add-sources.md): The method allows you to post a list of the integration sources.
+  - [Update source](https://developers.kommo.com/reference/update-source.md): The method allows you to edit a specific source.
+  - [Update sources](https://developers.kommo.com/reference/update-sources.md): The method allows you to edit sources in batches.
+  - [Delete source](https://developers.kommo.com/reference/delete-source.md): The method allows you to remove a specific source. No request body is not required to be passed.
+  - [Delete sources](https://developers.kommo.com/reference/delete-sources.md): The method allows you to delete the integration sources in batches. An array of source objects is passed.
+  - [Get list of Website chat buttons](https://developers.kommo.com/reference/get-list-crm-plugin.md): The method allows you to get a paginated list of parameters of all CRM Plugins in your account.
+  - [Get Website chat button](https://developers.kommo.com/reference/get-crm-plugin.md): The method allows you to obtain the parameters of one CRM Plugin.
+  - [Add Website chat button](https://developers.kommo.com/reference/add-crm-plugin.md): This method enables you to add a CRM Plugin. Once you make the request, the source in the pipeline is created immediately, while the CRM Plugin settings are created asynchronously (outside the…
+  - [Connect online chat to Website chat button](https://developers.kommo.com/reference/connect-online-chat-to-crm-plugin.md): This method enables you to link an online chat to the CRM Plugin. The process of creating an online chat and connecting it to the CRM Plugin happens asynchronously, and not in the context of a…
+  - [Update Website chat button](https://developers.kommo.com/reference/update-crm-plugin.md): This method enables users to modify an existing CRM Plugin. Users can add new trusted domains to an existing CRM Plugin, but the addition occurs asynchronously, outside of the request context.
+- [Templates](https://developers.kommo.com/reference/templates.md): This section provides an overview of the methods available for managing chat response templates.
+  - [Get list of templates](https://developers.kommo.com/reference/get-templates.md): The method allows you to get a list of templates in your account.
+  - [Get template by ID](https://developers.kommo.com/reference/get-template.md): The method allows you to get data about a template.
+  - [Add templates](https://developers.kommo.com/reference/add-templates.md): The method allows adding templates in a bunch.
+  - [Edit templates](https://developers.kommo.com/reference/edit-templates.md): The method allows editing templates in a bunch.
+  - [Submit a WhatsApp template for moderation](https://developers.kommo.com/reference/submit-a-whatsapp-template-for-moderation.md): The method allows submitting a WhatsApp template for moderation.
+  - [Edit a WhatsApp template status](https://developers.kommo.com/reference/edit-template-status.md): The method allows editing the WhatsApp template status.
+  - [Delete templates](https://developers.kommo.com/reference/delete-templates.md): The method allows deleting a template in your account. You can delete either a specific template or several templates at once. If the file attached to the template has not been used anywhere else, or…
+  - [Delete a template](https://developers.kommo.com/reference/delete-template.md): The method allows deleting a template in your account. If the file attached to the template has not been used anywhere else, or all entities where it was used have been deleted, then the file will be…
+- [Webhooks](https://developers.kommo.com/reference/webhooks.md): In this section we will describe all available methods for working with Webhooks via API.
+  - [List of webhooks](https://developers.kommo.com/reference/list-webhooks.md): The method allows getting a list of webhooks.
+  - [Add webhook](https://developers.kommo.com/reference/add-webhooks.md): The method allows creating a webhook to sent event notifications to the specified URL.
+  - [Delete webhook](https://developers.kommo.com/reference/delete-webhook.md): The method allows you to delete a webhook.
+  - [Webhook events](https://developers.kommo.com/reference/webhook-events.md): A list of events that can be set as webhooks triggers
+- [Widgets](https://developers.kommo.com/reference/widgets.md)
+  - [Widgets List](https://developers.kommo.com/reference/widgets-list.md): This method returns an aggregated list of public widgets installed on the account as well as widgets added by the current user.
+  - [Get the widget info by its code](https://developers.kommo.com/reference/widget-by-code.md): This method allows getting the information on a public widget or a private widget uploaded by the current user.
+  - [Install widget into account](https://developers.kommo.com/reference/installing-the-widget-into-the-account.md): This method allows installing the widget into the account.
+  - [Uninstall widget](https://developers.kommo.com/reference/uninstall-widget.md): This method allows uninstalling a widget by its code.
+- [Conversations](https://developers.kommo.com/reference/conversations.md)
+  - [Get conversations](https://developers.kommo.com/reference/get-talks.md): The method returns a collection of conversations in the account.
+  - [Get conversation by ID](https://developers.kommo.com/reference/get-conversation.md): The method allows you to obtain data for a specific conversation by its ID
+  - [Close conversation](https://developers.kommo.com/reference/close-conversation.md): Method allows you to launch a NPS bot or close a conversation by its ID. NPS bot is being launched only when it is enabled in the account settings, available in your plan and no force_close parameter…
+- [Calls](https://developers.kommo.com/reference/calls.md)
+  - [Add call note](https://developers.kommo.com/reference/add-calls.md): This method allows adding multiple calls
+  - [Add call notification](https://developers.kommo.com/reference/add-call-notifications.md): The method allows to add a notification of a running call for a specific phone number.
+
+## API Reference: Files API
+- [Files API capabilities](https://developers.kommo.com/reference/files-api.md): The Files feature in Kommo enables users to upload and access files from various sources, including messengers, forms, bots, or notes, all in one place - the Media section.
+  - [Files API Key Features](https://developers.kommo.com/reference/files-api-key-features.md): In this article we describe the features from the user’s point of view
+- [Files API methods](https://developers.kommo.com/reference/files-methods.md): This section explains how to use the file API in Kommo
+  - [Getting started](https://developers.kommo.com/reference/your-drive.md)
+  - [Get files](https://developers.kommo.com/reference/get-files.md): The method for obtaining account files that meet specified filters requires a request to be sent to the file service host.
+  - [Get file by UUID](https://developers.kommo.com/reference/file-uuid.md): A method that allows you to receive a file.
+  - [Create a file upload session](https://developers.kommo.com/reference/create-session.md): The method allows you to create a session to upload a file or version of a file. If the method is used to upload a new version of a file, then the uploaded version will automatically become the…
+  - [Upload a part of the file](https://developers.kommo.com/reference/upload-file.md): The method allows you to upload part of the file. The request must be sent to the file service host. The full link indicating the session_token is returned when the session is opened.
+  - [Edit a file](https://developers.kommo.com/reference/edit-file.md): The method allows you to edit the file. When you edit a file, you can change its name or active version.
+  - [Delete files](https://developers.kommo.com/reference/delete-files.md): The method allows you to delete files from the account.
+  - [Restore files](https://developers.kommo.com/reference/restore-files.md): This method allows to restore files of the account.
+  - [Get a version of file](https://developers.kommo.com/reference/get-version.md): A method that allows you to get file versions.
+  - [Get files attached to an entity](https://developers.kommo.com/reference/get-files-entity.md): The method allows to get files attached to a chosen entity.
+  - [Attach files to an entity](https://developers.kommo.com/reference/attached-to-entity.md): The method allows attaching files to an entity.
+  - [Detach files from an entity](https://developers.kommo.com/reference/detach-files.md): The method allows to detach files from a chosen entity.
+  - [Get entities associated with a file](https://developers.kommo.com/reference/get-entities-with-file.md): This method allows to get entities associated with a file.
+
+## API Reference: Chats API
+- [Five steps to send a message](https://developers.kommo.com/reference/send-message-guide.md): This page will help you get started with Chats API.
+- [Register a chat channel](https://developers.kommo.com/reference/register-channel.md)
+- Chats API methods
+  - [Connect chat channel](https://developers.kommo.com/reference/connect-channel.md)
+  - [Create new chat](https://developers.kommo.com/reference/create-chat.md): This method allows you to create a chat before sending the first message.
+  - [Link chat to contact](https://developers.kommo.com/reference/link-chat-contact.md): The method allows you to link an existing chat to a contact.
+  - [Import, send and edit messages](https://developers.kommo.com/reference/send-import-messages.md)
+  - [Get chat history](https://developers.kommo.com/reference/chat-history.md): The method allows you to get a list of messages in a specific chat.
+  - [Get contact chats](https://developers.kommo.com/reference/get-contact-chats.md): The method allows you to retrieving a contact’s chats.
+  - [Update message delivery status](https://developers.kommo.com/reference/update-delivery-status.md): The method allows you to update the delivery status of a specific message.
+  - [Transfer typing information](https://developers.kommo.com/reference/typing-info.md): The method provides transferring information that the client is currently typing something in the messenger. The information will be displayed in Kommo interface.
+  - [Send or withdraw reactions](https://developers.kommo.com/reference/send-reactions.md): The method allows you to send or remove a reaction from a specific message.
+  - [Disconnect chat channel](https://developers.kommo.com/reference/disconnect-channel.md): After disconnecting the channel, you will stop receiving webhooks for outgoing messages.  The “initiate conversation” option will also be disabled in the lead card (upon the expiration of the UI/UX…
+- [Chats API account ID](https://developers.kommo.com/reference/chat-api-accountid.md): To begin using the Chat API, we need to retrieve the credentials from the Kommo account. In this section, we will acquire the Kommo chat service ID for both the account and the user.
+- [Chats API authorization](https://developers.kommo.com/reference/chats-api-authorization-and-headers.md)
+- [Chats API webhooks](https://developers.kommo.com/reference/receiving-chat-webhooks.md)
+- [Chats API add-on](https://developers.kommo.com/reference/chats-api-add-on.md)
+  - [Get conversation messages](https://developers.kommo.com/reference/get-conversation-messages.md): The method allows to retrieve messages from a conversation.
+  - [Send message to conversation](https://developers.kommo.com/reference/send-message-to-conversation.md): The method allows to send a message to a conversation.
+
+## API Reference: Kommo AI API
+- [Kommo AI key features](https://developers.kommo.com/reference/ai-features.md): This page will help you get started with Kommo AI API.
+- [Kommo AI API methods](https://developers.kommo.com/reference/ai-api-methods.md)
+  - [Add a source of the type URL](https://developers.kommo.com/reference/ai-add-source-url.md)
+  - [Add a source of the type file](https://developers.kommo.com/reference/ai-add-source-file.md)
+  - [Add a source of the type text](https://developers.kommo.com/reference/ai-add-source-text.md)
+  - [Launch import of products from CRM to AI](https://developers.kommo.com/reference/launch-import-of-products-from-crm-to-ai.md): The method allows you to launch products import.
+
+## Recipes
+- [Account with amojo_id](https://developers.kommo.com/recipes/account-with-amojo_id.md)
+- [Add a lead with UTMs](https://developers.kommo.com/recipes/add-a-lead-with-utms.md)
+- [Calculate headers for Chats API requests](https://developers.kommo.com/recipes/calculate-headers-for-chats-api-requests.md)
+- [Create a Lead with a Contact with Duplicate Control](https://developers.kommo.com/recipes/create-a-lead-with-a-contact-with-duplicate-control-1.md)
+- [Creating a contact with a phone number and email](https://developers.kommo.com/recipes/creating-a-contact-with-a-phone-number-and-email.md)
+- [Create product and add it to lead](https://developers.kommo.com/recipes/creating-a-product-and-adding-it-to-a-lead.md)
+- [Find a contact by a phone number](https://developers.kommo.com/recipes/find-a-contact-by-a-phone-number.md)
+- [Get/renew access token](https://developers.kommo.com/recipes/getrenew-access-token.md)
+- [Getting leads with pagination](https://developers.kommo.com/recipes/getting-leads-with-pagination.md)
+- [Import CRM templates from a csv document](https://developers.kommo.com/recipes/import-crm-templates-from-a-csv-document.md)
+- [Lead with Tag](https://developers.kommo.com/recipes/lead-with-tag.md)
+- [Move a lead to another stage](https://developers.kommo.com/recipes/move-a-lead-to-another-stage.md)
+- [Upload a file by chunks](https://developers.kommo.com/recipes/upload-a-part-of-the-file.md)
+- [Working with a Lead](https://developers.kommo.com/recipes/working-with-a-lead.md)
+
+## Changelog
+- [Linking sources to a chat channel update](https://developers.kommo.com/changelog/linking-sources-to-a-chat-channel-update-1.md)
+- [Added self.openWidgetSettings() method](https://developers.kommo.com/changelog/added-widget-method-selfopenwidgetsettings.md)
+- [Linking sources to a chat channel](https://developers.kommo.com/changelog/linking-sources-to-a-chat-channel-update.md)
+- [Lead subscribers API endpoint](https://developers.kommo.com/changelog/lead-subscribers-api-endpoint.md)
+- [Send message to conversation API update](https://developers.kommo.com/changelog/send-message-to-conversation-api-update.md)
+- [Chats API add-on](https://developers.kommo.com/changelog/chats-api-add-on-update.md)
+- [Conversations list and outgoing message webhook](https://developers.kommo.com/changelog/conversations-list-and-outgoing-message-webhook.md)
+- [Get a Salesbot by ID API endpoint](https://developers.kommo.com/changelog/get-a-salesbot-by-id-api-endpoint.md)
+- [Users activating and deactivating API endpoints](https://developers.kommo.com/changelog/users-activating-and-deactivating-api-endpoints.md)
+- [Salesbots list API endpoint](https://developers.kommo.com/changelog/salesbots-list-api-endpoint.md)

@@ -1,0 +1,151 @@
+swagger: "2.0"
+info:
+  title: Grupos de Insumos
+  description: API de Grupos de Insumos.
+  version: "1.0"
+  license:
+    name: Softplan - Todos os direitos reservados
+host: api.sienge.com.br
+basePath: "/{subdominio-do-cliente}/public/api/v1"
+paths:
+  "/resource-groups":
+    get:
+      operationId: getCostDatabasesIdResourcesGroups
+      tags:
+        - Grupos de Insumos
+      summary: >-
+        Retorna um array com todos os grupos de insumos.
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: query
+          description: Código ou descrição do grupo insumo para consulta
+          required: false
+          type: string
+        - in: query
+          name: resourceGroups
+          description: Códigos dos Grupos de insumo
+          required: false
+          type: array
+          items:
+            type: string
+        - in: query
+          name: status
+          description: >-
+            Status do Grupo de Insumo. Indica se o Grupo de insumo está ativo (ACTIVE) ou inativo (INACTIVE).
+          required: false
+          type: string
+          default: ACTIVE
+        - name: offset
+          in: query
+          description: >-
+            Deslocamento do primeiro item do resultado em relação ao primeiro item 
+            da série total de resultados válidos. Valor default é 0.
+          required: false
+          type: integer
+          default: 0
+          format: int32
+        - name: limit
+          in: query
+          description: >-
+            Quantidade máxima de resultados da pesquisa a serem retornados.
+            Valor default 100, valor mínimo permitido 1 e valor máximo permitido 200.
+          required: false
+          type: integer
+          default: 100
+          maximum: 200
+          minimum: 1
+          format: int32
+      responses:
+        "200":
+          description: >-
+            Requisição bem-sucedida, retorna um array com todos os grupos de insumos.
+          schema:
+            $ref: "#/definitions/ResourceGroupConsultaDTO"
+        "400":
+          description: Requisição mal formada
+          schema:
+            $ref: "#/definitions/ApiError"
+        "500":
+          description: Erro interno no servidor
+          schema:
+            $ref: "#/definitions/ApiError"
+
+definitions:
+  ResourceGroupConsultaDTO:
+    type: object
+    properties:
+      referenceId:
+        description: Código de referência do grupo de insumo
+        type: string
+        example: "02"
+      description:
+        description: Descrição do grupo de insumo
+        type: string
+        example: Material
+      category:
+        description: >-
+          Tipo do grupo de insumo:
+          - EQUIPMENT (EQUIPAMENTO)
+          - LABOR (MÃO DE OBRA)
+          - INCREMENTAL_COST_ITEM (ITEM INCIDÊNCIA)
+          - MATERIAL (MATEIRAL DE CONSUMO)
+          - WORK_ITEM (ITEM DE SERVIÇO)
+          - TRANSPORT_ITEM (ITEM TRANSPORTE)
+          - OTHER (OUTROS)
+          - OFFICE_SUPPLY (MATERIAL EXPEDIENTE)
+          - FUELS_AND_LUBRICANTS (COMBUSTÍVEIS E LUBRIFICANTES)
+          - MAINTENANCE_MATERIAL (MATERIAL MANUTENÇÃO)
+        type: enum
+        enum:
+          - EQUIPMENT
+          - LABOR
+          - INCREMENTAL_COST_ITEM
+          - MATERIAL
+          - WORK_ITEM
+          - TRANSPORT_ITEM
+          - OTHER
+          - OFFICE_SUPPLY
+          - FUELS_AND_LUBRICANTS
+          - MAINTENANCE_MATERIAL
+        example: MATERIAL
+      laborBurden:
+        description: Porcentagem de encargos sociais
+        type: number
+        format: double
+        example: 1.50
+      bdi:
+        description: Porcentagem de BDI
+        type: number
+        format: double
+        example: 1.00
+      status:
+        description: Indica se o grupo de insumo está ativo ou inativo
+        type: string
+        example: "ACTIVE"
+      level:
+        description: Nível do grupo de insumo
+        type: integer
+        example: 1
+
+  ApiError:
+    type: object
+    required:
+      - developerMessage
+      - status
+    properties:
+      status:
+        type: string
+        description: Status http
+      developerMessage:
+        type: string
+        description: >-
+          Mensagem de erro pertinente a ser reportada ao developer consumidor da
+          API.
+      clientMessage:
+        type: array
+        description: Lista contendo mensagem de errors relavantes para o utilizador final
+        items:
+          type: string
+    description: Objeto que encapsula os atributos de erros da API

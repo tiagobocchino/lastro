@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<script src="index.js"></script>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Sienge Platform</title>
+    <link href="index.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/favicon.ico"/>
+</head>
+
+<body>
+<main id="main">
+    <iframe name="content" src="/docs/general-information.html" frameborder="0"></iframe>
+</main>
+
+<nav id="nav">
+    <img src="images/logo-sienge.png"/>
+    <input type="text" id="searchInput" placeholder="Buscar API" class="search" onkeyup="searchApis()"/>
+
+    <div>
+        <h4 class="first-steps">Introdução</h4>
+        <ul>
+            <li><a href="/docs/general-information.html" onclick="handleChangeItemMenu(this);" target="content"><strong>Geral</strong></a></li>
+        </ul>
+
+        <h4>APIs REST</h4>
+        <ul>
+            <li><p><a href="/docs/general-rest.html" onclick="handleChangeItemMenu(this);" target="content"><strong>Sobre APIs REST</strong></a></p></li>
+            <li><a href="/docs/html-files/building-projects-progress-logs-v1.html" onclick="handleChangeItemMenu(this);" target="content">Acompanhamentos de Obra</a></li>
+				<li><a href="/docs/html-files/creditor-report-v1.html" onclick="handleChangeItemMenu(this);" target="content">API de relatório de extrato de credores</a></li>
+				<li><a href="/docs/html-files/prepayment-slip-register-v1.html" onclick="handleChangeItemMenu(this);" target="content">API para antecipação de parcelas</a></li>
+				<li><a href="/docs/html-files/trial-balance-v1.html" onclick="handleChangeItemMenu(this);" target="content">Balancete de verificação</a></li>
+				<li><a href="/docs/html-files/fixed-assets-v1.html" onclick="handleChangeItemMenu(this);" target="content">Bens imóveis</a></li>
+				<li><a href="/docs/html-files/movable-assets-v1.html" onclick="handleChangeItemMenu(this);" target="content">Bens móveis</a></li>
+				<li><a href="/docs/html-files/building-calendar-v1.html" onclick="handleChangeItemMenu(this);" target="content">Calendários de Obra</a></li>
+				<li><a href="/docs/html-files/supply-categories.html" onclick="handleChangeItemMenu(this);" target="content">Categorias de Suprimentos</a></li>
+				<li><a href="/docs/html-files/cost-center-v1.html" onclick="handleChangeItemMenu(this);" target="content">Centro de Custos</a></li>
+				<li><a href="/docs/html-files/customers-v1.html" onclick="handleChangeItemMenu(this);" target="content">Clientes</a></li>
+				<li><a href="/docs/html-files/commissions-v1.html" onclick="handleChangeItemMenu(this);" target="content">Comissões</a></li>
+				<li><a href="/docs/html-files/commissions-forecasts-v1.html" onclick="handleChangeItemMenu(this);" target="content">Comissões (Antigo)</a></li>
+				<li><a href="/docs/html-files/accountancy-accounts-v1.html" onclick="handleChangeItemMenu(this);" target="content">Contas Contábeis</a></li>
+				<li><a href="/docs/html-files/checking-accounts-v1.html" onclick="handleChangeItemMenu(this);" target="content">Contas-Correntes</a></li>
+				<li><a href="/docs/html-files/sales-contracts-v1.html" onclick="handleChangeItemMenu(this);" target="content">Contratos de Vendas</a></li>
+				<li><a href="/docs/html-files/contracts-v1.html" onclick="handleChangeItemMenu(this);" target="content">Contratos do Suprimentos</a></li>
+				<li><a href="/docs/html-files/purchase-quotations-v1.html" onclick="handleChangeItemMenu(this);" target="content">Cotações de Preços</a></li>
+				<li><a href="/docs/html-files/creditor-v1.html" onclick="handleChangeItemMenu(this);" target="content">Credores</a></li>
+				<li><a href="/docs/html-files/departments-v1.html" onclick="handleChangeItemMenu(this);" target="content">Departamentos</a></li>
+				<li><a href="/docs/html-files/construction-daily-report-v1.html" onclick="handleChangeItemMenu(this);" target="content">Diário de Obra</a></li>
+				<li><a href="/docs/html-files/document-identification-v1.html" onclick="handleChangeItemMenu(this);" target="content">Documentos</a></li>
+				<li><a href="/docs/html-files/enterprise-v1.html" onclick="handleChangeItemMenu(this);" target="content">Empreendimentos (Obras)</a></li>
+				<li><a href="/docs/html-files/company-v1.html" onclick="handleChangeItemMenu(this);" target="content">Empresas</a></li>
+				<li><a href="/docs/html-files/civil-status-v1.html" onclick="handleChangeItemMenu(this);" target="content">Estados Civis</a></li>
+				<li><a href="/docs/html-files/stock-inventories-v1.html" onclick="handleChangeItemMenu(this);" target="content">Estoque de Insumos</a></li>
+				<li><a href="/docs/html-files/customer-financial-statements-v1.html" onclick="handleChangeItemMenu(this);" target="content">Extrato de Cliente por E-mail</a></li>
+				<li><a href="/docs/html-files/accounts-statements-v1.html" onclick="handleChangeItemMenu(this);" target="content">Extrato de contas</a></li>
+				<li><a href="/docs/html-files/accountancy-closingaccountancy-v1.html" onclick="handleChangeItemMenu(this);" target="content">Fechamento Contábil (Contabilidade)</a></li>
+				<li><a href="/docs/html-files/payment-slip-notification-v1.html" onclick="handleChangeItemMenu(this);" target="content">Geração de Boleto (Segunda Via)</a></li>
+				<li><a href="/docs/html-files/overdue-receivable-v1.html" onclick="handleChangeItemMenu(this);" target="content">Geração de Cobrança de Parcelas Vencidas</a></li>
+				<li><a href="/docs/html-files/current-debit-balance-v1.html" onclick="handleChangeItemMenu(this);" target="content">Geração do Saldo Devedor Presente do Cliente</a></li>
+				<li><a href="/docs/html-files/resource-groups-v1.html" onclick="handleChangeItemMenu(this);" target="content">Grupos de Insumos</a></li>
+				<li><a href="/docs/html-files/work-item-groups-v1.html" onclick="handleChangeItemMenu(this);" target="content">Grupos de Serviços</a></li>
+				<li><a href="/docs/html-files/collections-notification-history-v1.html" onclick="handleChangeItemMenu(this);" target="content">Histórico de Notificação de Cobranças</a></li>
+				<li><a href="/docs/html-files/indexers-v1.html" onclick="handleChangeItemMenu(this);" target="content">Indexadores</a></li>
+				<li><a href="/docs/html-files/tax-information-v1.html" onclick="handleChangeItemMenu(this);" target="content">Informações Fiscais de Serviço - Contas a Pagar</a></li>
+				<li><a href="/docs/html-files/customer-income-tax-v1.html" onclick="handleChangeItemMenu(this);" target="content">Informe de Rendimentos - Imposto de Renda</a></li>
+				<li><a href="/docs/html-files/building-cost-estimation-resources-v1.html" onclick="handleChangeItemMenu(this);" target="content">Insumos do Orçamento da Obra</a></li>
+				<li><a href="/docs/html-files/building-cost-estimation-cost-estimate-resources-v1.html" onclick="handleChangeItemMenu(this);" target="content">Insumos Orçados da Obra</a></li>
+				<li><a href="/docs/html-files/accountancy-entries-v1.html" onclick="handleChangeItemMenu(this);" target="content">Lançamentos Contábeis (Contabilidade)</a></li>
+				<li><a href="/docs/html-files/accountancy-entrygenerator-entrybatches-v1.html" onclick="handleChangeItemMenu(this);" target="content">Lançamentos Contábeis (Integração Contábil)</a></li>
+				<li><a href="/docs/html-files/property-rental-v1.html" onclick="handleChangeItemMenu(this);" target="content">Locação de Imóveis</a></li>
+				<li><a href="/docs/html-files/sites-v1.html" onclick="handleChangeItemMenu(this);" target="content">Locais de Obra</a></li>
+				<li><a href="/docs/html-files/accountancy-batch-v1.html" onclick="handleChangeItemMenu(this);" target="content">Lotes Contábeis (Contabilidade)</a></li>
+				<li><a href="/docs/html-files/real-estate-map-v1.html" onclick="handleChangeItemMenu(this);" target="content">Mapa Imobiliário Consolidado</a></li>
+				<li><a href="/docs/html-files/trademarks-v1.html" onclick="handleChangeItemMenu(this);" target="content">Marcas</a></li>
+				<li><a href="/docs/html-files/measurement-v1.html" onclick="handleChangeItemMenu(this);" target="content">Medição de Contrato</a></li>
+				<li><a href="/docs/html-files/cities-v1.html" onclick="handleChangeItemMenu(this);" target="content">Municípios</a></li>
+				<li><a href="/docs/html-files/purchase-invoices-v1.html" onclick="handleChangeItemMenu(this);" target="content">Nota Fiscal de Compra</a></li>
+				<li><a href="/docs/html-files/nfe-api-v1.html" onclick="handleChangeItemMenu(this);" target="content">Notas Fiscais Eletrônicas de Produto</a></li>
+				<li><a href="/docs/html-files/building-cost-estimations-v1.html" onclick="handleChangeItemMenu(this);" target="content">Orçamentos de Obra</a></li>
+				<li><a href="/docs/html-files/parameters-v1.html" onclick="handleChangeItemMenu(this);" target="content">Parâmetros</a></li>
+				<li><a href="/docs/html-files/purchase-orders-v1.html" onclick="handleChangeItemMenu(this);" target="content">Pedidos de Compra</a></li>
+				<li><a href="/docs/html-files/building-projects-v1.html" onclick="handleChangeItemMenu(this);" target="content">Planejamentos de Obra</a></li>
+				<li><a href="/docs/html-files/payment-categories-v1.html" onclick="handleChangeItemMenu(this);" target="content">Planos Financeiros</a></li>
+				<li><a href="/docs/html-files/bearers-receivable-v1.html" onclick="handleChangeItemMenu(this);" target="content">Portadores para o Contas a Receber</a></li>
+				<li><a href="/docs/html-files/service-invoice-pre-registration.html" onclick="handleChangeItemMenu(this);" target="content">Pré-Cadastro de Nota Fiscal de Serviço</a></li>
+				<li><a href="/docs/html-files/professions-v1.html" onclick="handleChangeItemMenu(this);" target="content">Profissões</a></li>
+				<li><a href="/docs/html-files/remade-installments-v1.html" onclick="handleChangeItemMenu(this);" target="content">Reparcelamentos - Conta a Receber</a></li>
+				<li><a href="/docs/html-files/unit-bookings-v1.html" onclick="handleChangeItemMenu(this);" target="content">Reservas de Unidades</a></li>
+				<li><a href="/docs/html-files/accounts-balances-v1.html" onclick="handleChangeItemMenu(this);" target="content">Saldo de Contas Correntes</a></li>
+				<li><a href="/docs/html-files/email-current-debit-balance-v1.html" onclick="handleChangeItemMenu(this);" target="content">Saldo Devedor Presente</a></li>
+				<li><a href="/docs/html-files/total-current-debit-balance-v1.html" onclick="handleChangeItemMenu(this);" target="content">Saldo Devedor Presente do Cliente (Total)</a></li>
+				<li><a href="/docs/html-files/purchase-requests-v1.html" onclick="handleChangeItemMenu(this);" target="content">Solicitações de Compra</a></li>
+				<li><a href="/docs/html-files/price-tables-v1.html" onclick="handleChangeItemMenu(this);" target="content">Tabela de Preços</a></li>
+				<li><a href="/docs/html-files/cost-databases-v1.html" onclick="handleChangeItemMenu(this);" target="content">Tabelas do Custos Unitários</a></li>
+				<li><a href="/docs/html-files/property-types-v1.html" onclick="handleChangeItemMenu(this);" target="content">Tipo de Imóveis</a></li>
+				<li><a href="/docs/html-files/customer-types-v1.html" onclick="handleChangeItemMenu(this);" target="content">Tipos de Clientes</a></li>
+				<li><a href="/docs/html-files/payment-condition-types-v1.html" onclick="handleChangeItemMenu(this);" target="content">Tipos de Condição de Pagamento</a></li>
+				<li><a href="/docs/html-files/bill-debt-v1.html" onclick="handleChangeItemMenu(this);" target="content">Títulos do Contas a Pagar</a></li>
+				<li><a href="/docs/html-files/accounts-receivable-v1.html" onclick="handleChangeItemMenu(this);" target="content">Títulos do Contas a Receber</a></li>
+				<li><a href="/docs/html-files/unit-v1.html" onclick="handleChangeItemMenu(this);" target="content">Unidades de Imóveis</a></li>
+				<li><a href="/docs/html-files/units-of-measure-v1.html" onclick="handleChangeItemMenu(this);" target="content">Unidades de Medidas</a></li>
+				<li><a href="/docs/html-files/resource-units-of-movement-v1.html" onclick="handleChangeItemMenu(this);" target="content">Unidades de Movimento de Insumos da Obra</a></li>
+				
+        </ul>
+
+        <h4>APIs Bulk-Data</h4>
+        <ul>
+            <li><p><a href="/docs/general-bulk.html" onclick="handleChangeItemMenu(this);" target="content"><strong>Sobre APIs Bulk-data</strong></a></p></li>
+            <li><a href="/docs/html-files/bulk-data-sales-v1.html" onclick="handleChangeItemMenu(this);" target="content">Contratos de vendas</a></li>
+				<li><a href="/docs/html-files/bulk-data-purchase-quotations-v1.html" onclick="handleChangeItemMenu(this);" target="content">Cotações de preços</a></li>
+				<li><a href="/docs/html-files/bulk-data-customer-extract-history-v1.html" onclick="handleChangeItemMenu(this);" target="content">Extrato Cliente Histórico</a></li>
+				<li><a href="/docs/html-files/bulk-data-customer-debt-balance.html" onclick="handleChangeItemMenu(this);" target="content">Geração do Saldo Devedor do Cliente</a></li>
+				<li><a href="/docs/html-files/bulk-data-building-resource-v1.html" onclick="handleChangeItemMenu(this);" target="content">Insumos da Obra</a></li>
+				<li><a href="/docs/html-files/bulk-data-building-cost-estimations-v1.html" onclick="handleChangeItemMenu(this);" target="content">Itens de Orçamentos de Obra</a></li>
+				<li><a href="/docs/html-files/bulk-data-bank-movement-v1.html" onclick="handleChangeItemMenu(this);" target="content">Movimentos de Caixa e Bancos</a></li>
+				<li><a href="/docs/html-files/bulk-data-business-budget-v1.html" onclick="handleChangeItemMenu(this);" target="content">Orçamento empresarial.</a></li>
+				<li><a href="/docs/html-files/bulk-data-outcome-v1.html" onclick="handleChangeItemMenu(this);" target="content">Parcelas do Contas a Pagar</a></li>
+				<li><a href="/docs/html-files/bulk-data-income-v1.html" onclick="handleChangeItemMenu(this);" target="content">Parcelas do Contas a Receber</a></li>
+				<li><a href="/docs/html-files/bulk-data-invoice-items-v1.html" onclick="handleChangeItemMenu(this);" target="content">Relatório Notas Fiscais</a></li>
+				<li><a href="/docs/html-files/bulk-data-account-cost-center-balance-v1.html" onclick="handleChangeItemMenu(this);" target="content">Saldos Contábeis Consolidados por Centro de Custo</a></li>
+				<li><a href="/docs/html-files/bulk-data-account-company-balance-v1.html" onclick="handleChangeItemMenu(this);" target="content">Saldos Contábeis Consolidados por Empresa</a></li>
+				<li><a href="/docs/html-files/bulk-data-defaulters-receivable-bills-v1.html" onclick="handleChangeItemMenu(this);" target="content">Títulos Inadimplentes</a></li>
+				
+        </ul>
+
+        <h4>WebHooks</h4>
+        <ul>
+            <li><a href="/docs/general-hooks.html" onclick="handleChangeItemMenu(this);" target="content"><strong>Sobre WebHooks</strong></a></li>
+            <li><a href="/docs/general-hooks-types.html" onclick="handleChangeItemMenu(this);" target="content"><strong>Tipos de WebHooks</strong></a></li>
+            <li><a href="/docs/html-files/hooks-v1.html" onclick="handleChangeItemMenu(this);" target="content">Gerenciamento de WebHooks</a></li>
+				
+        </ul>
+    </div>
+</nav>
+<footer><a href="https://softplan.com.br"><img id="footer-logo" src="images/logo-softplan.png"/></a></footer>
+</body>
+</html>
