@@ -48,3 +48,7 @@ Verificação: comandos da seção (secoes.yaml) + os do card
 - Um card cabe numa sessão. Maior que isso, o PO quebra.
 - Comentário de trabalho sempre com evidência: comando, saída resumida, caminho do arquivo, print.
 - Ninguém escreve token, senha ou chave em card, comentário ou anexo.
+
+# Scrum
+
+Papéis, cadência, estimativa, Definition of Done e releases em `docs/agents/scrum.md`. Card só entra em sprint com estimativa (Fibonacci, máx. 8), versão (fix version) e data de início/vencimento, para aparecer no Cronograma e no Calendário.

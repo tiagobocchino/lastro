@@ -40,7 +40,7 @@ Nunca em arquivo versionado. `.env` local copiado de `.env.example`; em produç�
 
 ## Fluxo do projeto (Atlassian)
 
-Quatro seções (NUC, INT, MKT, CON) em `docs/agents/secoes.yaml`. Cada uma tem PO (`/po-secao`), gerente (`/gerente-secao`) e QA (`/qa-secao`); regras de estados e modelo de card em `.claude/skills/fluxo-jira/`. Especialistas em `.claude/agents/`. Jira: projeto `LST` em adelecrm.atlassian.net; enquanto não existir, o espelho é `shared-docs/board/`.
+Scrum (sprints de 2 semanas, DoD, releases) em `docs/agents/scrum.md`. Quatro seções (NUC, INT, MKT, CON) em `docs/agents/secoes.yaml`. Cada uma tem PO (`/po-secao`), gerente (`/gerente-secao`) e QA (`/qa-secao`); regras de estados e modelo de card em `.claude/skills/fluxo-jira/`. Especialistas em `.claude/agents/`. Jira: projeto `LST` em adelecrm.atlassian.net; enquanto não existir, o espelho é `shared-docs/board/`.
 
 ## Conectores SaaS
 
