@@ -2,7 +2,7 @@
 chave: LST-5
 jira: https://adelecrm.atlassian.net/browse/LST-5
 secao: NUC
-status: em-qa
+status: feito
 especialista: engenheiro-de-dados
 ---
 
@@ -12,9 +12,9 @@ especialista: engenheiro-de-dados
 
 ## Critérios de aceite
 
-- [ ] Embedder local gratuito (fastembed ou Ollama) plugado em Caixa sem rede paga
-- [ ] Busca 'faturamento' traz a decisão sobre valor_vendido entre as 3 primeiras
-- [ ] Suite continua verde
+- [x] Embedder local gratuito (fastembed ou Ollama) plugado em Caixa sem rede paga
+- [x] Busca 'faturamento' traz a decisão sobre valor_vendido entre as 3 primeiras
+- [x] Suite continua verde
 
 ## Verificação
 
@@ -27,3 +27,7 @@ Comandos da seção NUC em `docs/agents/secoes.yaml` + os critérios acima.
 - Notas de decisão ganham a seção "Em palavras" (valor_vendido → valor vendido) para o modelo semântico.
 - Medição: "faturamento" → decisão de medida em 1º com fastembed; sem embedder, nenhum resultado.
 - `uv run pytest -q` → 100 passed (4 novos em `tests/test_vetores.py`).
+
+## QA (qa-secao NUC)
+
+Aprovado em clone limpo (cee12bb) com download do modelo do zero: 4 testes do card sem skip, 100 passed. Sugestão ao PO: registrar no CONTEXT.md que decisões da demanda vão para o histórico.

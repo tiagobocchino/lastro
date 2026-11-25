@@ -8,7 +8,7 @@ Glossário. Um termo por linha; agentes e código usam estes nomes.
 - **Revisor de negócio**: humano da camada 2 da auditoria. Papel `revisor` (ou `admin`).
 - **Demanda**: uma pergunta e o ciclo dela: `grill` → `pronta` → `em_revisao` → `aprovada` | `reprovada`.
 - **Grill**: as perguntas que o Orquestrador faz antes de construir. Cada pergunta tem uma sugestão padrão.
-- **Decisão**: resposta de grill sobre a fonte (data, chave, revisor), gravada na Caixa do tenant e não perguntada de novo. Medida e recorte são da demanda e são perguntados a cada vez.
+- **Decisão**: resposta de grill gravada na Caixa do tenant. As da fonte (data, chave, revisor) ficam em `decisoes/` e não voltam ao grill; as da demanda (medida, recorte) ficam em `decisoes/historico/`: a busca acha, mas o grill pergunta de novo.
 - **Fonte primária**: dado do cliente conectado à plataforma. Só leitura.
 - **Sandbox**: DuckDB da demanda, onde o pipeline escreve.
 - **Staging**: pasta da demanda com o gold em Parquet, o `pipeline.py`, o notebook e o relatório.
