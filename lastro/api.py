@@ -738,3 +738,74 @@ def painel_powerbi(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated
     p.repo.registrar(s.email, "baixou_powerbi", {"versao": spec["versao"], "aponta_para_bi": con["esquema"] != "SEU_SCHEMA"}, did)
     return Response(buf.getvalue(), media_type="application/zip",
                     headers={"Content-Disposition": f'attachment; filename="lastro_demanda_{did}_powerbi.zip"'})
+
+
+# ---- Demonstração do site (LST-39, ADR 0010) ------------------------------------------------
+# Pública e sem login. Desligada por padrão: LASTRO_DEMO=1 liga (produção só depois dos limites do LST-42).
+
+_DEMOS = None
+
+
+def _demos():
+    global _DEMOS
+    if os.environ.get("LASTRO_DEMO") != "1":
+        raise HTTPException(404, "demonstração desligada")
+    if _DEMOS is None:
+        import threading
+
+        from .demo import Demos
+
+        _DEMOS = Demos(cfg)
+
+        def varrer_sempre() -> None:
+            while True:
+                time.sleep(300)
+                try:
+                    _DEMOS.varrer()
+                except Exception as e:  # noqa: BLE001
+                    log.error("demo: varredura falhou: %s", type(e).__name__)
+
+        threading.Thread(target=varrer_sempre, daemon=True, name="demo-varredura").start()
+    return _DEMOS
+
+
+@app.post("/api/demo/sessoes")
+async def demo_abrir(arquivo: UploadFile | None = File(None), exemplo: bool = Form(False)) -> dict:  # noqa: B008
+    from starlette.concurrency import run_in_threadpool
+
+    from .demo import MAX_BYTES, ErroDemo
+
+    demos = _demos()
+    conteudo, nome = None, None
+    if arquivo is not None and not exemplo:
+        conteudo = await arquivo.read(MAX_BYTES + 1)
+        nome = arquivo.filename
+    try:
+        _, resposta = await run_in_threadpool(demos.abrir, nome, conteudo)
+    except ErroDemo as e:
+        raise HTTPException(400, str(e)) from e
+    return resposta
+
+
+class RespostasDemo(BaseModel):
+    respostas: dict[str, str] = {}
+
+
+@app.post("/api/demo/sessoes/{sid}/painel")
+def demo_painel(sid: str, dados: RespostasDemo) -> dict:
+    from .demo import ErroDemo
+
+    try:
+        return _demos().responder(sid, dados.respostas)
+    except ErroDemo as e:
+        raise HTTPException(404, str(e)) from e
+
+
+@app.delete("/api/demo/sessoes/{sid}")
+def demo_apagar(sid: str) -> dict:
+    from .demo import ErroDemo
+
+    try:
+        return {"recibo": _demos().apagar(sid)}
+    except ErroDemo as e:
+        raise HTTPException(404, str(e)) from e
