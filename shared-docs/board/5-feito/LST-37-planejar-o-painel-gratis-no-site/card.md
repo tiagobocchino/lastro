@@ -2,7 +2,7 @@
 chave: LST-37
 jira: https://adelecrm.atlassian.net/browse/LST-37
 secao: MKT
-status: em-andamento
+status: feito
 especialista: engenheiro-backend
 ---
 
@@ -24,9 +24,13 @@ especialista: engenheiro-backend
   - a jornada e a arquitetura do modo visitante;
   - a tabela de apagamento: onde o dado pode ficar e como cada lugar é fechado e provado;
   - a regra das duas camadas, o anti-abuso, as métricas e as fatias de entrega.
-- [ ] Grill respondido pelo Tiago: 8 perguntas, na seção 9 do plano.
-- [ ] Cards de execução criados no Jira e no board a partir das respostas.
+- [x] Grill respondido pelo Tiago: 8 perguntas, na seção 9 do plano.
+- [x] Cards de execução criados no Jira e no board a partir das respostas.
 
 ## Verificação
 
 Plano revisado pelo Tiago e cards conferidos com `scripts/conferir_board.py`.
+
+## Fechamento (25/11)
+
+O Tiago aceitou as 8 recomendações do grill. Cards de execução: LST-38 a LST-44. O caminho mínimo para ir ao ar é LST-38, 39, 40, 42 e 43.

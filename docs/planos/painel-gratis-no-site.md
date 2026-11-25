@@ -1,6 +1,6 @@
 # Painel grátis no site: o visitante sobe uma planilha e sai com um painel (plano · card LST-37)
 
-**Status:** rascunho para o grill. Nada é construído antes das respostas da seção 9.
+**Status:** aprovado em 25/11. O Tiago aceitou as 8 recomendações da seção 9. Cards de execução: LST-38 a LST-44.
 
 ## 1. Objetivo
 
@@ -86,7 +86,7 @@ Eventos anônimos numa tabela `interno.demo_eventos`, sem IP e sem nada da plani
 
 Eles entram no painel de operação (`lastro painel`) como um funil.
 
-## 8. Fatias de entrega (viram cards depois do grill)
+## 8. Fatias de entrega (cards LST-38 a LST-44, na ordem da tabela)
 
 | Ordem | Card | Seção | Tamanho |
 | --- | --- | --- | --- |
