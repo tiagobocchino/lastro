@@ -2,7 +2,7 @@
 chave: LST-21
 jira: https://adelecrm.atlassian.net/browse/LST-21
 secao: OPS
-status: backlog
+status: em-andamento
 especialista: engenheiro-de-dados
 ---
 
