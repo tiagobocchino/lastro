@@ -77,7 +77,9 @@ class Engenheiro(Agente):
         for c in perfil["colunas"]:
             n = c["nome"]
             if c["papel"] == "texto":
-                selecao.append(f"NULLIF(trim(CAST({q(n)} AS VARCHAR)), '') AS {ident(n)}")
+                # trim e espaços repetidos colapsados: 'Recebido ' e 'Recebido' viram a mesma categoria
+                # (replace aninhado e não regex: traduz igual para BigQuery, Azure e Athena)
+                selecao.append(f"NULLIF(replace(replace(trim(CAST({q(n)} AS VARCHAR)), '  ', ' '), '  ', ' '), '') AS {ident(n)}")
             elif c["papel"] == "data":
                 selecao.append(f"TRY_CAST({q(n)} AS DATE) AS {ident(n)}")
             else:

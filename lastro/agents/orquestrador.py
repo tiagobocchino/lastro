@@ -95,7 +95,12 @@ class Orquestrador(Agente):
             if numeros:
                 add("medida", f"Em '{fonte}', qual coluna é o valor que a análise soma?", (medidas_citadas or numeros)[0], numeros, persistir=False)
             if datas:
-                add("data", f"Em '{fonte}', qual data define o período?", datas[0], datas)
+                texto = f"Em '{fonte}', qual data define o período?"
+                if len(datas) > 1:  # caixa/global/metodos/data-que-define-o-periodo.md
+                    preench = {c["nome"]: perfil["linhas"] - c["nulos"] for c in cols if c["nome"] in datas}
+                    texto += (" Cada data coloca o registro num mês diferente, e a contagem por mês muda conforme a escolha "
+                              "(preenchidas: " + ", ".join(f"{d} {preench[d]:,}".replace(",", ".") for d in datas) + ").")
+                add("data", texto, datas[0], datas)
             repetidos = next((c["repetidos"] for c in cols if perfil["chaves_candidatas"] and c["nome"] == perfil["chaves_candidatas"][0]), 0)
             aviso = f" '{perfil['chaves_candidatas'][0]}' tem {repetidos} valores repetidos na fonte." if repetidos else ""
             add(

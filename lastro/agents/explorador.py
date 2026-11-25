@@ -25,6 +25,33 @@ def _eh_identificador(col: str, tipo: str, distintos: int, total: int) -> bool:
     return pelo_nome and inteiro and total > 0 and distintos >= 0.95 * total
 
 
+# Lições do dia a dia de BI (caixa/global/erros/texto-sujo-em-categoria.md): a mesma categoria escrita de
+# jeitos diferentes vira barras separadas; marcador de vazio conta como valor; acento quebrado não casa.
+MARCADORES_VAZIO = ("-", "--", "x", "n/a", "na", "null", "none", "s/n", "sem", "0000-00-00", "00/00/0000", "#n/d", "#n/a")
+ACENTO_QUEBRADO = ("Ã§", "Ã£", "Ã©", "Ã¡", "Ãµ", "Ã‡", "Ãƒ", "Â", "\ufffd")
+
+
+def _qualidade_texto(valores: list[str]) -> dict:
+    """Sujeira de uma coluna de texto, sem mudar nada: só conta e dá exemplos."""
+    import unicodedata
+
+    def forma(v: str) -> str:
+        sem_acento = unicodedata.normalize("NFKD", v).encode("ascii", "ignore").decode()
+        return " ".join(sem_acento.upper().split())
+
+    grupos: dict[str, set[str]] = {}
+    for v in valores:
+        grupos.setdefault(forma(v), set()).add(" ".join(v.split()))
+    variantes = [sorted(g) for g in grupos.values() if len(g) > 1]
+    q = {
+        "variantes": len(variantes),
+        "exemplos_variantes": [" / ".join(repr(x) for x in g[:3]) for g in variantes[:3]],
+        "marcadores_vazio": sorted({v for v in valores if v.strip().lower() in MARCADORES_VAZIO})[:5],
+        "acentos_quebrados": sum(1 for v in valores if any(m in v for m in ACENTO_QUEBRADO)),
+    }
+    return {k: v for k, v in q.items() if v}
+
+
 def _eh_data_por_nome(col: str) -> bool:
     c = col.lower()
     return c.startswith("data") or c.startswith("dt_") or c.endswith("_em") or "date" in c
@@ -60,6 +87,12 @@ class Explorador(Agente):
                     if pessoal:
                         coluna["pessoal"] = pessoal
                         coluna["amostra"] = [f"(dado pessoal: {NOMES_PESSOAIS[pessoal]})"]  # nunca guardar CPF na nota
+                if papel == "texto" and not coluna.get("pessoal"):
+                    textos = [r[0] for r in ctx.sandbox.consultar(
+                        f"SELECT DISTINCT CAST({q} AS VARCHAR) FROM {view} WHERE {q} IS NOT NULL LIMIT 2000")[1]]
+                    qualidade = _qualidade_texto(textos)
+                    if qualidade:
+                        coluna["qualidade"] = qualidade
                 # Coluna categórica (poucos valores): guarda os valores para o grill achar o recorte citado na pergunta.
                 if papel == "texto" and 0 < distintos <= MAX_CATEGORIAS and distintos < total:
                     coluna["valores"] = [

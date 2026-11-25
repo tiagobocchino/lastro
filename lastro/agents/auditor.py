@@ -41,6 +41,28 @@ class Auditor(Agente):
             check("duplicidade na chave", dup == 0, f"{dup} chaves repetidas em '{m['chave']}' após a limpeza")
             dup_fonte = um(f'SELECT count(*) FROM (SELECT "{m["chave"]}" FROM {m["view"]} GROUP BY 1 HAVING count(*) > 1)')
             check("duplicidade na fonte", dup_fonte == 0, f"{dup_fonte} chaves repetidas na fonte original (tratadas na silver)", grave=False)
+        perfil = ctx.memoria.get("perfis", {}).get(m["view"], {})
+        cols_perfil = {c["nome"]: c for c in perfil.get("colunas", [])}
+        med_sql = ident(m["medida"]) if m["medida"] else None
+        for d in m["dimensoes"]:
+            i = ident(d)
+            # Card × tabela (caixa/global/metodos/conferencia-card-x-tabela.md): linha sem categoria entra no
+            # total e some do gráfico por essa categoria. Dizer quanto some evita a pergunta "por que não fecha?".
+            sem = sb.consultar(f"SELECT count(*), coalesce(sum({med_sql}), 0) FROM silver WHERE {i} IS NULL" if med_sql
+                               else f"SELECT count(*), 0 FROM silver WHERE {i} IS NULL")[1][0]
+            if sem[0]:
+                valor = f" ({br(sem[1])} de {m['medida']})" if med_sql else ""
+                check(f"fora do gráfico por {d}", False, f"{sem[0]} linhas{valor} sem {d}: entram no total e não aparecem "
+                      f"em visual quebrado por {d}. Mostre como 'NAO DEFINIDO' ou explique no painel.", grave=False)
+            qual = cols_perfil.get(d, {}).get("qualidade", {})
+            if qual.get("variantes"):
+                check(f"grafias diferentes em {d}", False, f"{qual['variantes']} grupos com grafias diferentes do mesmo valor "
+                      f"(ex.: {'; '.join(qual['exemplos_variantes'][:2])}): viram barras separadas. Padronize na origem ou peça a regra no grill.", grave=False)
+            if qual.get("marcadores_vazio"):
+                check(f"marcador de vazio em {d}", False, f"valores que significam 'vazio' mas contam como categoria: {', '.join(qual['marcadores_vazio'])}", grave=False)
+            if qual.get("acentos_quebrados"):
+                check(f"acentos quebrados em {d}", False, f"{qual['acentos_quebrados']} valores com codificação errada (ex.: 'Ã§' no lugar de 'ç'): "
+                      "o arquivo foi salvo em latin-1/cp1252 e lido como UTF-8", grave=False)
         for d in m["dimensoes"]:
             i = ident(d)
             orf = um(
@@ -53,7 +75,8 @@ class Auditor(Agente):
             soma_fato = um(f"SELECT coalesce(sum({med}), 0) FROM fato")
             check("valores: silver = fato", abs(float(soma_silver) - float(soma_fato)) < 0.01, f"soma de {m['medida']}: silver {br(soma_silver)} · fato {br(soma_fato)}")
             nulos = um(f"SELECT count(*) FROM silver WHERE {med} IS NULL")
-            check("nulos na medida", nulos == 0, f"{nulos} linhas sem {m['medida']}", grave=False)
+            check("nulos na medida", nulos == 0, f"{nulos} linhas sem {m['medida']}: contam em 'quantidade' e somem de tabela e "
+                  "gráfico de valor (é a diferença clássica entre o cartão e a tabela)", grave=False)
             neg = um(f"SELECT count(*) FROM silver WHERE {med} < 0")
             check("valores negativos", neg == 0, f"{neg} linhas com {m['medida']} negativo", grave=False)
             r = ctx.memoria.get("resposta", {})

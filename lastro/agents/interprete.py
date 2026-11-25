@@ -212,8 +212,28 @@ class Interprete(Agente):
             except InsightSemProva as e:
                 recusados.append({"tipo": ins.get("tipo"), "motivo": str(e)})
         ins_origem = self.medida["origem"]
-        return {"pergunta": pergunta, "reconhecida": reconhecida, "base": ins_origem, "insights": insights, "recusados": recusados,
-                "sugestoes": self.sugestoes(eixo)}
+        r = {"pergunta": pergunta, "reconhecida": reconhecida, "base": ins_origem, "insights": insights, "recusados": recusados,
+             "sugestoes": self.sugestoes(eixo)}
+        if re.search(r"nao bate|nao fecha|diferen|diverg|por que .*(cartao|card|tabela|total|grafico|barra)", p):
+            r["conferencia"] = self.conferencia()
+            r["reconhecida"] = True
+        return r
+
+    def avisos_de_conferencia(self) -> list[dict]:
+        """O que o Auditor já mediu e explica número que 'não bate' (caixa/global/metodos/conferencia-card-x-tabela.md)."""
+        checks = (self.demanda["resultado"].get("auditoria") or {}).get("checagens", [])
+        chaves = ("fora do gráfico", "nulos na medida", "grafias diferentes", "marcador de vazio", "linhas: fonte")
+        return [c for c in checks if c["checagem"].startswith(chaves) and (not c["ok"] or c["checagem"].startswith("linhas: fonte"))]
+
+    def conferencia(self) -> dict:
+        """Resposta para 'por que o cartão não bate com a tabela?': os motivos medidos pela auditoria, sem inventar."""
+        avisos = self.avisos_de_conferencia()
+        motivos = [f"{a['checagem']}: {a['detalhe']}" for a in avisos]
+        if not any(not a["ok"] for a in avisos):
+            motivos.append("A auditoria não achou linha fora de visual: total e soma das fatias batem. Confira filtros de página "
+                           "ou de relatório no seu BI e a unidade da contagem (registro, documento ou projeto).")
+        return {"metodo": "global:metodos/conferencia-card-x-tabela.md", "motivos": motivos,
+                "texto": "Motivos medidos na auditoria desta demanda, do maior suspeito ao menor."}
 
     def sugestoes(self, eixo: str | None) -> list[str]:
         nome = self.medida["nome"].lower()
@@ -223,4 +243,6 @@ class Interprete(Agente):
                   f"O {nome} por {eixo.replace('_', ' ')} está concentrado?"]
         if "dim_data" in self.tabelas:
             s.append(f"Como evoluiu o {nome} no último mês?")
+        if any(not a["ok"] for a in self.avisos_de_conferencia()):
+            s.append("Por que o total não bate com a soma das barras?")
         return s

@@ -519,7 +519,8 @@ async function telaConversa(did, aviso = "") {
       ${turnos.map((t) => `<div style="display:grid;gap:4px">
         <p class="rot" style="margin:0">${esc(t.autor.split("@")[0])} perguntou · <span class="status ${t.camada2 === "aprovado" ? "aprovada" : t.camada2 === "reprovado" ? "reprovada" : "em_revisao"}">${esc(CAMADA2[t.camada2] || t.camada2)}</span></p>
         <p style="margin:0"><b>${esc(t.pergunta)}</b></p>
-        ${t.insights.map(insightHtml).join("") || `<p class="quem">Nenhum insight com prova para essa pergunta.</p>`}
+        ${t.conferencia ? `<div class="bloco"><p style="margin:0 0 6px"><b>Por que o número não bate</b> <span class="quem">${esc(t.conferencia.texto)}</span></p><ul>${t.conferencia.motivos.map((m) => `<li>${esc(m)}</li>`).join("")}</ul></div>` : ""}
+        ${t.insights.map(insightHtml).join("") || (t.conferencia ? "" : `<p class="quem">Nenhum insight com prova para essa pergunta.</p>`)}
         ${t.recusados?.length ? `<p class="quem">${t.recusados.length} insight(s) recusado(s) pelo auditor por falta de prova.</p>` : ""}
         ${t.revisao ? `<p class="quem">${esc(t.revisao.revisor)}: ${esc(t.revisao.parecer || "(sem parecer)")}</p>` : ""}
         ${revisa && t.camada2 === "aguardando revisor" ? `<div class="linha-btn"><button class="btn ouro" data-rev="${t.n}" data-ok="1">aprovar insights</button><button class="btn sec" data-rev="${t.n}" data-ok="0">reprovar</button></div>` : ""}
