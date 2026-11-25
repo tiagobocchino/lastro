@@ -24,3 +24,17 @@ especialista: engenheiro-de-dados
 ## Verificação
 
 `uv run pytest -q`: 322 testes passando. Lint sem erro novo.
+
+## Revisão pedida pelo Tiago (25/11): regra de negócio vem do cliente
+
+> "regras especificas de vendas, clientes e negócio devem sempre ser respondidas pelo cliente e não deduzidas"
+
+- **ADR 0011** registra o princípio: o agente interpreta (detecta, mede, explica, pergunta) e o cliente define a regra.
+- Saiu o que era dedução:
+  - a silver unir espaços internos;
+  - "a versão mais recente vence";
+  - "no funil a data é a da etapa";
+  - RH agregado e 3 versões como regra geral.
+- Entraram perguntas no grill: "são o mesmo valor?" e "significam vazio?", com sugestão "manter como está". O Engenheiro só aplica o que o cliente respondeu, e a regra fica gravada para as próximas demandas da fonte.
+- As notas da Caixa separam "o que o agente faz" de "o que o cliente responde". As skills do orquestrador e do arquiteto ganharam a regra.
+- Teste novo: sem resposta, nada muda; com resposta, a regra é aplicada, o aviso some e a pergunta não volta. A suíte inteira está verde (323).

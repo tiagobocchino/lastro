@@ -11,7 +11,7 @@ tags: [conferência, tabela única, flat, sql, dbeaver, regras de negócio, audi
 
 # Regra
 
-- **Uma linha por registro** da fato, com as dimensões já ligadas e as colunas derivadas pelas mesmas regras do painel.
+- **Uma linha por registro** da fato, com as dimensões já ligadas e as colunas derivadas pelas **regras que o cliente estabeleceu** (as do painel), nunca por regra deduzida.
 - Os nomes de coluna são os que o negócio usa, e cada coluna derivada traz a regra num comentário.
 - Há um filtro só, no topo, como parâmetro (por exemplo o ano).
 - Entregue em SQL para rodar no cliente de banco e também em CSV/Excel.

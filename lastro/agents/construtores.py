@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
 from ..somente_leitura import EscritaBloqueada, verificar
 from .base import Agente, Contexto
@@ -18,6 +19,26 @@ def q(col: str) -> str:
 
 def ident(col: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", _sem_acento(col)).strip("_") or "col"
+
+
+SIM_UNIFICAR = "sim, é o mesmo valor (unificar em maiúsculas)"
+SIM_VAZIO = "sim, significam vazio"
+
+
+def regras_texto(fonte: str, cols: dict, r: Any) -> dict:
+    """Regras de texto que o cliente estabeleceu no grill (grafias e marcadores de vazio). Sem resposta, nada muda."""
+    regras: dict[str, dict] = {}
+    for n, c in cols.items():
+        qual = c.get("qualidade", {})
+        if qual.get("variantes") and r(f"grafias-{_slug_col(n)}") == SIM_UNIFICAR:
+            regras.setdefault(n, {})["unificar_grafias"] = True
+        if qual.get("marcadores_vazio") and r(f"vazios-{_slug_col(n)}") == SIM_VAZIO:
+            regras.setdefault(n, {})["vazios"] = qual["marcadores_vazio"]
+    return regras
+
+
+def _slug_col(n: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", _sem_acento(n)).strip("-") or "col"
 
 
 def dimensoes_candidatas(perfil: dict, chave: str | None) -> list[str]:
@@ -55,6 +76,7 @@ class Arquiteto(Agente):
             "data": data,
             "chave": chave,
             "identificadores": [n for n, c in cols.items() if c["papel"] == "identificador"],
+            "regras_texto": regras_texto(fonte, cols, r),
             "filtro": filtro,
             "dimensoes": dims,
             "playbook": f"{playbook[0].caminho} § {playbook[0].secao}" if playbook else None,
@@ -77,9 +99,15 @@ class Engenheiro(Agente):
         for c in perfil["colunas"]:
             n = c["nome"]
             if c["papel"] == "texto":
-                # trim e espaços repetidos colapsados: 'Recebido ' e 'Recebido' viram a mesma categoria
-                # (replace aninhado e não regex: traduz igual para BigQuery, Azure e Athena)
-                selecao.append(f"NULLIF(replace(replace(trim(CAST({q(n)} AS VARCHAR)), '  ', ' '), '  ', ' '), '') AS {ident(n)}")
+                expr = f"trim(CAST({q(n)} AS VARCHAR))"
+                # Regras de negócio só entram quando o cliente respondeu no grill (ADR 0011); nada é deduzido.
+                regras = m.get("regras_texto", {}).get(n, {})
+                if regras.get("unificar_grafias"):
+                    expr = f"upper({expr})"
+                if regras.get("vazios"):
+                    lista = ", ".join("'" + v.upper().replace("'", "''") + "'" for v in regras["vazios"])
+                    expr = f"CASE WHEN upper({expr}) IN ({lista}) THEN NULL ELSE {expr} END"
+                selecao.append(f"NULLIF({expr}, '') AS {ident(n)}")
             elif c["papel"] == "data":
                 selecao.append(f"TRY_CAST({q(n)} AS DATE) AS {ident(n)}")
             else:

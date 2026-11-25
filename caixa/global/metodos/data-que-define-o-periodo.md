@@ -14,9 +14,13 @@ O mesmo cartão "Solicitado, setembro" deu três números:
 
 Cada etapa do funil pode ter a sua própria data de referência: a solicitação, o envio, a aprovação.
 
-# Regra
+# O que o agente faz (interpretação)
 
-- Com mais de uma data, o grill pergunta qual define o período e mostra quantas estão preenchidas.
-- Quem não tem a data escolhida fica fora da série temporal. Diga quantos são.
-- No funil, a data de referência é a da **etapa**, não a de criação. Se o negócio usa datas diferentes por etapa, anote como regra.
-- Datas de mentira (`0000-00-00`, `1900-01-01`) viram vazio, nunca uma data.
+- Com mais de uma data, o grill mostra quantas estão preenchidas e avisa que a escolha muda a contagem por mês.
+- Diz quantos registros ficam fora da série por não ter a data escolhida.
+- Data que não é data (`0000-00-00`) não vira data: fica vazia na leitura, sem inventar um dia.
+
+# O que o cliente responde (regra de negócio, nunca deduzida)
+
+- **Qual data define o período** desta análise.
+- **No funil, se cada etapa tem data própria** e qual é. O agente não supõe que é a data da etapa nem a de criação.

@@ -53,13 +53,14 @@ class Auditor(Agente):
             if sem[0]:
                 valor = f" ({br(sem[1])} de {m['medida']})" if med_sql else ""
                 check(f"fora do gráfico por {d}", False, f"{sem[0]} linhas{valor} sem {d}: entram no total e não aparecem "
-                      f"em visual quebrado por {d}. Mostre como 'NAO DEFINIDO' ou explique no painel.", grave=False)
+                      f"em visual quebrado por {d}. Como mostrar essas linhas é regra do cliente: pergunte antes de mudar.", grave=False)
             qual = cols_perfil.get(d, {}).get("qualidade", {})
-            if qual.get("variantes"):
+            regra = m.get("regras_texto", {}).get(d, {})
+            if qual.get("variantes") and not regra.get("unificar_grafias"):
                 check(f"grafias diferentes em {d}", False, f"{qual['variantes']} grupos com grafias diferentes do mesmo valor "
-                      f"(ex.: {'; '.join(qual['exemplos_variantes'][:2])}): viram barras separadas. Padronize na origem ou peça a regra no grill.", grave=False)
-            if qual.get("marcadores_vazio"):
-                check(f"marcador de vazio em {d}", False, f"valores que significam 'vazio' mas contam como categoria: {', '.join(qual['marcadores_vazio'])}", grave=False)
+                      f"(ex.: {'; '.join(qual['exemplos_variantes'][:2])}): viram barras separadas. Se são o mesmo valor, só o cliente diz (pergunta do grill).", grave=False)
+            if qual.get("marcadores_vazio") and not regra.get("vazios"):
+                check(f"marcador de vazio em {d}", False, f"valores com cara de 'vazio' contando como categoria: {', '.join(qual['marcadores_vazio'])}. O cliente decide no grill se são vazio.", grave=False)
             if qual.get("acentos_quebrados"):
                 check(f"acentos quebrados em {d}", False, f"{qual['acentos_quebrados']} valores com codificação errada (ex.: 'Ã§' no lugar de 'ç'): "
                       "o arquivo foi salvo em latin-1/cp1252 e lido como UTF-8", grave=False)

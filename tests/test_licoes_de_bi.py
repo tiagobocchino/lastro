@@ -44,10 +44,10 @@ def test_auditor_avisa_o_que_some_do_grafico_e_o_grill_explica_a_data(tmp_path):
     assert d["resultado"]["auditoria"]["aprovado_camada1"]  # avisos não reprovam
     fora = checks["fora do gráfico por vendedor"]
     assert fora["nivel"] == "aviso" and fora["detalhe"].startswith("1 linhas (70,00")
-    assert "grafias diferentes em vendedor" in checks and "'Ana'" in checks["grafias diferentes em vendedor"]["detalhe"]
+    assert "grafias diferentes em vendedor" in checks and "só o cliente diz" in checks["grafias diferentes em vendedor"]["detalhe"]
     assert "N/A" in checks["marcador de vazio em vendedor"]["detalhe"]
     assert "cartão e a tabela" in checks["nulos na medida"]["detalhe"]
-    # o espaço no fim some na silver: 'Ana ' e 'Ana' viram a mesma categoria (ANA continua separada: é aviso, não conserto)
+    # sem resposta do cliente nada é deduzido: só o trim de sempre ('Ana ' = 'Ana'); ANA e N/A continuam como vieram
     gold = plat.pasta_demanda(d["id"]) / "gold"
     import duckdb
     nomes = sorted(r[0] for r in duckdb.sql(f"SELECT vendedor FROM '{gold / 'dim_vendedor.parquet'}' WHERE vendedor IS NOT NULL").fetchall())
@@ -74,3 +74,28 @@ def test_interprete_explica_por_que_nao_bate(tmp_path):
         assert "Por que o total não bate com a soma das barras?" in r["sugestoes"]
     finally:
         ag.fechar()
+
+
+def test_regra_de_texto_so_entra_com_resposta_do_cliente_e_fica_gravada(tmp_path):
+    import duckdb
+
+    from lastro.agents.construtores import SIM_UNIFICAR, SIM_VAZIO
+
+    df = pd.DataFrame({"id": range(1, 7), "vendedor": ["Ana", "ANA", "Bia", "bia", "N/A", "Ana"],
+                       "valor": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0], "data_criacao": ["2026-09-01"] * 6})
+    plat, d, _ = _demanda(tmp_path, df, {})
+    perguntas = {q["id"]: q for q in d["grill"]}
+    assert perguntas["orcamentos:grafias-vendedor"]["sugestao"] == "não, manter como está"  # a sugestão nunca deduz
+    assert "'N/A'" in perguntas["orcamentos:vazios-vendedor"]["pergunta"]
+    resp = {"orcamentos:medida": "valor", "orcamentos:data": "data_criacao", "orcamentos:chave": "id", "geral:revisor": "t",
+            "orcamentos:grafias-vendedor": SIM_UNIFICAR, "orcamentos:vazios-vendedor": SIM_VAZIO}
+    d = plat.executar(plat.responder_grill(d["id"], "visitante", {k: v for k, v in resp.items() if k in perguntas})["id"], "visitante")
+    gold = plat.pasta_demanda(d["id"]) / "gold"
+    nomes = sorted(r[0] for r in duckdb.sql(f"SELECT vendedor FROM '{gold / 'dim_vendedor.parquet'}' WHERE vendedor IS NOT NULL").fetchall())
+    assert nomes == ["ANA", "BIA"]
+    checks = {c["checagem"] for c in d["resultado"]["auditoria"]["checagens"]}
+    assert "grafias diferentes em vendedor" not in checks and "marcador de vazio em vendedor" not in checks
+    # a regra do cliente vale para a próxima demanda da mesma fonte: não volta a ser perguntada
+    fid = plat.repo.fontes()[0]["id"]
+    d2 = plat.abrir("visitante", "Quanto cada vendedor vendeu?", [fid])
+    assert not {"orcamentos:grafias-vendedor", "orcamentos:vazios-vendedor"} & {q["id"] for q in d2["grill"]}

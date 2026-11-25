@@ -109,6 +109,26 @@ class Orquestrador(Agente):
                 (perfil["chaves_candidatas"] or ["(nenhuma: manter todas as linhas)"])[0],
                 perfil["chaves_candidatas"] + ["(nenhuma: manter todas as linhas)"],
             )
+            # Regra de negócio vem do cliente (ADR 0011): o Explorador só detecta; o grill pergunta; sem resposta, nada muda.
+            from .construtores import (
+                SIM_UNIFICAR,
+                SIM_VAZIO,
+                _slug_col,
+                dimensoes_candidatas,
+            )
+
+            for nome in dimensoes_candidatas(perfil, None):
+                qual = next(c for c in cols if c["nome"] == nome).get("qualidade", {})
+                if qual.get("variantes"):
+                    add(f"grafias-{_slug_col(nome)}",
+                        f"Em '{fonte}', a coluna '{nome}' tem o mesmo texto escrito de jeitos diferentes "
+                        f"({'; '.join(qual['exemplos_variantes'][:2])}). São o mesmo valor?",
+                        "não, manter como está", [SIM_UNIFICAR, "não, manter como está"])
+                if qual.get("marcadores_vazio"):
+                    add(f"vazios-{_slug_col(nome)}",
+                        f"Em '{fonte}', os valores {', '.join(repr(v) for v in qual['marcadores_vazio'])} da coluna '{nome}' "
+                        "significam 'sem informação'?",
+                        "não, manter como está", [SIM_VAZIO, "não, manter como está"])
             add(
                 "filtro",
                 f"Existe um recorte obrigatório em '{fonte}' (ex.: só um status ou uma empresa)? Escreva como condição SQL ou deixe 'nenhum'.",

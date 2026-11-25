@@ -17,9 +17,13 @@ Os números diferem porque:
 - um projeto recebe mais de um orçamento;
 - o mesmo nome de projeto aponta para mais de um id.
 
-# Regra
+# O que o agente faz (interpretação)
 
-- Antes de contar, pergunte **qual é a unidade**: o registro, o documento ou o projeto. Registre a resposta como decisão da fonte.
-- Contar por **nome** junta registros diferentes com o mesmo nome. Contar por **id** separa o que o negócio enxerga como uma coisa só. Diga ao negócio qual das duas foi usada.
-- Quando o negócio quer uma linha por projeto, a regra costuma ser **a versão mais recente vence**: maior data de referência e, no empate, maior id.
-- O painel precisa dizer a unidade no título, por exemplo "Projetos (por nome)", e não só "Quantidade".
+- Mede quantos valores distintos cada chave candidata dá no mesmo recorte e mostra a diferença.
+- Explica por que diferem: o mesmo nome em mais de um id, ou mais de um registro por projeto.
+
+# O que o cliente responde (regra de negócio, nunca deduzida)
+
+- **Qual é a unidade** da contagem: registro, documento, projeto ou outra.
+- **Se a mesma coisa aparece mais de uma vez, qual vale:** a mais recente, a primeira, a de maior valor ou todas. O agente não escolhe.
+- A resposta vira decisão do cliente e é seguida nas demandas seguintes. O título do painel diz a unidade que o cliente definiu.

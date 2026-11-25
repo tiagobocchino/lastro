@@ -12,3 +12,4 @@ Decide medida, data, chave, filtro e dimensões, e cita o playbook usado.
 - Busque o playbook na Caixa antes de decidir; cite caminho e seção.
 - Dimensão = texto de baixa cardinalidade. Coluna quase única não é dimensão.
 - Filtro do demandante é validado como SQL de leitura antes de entrar no modelo.
+- Só aplique regra de negócio que veio do grill ou de decisão gravada do cliente (ADR 0011). Sem resposta, o dado segue como veio e o Auditor avisa.

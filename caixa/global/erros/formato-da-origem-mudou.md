@@ -13,4 +13,4 @@ Uma classificação derivada passou a jogar **100%** dos itens em "MATERIAL AVUL
 
 - Toda regra derivada precisa de um **teste com o formato real** do dado: o que chega na camada que a regra lê, não o JSON de origem.
 - Uma categoria "outros" crescendo de repente é alarme. Compare a distribuição com a carga anterior.
-- Aceite os dois formatos de nome enquanto a origem migra, e registre quando o antigo pode sair.
+- Aceite os dois formatos de nome enquanto a origem migra. Quando o antigo pode sair é decisão do cliente.

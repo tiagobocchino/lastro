@@ -5,11 +5,16 @@ type: metodo
 tags: [governança, somente leitura, planilha, relatório validado, lgpd, rh, versões, publicar]
 ---
 
-# Regras
+# Garantias da plataforma (valem para todo cliente)
 
-- **Somente leitura nas fontes.** Planilhas, relatórios e bases do cliente são referência. Só se constrói o que é novo e nosso.
-- **Relatório validado não muda de valor** (ver mudar-sem-mudar-o-numero).
-- **RH só em agregado:** nunca uma linha por pessoa no painel; empresa entra como filtro, não como visual. Cumpre a LGPD.
-- **Quem publica é o dono.** O agente prepara; a pessoa responsável publica no Power BI Service ou no Data Studio.
-- **Versões:** guarde poucas versões por relatório (três, por exemplo) com data, e diga o que mudou em cada uma.
-- **Documente a linhagem** de cada painel: fonte → tratamento → tabela → visual, com o cálculo de cada indicador.
+- **Somente leitura nas fontes.** Planilhas, relatórios e bases do cliente são referência e nunca são alterados (ADR 0002).
+- **Regra de negócio vem do cliente** (ADR 0011). Como contar, qual data, o que é o mesmo valor, o que entra e o que sai: o agente pergunta, não deduz. A resposta fica gravada e é seguida.
+- **Relatório validado não muda de valor sem aviso** (ver mudar-sem-mudar-o-numero).
+- **Dado pessoal não aparece no painel** sem decisão explícita (LST-41).
+- **Linhagem documentada:** fonte → tratamento → tabela → visual.
+
+# O que cada cliente define (perguntar e registrar, nunca supor)
+
+- Como mostrar dados de pessoas, por exemplo RH em agregado ou por empresa como filtro.
+- Quem publica e onde.
+- Quantas versões guardar e o que conta como versão.
