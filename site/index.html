@@ -1,6 +1,10 @@
+<!doctype html>
+<html lang="pt-BR">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lastro</title>
+<link rel="icon" type="image/svg+xml" href="marca/simbolo-cotejo-claro.svg">
+<meta name="description" content="Lastro: análise de dados com conferência em duas camadas. Suba uma planilha, responda quatro perguntas e saia com um painel conferido. Seus dados são apagados ao final.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -80,6 +84,38 @@ section { padding-block: 72px; border-top: 1px solid var(--linha) }
 .copiar { font: 12px var(--f-dado); background: var(--sup-2); border: 1px solid var(--linha); color: var(--tinta); border-radius: 6px; padding: 4px 9px; cursor: pointer }
 footer { padding-block: 28px 48px; border-top: 1px solid var(--linha); color: var(--quieta); font-size: 14px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap }
 
+
+/* Teste com a sua planilha (LST-43) */
+.teste { display: grid; grid-template-columns: 5fr 7fr; gap: 56px; align-items: start }
+.teste > * { min-width: 0 }
+.teste h2 { font-size: clamp(30px, 4vw, 44px); line-height: 1.06; font-weight: 800 }
+.teste .pergunta .rot { display: block; margin-bottom: 14px }
+.teste .pergunta p { color: var(--quieta); margin-top: 16px; max-width: 46ch }
+.palco { background: var(--sup); border: 1px solid var(--linha); border-radius: 12px; padding: 22px; display: grid; gap: 16px; min-width: 0 }
+.palco h3 { font-size: 20px; font-weight: 600 }
+.envio { border: 1.5px dashed var(--linha); border-radius: 10px; padding: 22px; display: grid; gap: 10px; justify-items: start; background: var(--sup-2) }
+.envio.sobre { border-color: var(--ouro) }
+.envio input[type=file] { font: 15px var(--f-texto); max-width: 100% }
+.miuda { font-size: 14px; color: var(--quieta) }
+.aceite { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px }
+.aceite input { margin-top: 4px; accent-color: var(--ouro) }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--ouro-tx); font: 600 15px var(--f-texto); cursor: pointer; text-decoration: underline; text-underline-offset: 3px }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font: 12.5px var(--f-dado); border: 1px solid var(--linha); border-radius: 99px; padding: 3px 10px; background: var(--sup-2); overflow-wrap: anywhere }
+.chip b { font-weight: 500; color: var(--ouro-tx) }
+.perg { display: grid; gap: 6px; font-weight: 500 }
+.perg select { font: 15px var(--f-texto); padding: 10px 12px; border: 1px solid var(--linha); border-radius: 8px; background: var(--sup-2); color: var(--tinta); width: 100% }
+.duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px }
+.selo { font: 500 12px var(--f-dado); color: var(--ouro-tx); background: var(--ouro-f); border-radius: 6px; padding: 6px 10px; justify-self: start }
+.painel-ifr { width: 100%; height: 640px; border: 1px solid var(--linha); border-radius: 10px; background: var(--chao) }
+.recibo { border-left: 3px solid var(--ok); padding: 4px 0 4px 14px; display: grid; gap: 4px }
+.recibo b { font-family: var(--f-disp); font-size: 18px }
+.recibo span { font: 13px var(--f-dado); color: var(--quieta) }
+.convite { background: var(--sup-2); border-radius: 10px; padding: 18px; display: grid; gap: 12px }
+.alerta { color: #A3392B; font-size: 15px } @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .alerta { color: #F08A7C } }
+.esperando { font: 13px var(--f-dado); color: var(--quieta) }
+@media (max-width: 900px) { .teste { grid-template-columns: 1fr; gap: 28px } .painel-ifr { height: 560px } }
+
 @media (max-width: 900px) {
   .abre, .qa, .contato { grid-template-columns: 1fr; gap: 28px }
   .piloto { grid-template-columns: 1fr 1fr }
@@ -97,6 +133,7 @@ footer { padding-block: 28px 48px; border-top: 1px solid var(--linha); color: va
       lastro
     </a>
     <nav aria-label="Seções">
+      <a href="#teste">testar agora</a>
       <a href="#certo">o número está certo?</a>
       <a href="#sistemas">meus sistemas</a>
       <a href="#piloto">como começar</a>
@@ -110,7 +147,7 @@ footer { padding-block: 28px 48px; border-top: 1px solid var(--linha); color: va
         <p class="rot">para quem decide com números</p>
         <h1>O relatório chegou. Dá para confiar nele?</h1>
         <p class="lead">O Lastro monta as análises da sua empresa direto dos sistemas que você já usa: ERP, CRM ou planilha. O número só chega até você depois de duas conferências: uma feita pelos agentes, outra por alguém que conhece o seu negócio.</p>
-        <div class="acoes"><a class="cta ouro" href="#contato">testar com os meus dados</a><a class="cta leve" href="#certo">ver como a conferência funciona</a></div>
+        <div class="acoes"><a class="cta ouro" href="#teste">testar com os meus dados</a><a class="cta leve" href="#certo">ver como a conferência funciona</a></div>
       </div>
       <figure style="margin:0">
         <div class="janela">
@@ -120,6 +157,29 @@ footer { padding-block: 28px 48px; border-top: 1px solid var(--linha); color: va
         <figcaption class="nota"><span>Antes de somar, o Lastro achou <b>12 contratos lançados duas vezes</b>. Sem essa limpeza, o total sairia <b>R$ 181.820,60 maior</b>. Dados fictícios da demonstração.</span></figcaption>
       </figure>
     </div>
+
+    <section id="teste">
+      <div class="teste">
+        <div class="pergunta">
+          <span class="rot">teste com a sua planilha</span>
+          <h2>Suba uma planilha. Saia com um painel conferido.</h2>
+          <p>O Lastro lê os seus dados, faz quatro perguntas e monta o painel. A conferência automática roda na sua frente. No fim, apagamos tudo e mostramos o recibo.</p>
+          <p class="nota"><span><b>Nada fica com a gente.</b> A análise roda numa área temporária e é apagada antes de o painel chegar à sua tela.</span></p>
+          <p class="nota"><span><b>CSV ou Excel</b>, até 5 MB e 50 mil linhas. Sem cadastro.</span></p>
+        </div>
+        <div class="palco" id="palco" aria-live="polite">
+          <form id="t-envio" class="envio" novalidate>
+            <h3>1. A planilha</h3>
+            <label class="miuda" for="t-arquivo">A primeira linha precisa ter o nome das colunas.</label>
+            <input id="t-arquivo" type="file" accept=".csv,.xlsx">
+            <p class="miuda">Não tem uma à mão? <button type="button" class="linkbtn" id="t-exemplo">usar a planilha de exemplo</button> (orçamentos de uma construtora fictícia).</p>
+            <label class="aceite"><input type="checkbox" id="t-aceite"> <span>Não vou enviar dados pessoais (CPF, e-mail, telefone). Entendo que é uma demonstração, com conferência automática e sem revisão humana, apagada ao final.</span></label>
+            <button class="cta ouro" type="submit" id="t-analisar">analisar planilha</button>
+            <p class="alerta" id="t-erro" role="alert"></p>
+          </form>
+        </div>
+      </div>
+    </section>
 
     <section id="certo">
       <div class="qa">
@@ -252,3 +312,4 @@ footer { padding-block: 28px 48px; border-top: 1px solid var(--linha); color: va
     setTimeout(() => (b.textContent = "copiar e-mail"), 1800);
   });
 </script>
+<script src="demo.js" defer></script>

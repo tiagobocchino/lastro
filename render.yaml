@@ -24,5 +24,7 @@ services:
         sync: false
       - key: LASTRO_STORAGE_BUCKET
         value: tenants
+      - key: LASTRO_DEMO             # demonstração do site (LST-39 a LST-43), com os limites do LST-42
+        value: "1"
       - key: LASTRO_URL_PUBLICA      # https://lastro-api-73zx.onrender.com ou o domínio próprio
         sync: false

@@ -114,7 +114,8 @@ def para_visitante(demanda: dict, gold: Path, quebra: str | None, periodo: str |
     elif tipo == "linha" and cat["tempo"]:
         eixo = periodo if periodo in cat["tempo"] else "ano_mes"
         visuais.append({"id": "v2", "tipo": "linha", "titulo": f"{m['nome']} por {TEMPO[eixo]}", "medida": m["id"], "eixo": eixo})
-    spec = {"versao": 1, "demanda": demanda["id"], "titulo": f"{m['nome']}: painel da sua planilha", "medidas": [m], "visuais": visuais}
+    spec = {"versao": 1, "demanda": demanda["id"], "titulo": f"{m['nome']}: painel da sua planilha", "medidas": [m], "visuais": visuais,
+            "modo": "demonstracao"}
     validar(spec, cat)
     return spec
 
@@ -312,6 +313,12 @@ def _e(v: Any) -> str:
     return html.escape("" if v is None else str(v))
 
 
+def _origem(spec: dict, gerado_em: str) -> str:
+    if spec.get("modo") == "demonstracao":  # ADR 0010: ninguém aprovou; dizer o que é
+        return f"Demonstração do Lastro · gerado em {gerado_em} · conferência automática, sem revisão humana · seus dados já foram apagados"
+    return f"Painel da demanda {spec['demanda']} · versão {spec['versao']} · gerado em {gerado_em} pelo Lastro a partir do gold aprovado"
+
+
 def html_painel(spec: dict, gold: Path, gerado_em: str) -> str:
     valores = dados(spec, gold)
     blocos = []
@@ -364,7 +371,7 @@ th, td {{ text-align:left; padding:6px 10px; border-bottom:1px solid var(--linha
 td.n {{ text-align:right; font-family:var(--f-dado); font-variant-numeric:tabular-nums }}
 </style></head><body><main>
 <h1>{_e(spec['titulo'])}</h1>
-<p class="quieta">Painel da demanda {spec['demanda']} · versão {spec['versao']} · gerado em {_e(gerado_em)} pelo Lastro a partir do gold aprovado</p>
+<p class="quieta">{_e(_origem(spec, gerado_em))}</p>
 <div class="grade">{''.join(blocos)}</div>
 </main></body></html>
 """

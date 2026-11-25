@@ -29,6 +29,7 @@ COPY lastro ./lastro
 COPY caixa ./caixa
 COPY skills ./skills
 COPY exemplos ./exemplos
+COPY site ./site
 USER lastro
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import os,urllib.request; urllib.request.urlopen(f'http://127.0.0.1:{os.environ[\"PORT\"]}/saude', timeout=4)"

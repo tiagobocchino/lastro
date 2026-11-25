@@ -44,9 +44,12 @@ cofre = abrir_cofre(cfg, banco)
 espelho = abrir_espelho()
 WEB = Path(__file__).parent / "web"
 app = FastAPI(title="Lastro", version="0.1.0")
+from fastapi.middleware.gzip import GZipMiddleware
+
+app.add_middleware(GZipMiddleware, minimum_size=1024)  # site, portal e painéis em HTML/JS comprimidos
 
 
-NAO_MEDIR = ("/saude", "/web/", "/favicon")
+NAO_MEDIR = ("/saude", "/web/", "/site", "/favicon")
 
 
 @app.middleware("http")
@@ -315,6 +318,9 @@ def portal() -> str:
 
 
 app.mount("/web", StaticFiles(directory=WEB), name="web")
+SITE = Path(__file__).parent.parent / "site"
+if SITE.exists():  # site de apresentação servido pelo Render até existir domínio (LST-23, LST-43)
+    app.mount("/site", StaticFiles(directory=SITE, html=True), name="site")
 
 
 # ---- Conectores SaaS: catálogo, teste de conexão, importação, Postman e sandbox -------------
@@ -833,3 +839,14 @@ def demo_apagar(sid: str) -> dict:
         return {"recibo": _demos().apagar(sid)}
     except ErroDemo as e:
         raise HTTPException(404, str(e)) from e
+
+
+@app.post("/api/demo/sessoes/{sid}/apagar", include_in_schema=False)
+def demo_apagar_ao_sair(sid: str) -> dict:
+    """O navegador avisa (sendBeacon, só POST) quando o visitante sai da página no meio da análise."""
+    from .demo import ErroDemo
+
+    try:
+        return {"recibo": _demos().apagar(sid)}
+    except ErroDemo:
+        return {"recibo": None}

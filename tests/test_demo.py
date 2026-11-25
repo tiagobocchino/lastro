@@ -59,6 +59,7 @@ def test_exemplo_de_ponta_a_ponta_e_nada_sobra(api, caplog):
                json={"respostas": {"planilha:medida": "valor_vendido", "demo:quebra": "vendedor", "demo:formato": "ranking (barras)"}})
     p = r.json()
     assert r.status_code == 200 and "14.030.477,92" in p["html"] and p["modo"] == "demonstracao" and p["auditoria"]["aprovada"]
+    assert "sem revisão humana" in p["html"] and "gold aprovado" not in p["html"]  # o painel diz o que é
     recibo = p["recibo"]
     assert recibo["conferido"] and recibo["arquivos"] > 5 and recibo["tabelas"] >= 3 and recibo["bytes"] > 0 and recibo["registros_em_memoria"] > 0
     assert list(base.glob("demo-*")) == [] and modulo._DEMOS.abertas == 0
@@ -340,3 +341,23 @@ def test_prazo_estourado_na_leitura_apaga_a_sessao_que_nasce_depois(monkeypatch,
             break
         _time.sleep(0.1)
     assert list(base.glob("demo-*")) == [] and demos.abertas == 0  # a sessão que nasceu tarde foi apagada
+
+
+# ---- LST-43: o site servido pelo Render ---------------------------------------------------------
+
+def test_site_servido_com_a_secao_e_o_script(api):
+    _, c, _ = api
+    h = c.get("/site/")
+    assert h.status_code == 200 and h.text.startswith("<!doctype html>") and 'id="teste"' in h.text and 'src="demo.js"' in h.text
+    assert "apagamos tudo" in h.text.lower()
+    js = c.get("/site/demo.js")
+    assert js.status_code == 200 and "/api/demo/sessoes" in js.text
+    assert c.get("/site/marca/simbolo-cotejo-claro.svg").status_code == 200
+
+
+def test_sair_da_pagina_apaga_a_sessao(api):
+    _, c, base = api
+    s = c.post("/api/demo/sessoes", data={"exemplo": "true"}).json()
+    assert c.post(f"/api/demo/sessoes/{s['sessao']}/apagar").json()["recibo"]["conferido"]
+    assert list(base.glob("demo-*")) == []
+    assert c.post(f"/api/demo/sessoes/{s['sessao']}/apagar").json() == {"recibo": None}  # repetido não dá erro
