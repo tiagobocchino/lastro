@@ -62,7 +62,7 @@ if not chave:
     st.info("Informe a chave de leitura do BI da empresa (portal do Lastro → conta → Conectar ao BI).")
     st.stop()
 try:
-    con = conexao(api, chave)
+    con = n.por_sessao(conexao(api, chave))  # cursor por execução: a conexão em cache é de todos
 except Exception as e:  # noqa: BLE001
     st.error(f"Não consegui ler o BI ({type(e).__name__}). Confira a chave de leitura.")
     st.stop()

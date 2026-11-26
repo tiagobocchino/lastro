@@ -109,3 +109,29 @@ def test_app_streamlit_abre_com_indicadores_e_responde_pergunta(con, monkeypatch
     assert metricas["Total de valor de produtos"] == "390,50" and metricas["Registros"] == "6"
     at.text_input[0].input("vendas por região").run()
     assert not at.exception and any("região da obra" in s.value for s in at.subheader)
+
+
+def test_consultas_em_paralelo_com_cursor_por_sessao():
+    """Streamlit Cloud, 26/11: a conexão em cache, usada por várias sessões ao mesmo tempo, dava ResourceInUseException."""
+    import threading
+
+    import duckdb
+
+    con = duckdb.connect()
+    con.execute("CREATE TABLE painel_1_vendas AS SELECT range AS registros, range % 7 AS company FROM range(300000)")
+    erros: list[str] = []
+
+    def consultar() -> None:
+        c = n.por_sessao(con)
+        try:
+            for _ in range(15):
+                c.execute('SELECT company, sum(registros) FROM "painel_1_vendas" GROUP BY 1 ORDER BY 2 DESC').fetchall()
+        except Exception as e:  # noqa: BLE001
+            erros.append(type(e).__name__)
+
+    ts = [threading.Thread(target=consultar) for _ in range(4)]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    assert erros == []

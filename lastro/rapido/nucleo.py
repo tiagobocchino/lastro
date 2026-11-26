@@ -62,6 +62,12 @@ def carregar(parquets: dict[str, bytes]) -> duckdb.DuckDBPyConnection:
     return con
 
 
+def por_sessao(con: duckdb.DuckDBPyConnection) -> duckdb.DuckDBPyConnection:
+    """Cursor próprio para cada execução do app. A conexão em cache é compartilhada entre as sessões do Streamlit,
+    e duas consultas ao mesmo tempo na mesma conexão dão ResourceInUseException (visto no Streamlit Cloud em 26/11)."""
+    return con.cursor()
+
+
 def baixar(api: str, chave: str, cliente: Any = None) -> dict[str, bytes]:
     """As tabelas prontas da empresa pela API do Lastro (LST-47), com a chave de leitura no cabeçalho."""
     import httpx
