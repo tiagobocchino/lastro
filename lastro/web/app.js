@@ -62,6 +62,12 @@ async function telaPrincipal() {
   $("#nova").onclick = () => { atual = null; telaNova(); marcarLista(); };
   await carregarLista();
   const autorizado = new URLSearchParams(location.search).get("autorizado");
+  if (autorizado === "planilha_bi") {  // volta do Google: a planilha do BI (LST-48) já recebeu o primeiro envio
+    history.replaceState(null, "", "/");
+    await telaConta();
+    if ($("#bi-msg")) { $("#bi-msg").className = "ok"; $("#bi-msg").textContent = "Google autorizado. A planilha recebe as tabelas prontas a cada publicação."; }
+    return;
+  }
   if (autorizado) {  // volta da autorização OAuth2 no sistema do cliente
     history.replaceState(null, "", "/");
     await telaConectores(autorizado);
@@ -427,6 +433,12 @@ async function telaBI(nova = null, teste = null, chave = null) {
       ${chave ? `<div class="bloco" style="background:var(--sup-2)"><p><b>Chave de leitura</b> (aparece só agora; cole no parâmetro <code>ChaveLastro</code> do projeto e guarde como senha):</p>
         <div class="linha-btn" style="align-items:center"><code id="bi-chave" style="overflow-wrap:anywhere">${esc(chave.chave)}</code><button class="btn sec" id="bi-copiar-chave" type="button">copiar</button></div>
         <p class="quem">Endereço: <code>${esc(chave.base)}</code> · cabeçalho <code>${esc(chave.cabecalho)}</code></p></div>` : ""}
+      <h2 style="margin:6px 0 0">Data Studio pela planilha Google</h2>
+      ${e.planilha?.autorizada
+        ? `<p class="quem">As tabelas prontas (<code>painel_…</code>) vão para uma planilha no <b>seu</b> Google Drive a cada publicação; no Data Studio use o conector <b>Planilhas Google</b>, sem senha de banco nem certificado. ${e.planilha.url ? `Última atualização ${esc(quandoBI(e.planilha.enviada_em))}: <a href="${esc(e.planilha.url)}" target="_blank" rel="noopener">abrir a planilha</a>.` : "Ainda não enviada."}</p>
+           <div class="linha-btn"><button class="btn sec" id="bi-planilha-enviar">enviar agora</button><button class="btn sec" id="bi-planilha-sair">desconectar</button></div>`
+        : `<p class="quem">Quer o Data Studio sem senha de banco nem certificado? Autorize o Google uma vez: o Lastro cria uma planilha no seu Drive e só enxerga essa planilha (permissão <i>drive.file</i>).</p>
+           <div class="linha-btn"><button class="btn sec" id="bi-planilha-autorizar">conectar minha conta Google</button></div>`}
       <div class="linha-btn"><button class="btn sec" id="bi-chave-gerar">${e.chave_ativa ? "trocar a chave" : "gerar a chave de leitura"}</button>${e.chave_ativa ? `<button class="btn sec" id="bi-chave-revogar">revogar a chave</button>` : ""}</div>
       <details><summary>Como conectar (Power BI, Looker Studio, Metabase)</summary><ul class="quem">
         <li><b>Power BI Desktop</b> (gratuito): Obter dados → Banco de dados PostgreSQL → servidor <code>${esc(c.host)}:${esc(c.porta)}</code>, banco <code>${esc(c.banco)}</code> → usuário e senha acima. As tabelas <code>d…_fato</code> e <code>d…_dim_…</code> já formam um esquema estrela.</li>
@@ -442,6 +454,13 @@ async function telaBI(nova = null, teste = null, chave = null) {
   if (nova) $("#bi-copiar-senha").onclick = (ev) => copiar(ev.target, nova.senha, $("#bi-senha"));
   $("#bi-publicar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/publicar", { method: "POST" })).json(); await telaBI(); if (r.avisos.length) $("#bi-msg").textContent = r.avisos.join(" · "); });
   $("#bi-trocar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/credencial", { method: "POST" })).json(); await telaBI(r.credencial, r.teste); });
+  if ($("#bi-planilha-autorizar")) $("#bi-planilha-autorizar").onclick = (ev) => acao(ev.target, async () => { location.href = (await (await api("/api/bi/planilha/autorizar", { method: "POST" })).json()).url; });
+  if ($("#bi-planilha-enviar")) $("#bi-planilha-enviar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/planilha/enviar", { method: "POST" })).json(); await telaBI(); $("#bi-msg").className = "ok"; $("#bi-msg").textContent = `Planilha atualizada: ${r.abas.length} aba(s).` + (r.avisos.length ? " " + r.avisos.join(" · ") : ""); });
+  if ($("#bi-planilha-sair")) $("#bi-planilha-sair").onclick = (ev) => {
+    const b = ev.target;
+    if (b.dataset.confirmar !== "1") { b.dataset.confirmar = "1"; b.textContent = "confirmar: a planilha para de atualizar"; return; }
+    acao(b, async () => { await api("/api/bi/planilha", { method: "DELETE" }); await telaBI(); });
+  };
   if (chave) $("#bi-copiar-chave").onclick = (ev) => copiar(ev.target, chave.chave, $("#bi-chave"));
   $("#bi-chave-gerar").onclick = (ev) => acao(ev.target, async () => { const r = await (await api("/api/bi/chave", { method: "POST" })).json(); await telaBI(null, null, r); });
   if ($("#bi-chave-revogar")) $("#bi-chave-revogar").onclick = (ev) => {

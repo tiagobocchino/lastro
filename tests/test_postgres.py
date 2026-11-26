@@ -699,3 +699,61 @@ def test_bi_parquet_mantem_os_tipos_do_postgres_com_vazios(banco_pg, url_pg):
         assert tipos == {"id": "BIGINT", "dim_id": "BIGINT", "vazio_id": "BIGINT", "valor": "DOUBLE", "nome": "VARCHAR",
                          "vazio_txt": "VARCHAR", "ok": "BOOLEAN", "dia": "DATE"}
         assert duckdb.sql(f"SELECT sum(valor), count(dim_id) FROM '{arq}'").fetchall() == [(1.5, 1)]
+
+
+def test_planilha_google_do_bi_pelo_portal(banco_pg, url_pg, monkeypatch, tmp_path: Path):
+    """LST-48: o admin autoriza o Google uma vez; a planilha recebe as tabelas prontas e acompanha cada publicação."""
+    import importlib
+    from urllib.parse import parse_qs
+
+    import httpx
+    from fastapi.testclient import TestClient
+
+    from tests.google_falso import GoogleFalso
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path))
+    monkeypatch.setenv("LASTRO_BANCO_URL", url_pg)
+    monkeypatch.setenv("LASTRO_OAUTH_GOOGLE_SHEETS_CLIENT_ID", "app-google")
+    monkeypatch.setenv("LASTRO_OAUTH_GOOGLE_SHEETS_CLIENT_SECRET", "segredo-google")
+    import lastro.api as modulo
+
+    modulo = importlib.reload(modulo)
+    g = GoogleFalso()
+    monkeypatch.setattr(modulo, "_cliente_oauth", lambda: httpx.Client(transport=g.transporte()))
+    t, _, _, did = _empresa_com_gold(banco_pg, carregar())
+    modulo.banco.criar_usuario(t, f"chefe@{t}", "Chefe", "admin", "senha-longa-de-teste")
+    c = TestClient(modulo.app)
+    adm = {"Authorization": "Bearer " + c.post("/api/login", json={"email": f"chefe@{t}", "senha": "senha-longa-de-teste"}).json()["token"]}
+    c.post("/api/bi/credencial", headers=adm)
+    assert c.get("/api/bi", headers=adm).json()["planilha"] == {"autorizada": False, "id": None, "url": None, "enviada_em": None}
+    assert c.post("/api/bi/planilha/enviar", headers=adm).status_code == 409  # sem autorização do Google
+
+    url = c.post("/api/bi/planilha/autorizar", headers=adm).json()["url"]
+    q = parse_qs(url.split("?", 1)[1])
+    assert url.startswith("https://accounts.google.com/o/oauth2/v2/auth?") and q["client_id"] == ["app-google"]
+    assert q["scope"] == ["https://www.googleapis.com/auth/drive.file"] and q["access_type"] == ["offline"]
+    r = c.get("/oauth/retorno", params={"code": "codigo", "state": q["state"][0]}, follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/?autorizado=planilha_bi"
+
+    estado = c.get("/api/bi", headers=adm).json()["planilha"]  # a volta da autorização já fez o primeiro envio
+    assert estado["autorizada"] and estado["id"] in g.planilhas and estado["url"].endswith("/edit") and estado["enviada_em"]
+    abas = g.planilhas[estado["id"]]["abas"]
+    painel = next(n for n in abas if n.startswith(f"painel_{did}_"))
+    valores = abas[painel]["valores"]
+    cab = valores[0]
+    i_valor, i_reg = cab.index("valor_vendido"), cab.index("registros")
+    with modulo.banco._dono() as con:
+        esquema = con.execute("SELECT nome FROM interno.bi_acessos WHERE tenant_id = %s", (t,)).fetchone()["nome"]
+        total, n = con.execute(f'SELECT round(sum(valor_vendido)::numeric, 2), count(*) FROM "{esquema}"."{painel}"').fetchone().values()
+    assert round(sum(v[i_valor] or 0 for v in valores[1:] if v[i_valor] != ""), 2) == float(total)
+    assert sum(v[i_reg] for v in valores[1:]) == n
+
+    pedidos_antes = len(g.pedidos)  # publicar de novo regrava a mesma planilha, sem criar outra
+    pub = c.post("/api/bi/publicar", headers=adm).json()
+    assert pub["planilha"]["planilha_id"] == estado["id"] and len(g.planilhas) == 1 and len(g.pedidos) > pedidos_antes
+
+    assert c.delete("/api/bi/planilha", headers=adm).json() == {"autorizada": False}
+    assert c.get("/api/bi", headers=adm).json()["planilha"]["autorizada"] is False
+    pub = c.post("/api/bi/publicar", headers=adm).json()
+    assert "planilha" not in pub  # desconectada: publicar não mexe mais na planilha
+    modulo.banco.fechar()

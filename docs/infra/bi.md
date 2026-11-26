@@ -70,6 +70,25 @@ O Power BI Desktop pode recusar o certificado do Supabase ("a cadeia de certific
 - baixe o certificado em **Supabase → Database → Settings → SSL Configuration → Download certificate** e importe no Windows em **Autoridades de Certificação Raiz Confiáveis**;
 - ou aceite a conexão sem criptografia quando o Power BI perguntar. Prefira a primeira.
 
+## Data Studio pela planilha Google, sem senha nem certificado (recomendado, LST-48)
+
+1. No portal, vá em **conta → Conectar ao BI → conectar minha conta Google**. O Google pede permissão só para "arquivos que você usar com este app" (`drive.file`). O Lastro não enxerga o resto do Drive.
+2. Na volta, o Lastro cria a planilha **Lastro · BI · <empresa>** no Drive do cliente, com uma aba `painel_…` por demanda aprovada e uma aba LEIA-ME.
+3. No Data Studio, use **Criar → Fonte de dados → Planilhas Google → a planilha → a aba**. Uma fonte de dados por aba. Some `registros` para contar.
+4. A cada publicação (aprovação, carga agendada, "publicar agora"), as abas `painel_…` são regravadas. Abas que o cliente criar ficam intactas. O botão **enviar agora** força uma atualização.
+
+Detalhes:
+- **Sem injeção de fórmula:** os valores são gravados com `RAW`, então um texto do cliente que começa com `=` continua texto.
+- **Tamanho:** cada aba tem o tamanho exato dos dados, porque célula vazia também conta no limite de 10 milhões de células do Google. Acima de ~9 milhões, a tabela fica de fora com aviso. Nesse caso, use o Power BI por HTTPS ou o Postgres.
+- **Planilha apagada:** se o cliente apagar a planilha, o próximo envio cria outra.
+- **Desconectar:** apaga a autorização do cofre. A planilha continua no Drive do cliente, que é dono dela.
+
+**Configuração única no Google Cloud** (o mesmo app OAuth do conector Google Sheets, `LASTRO_OAUTH_GOOGLE_SHEETS_CLIENT_ID` e `_CLIENT_SECRET` no Render):
+- Ative a **Google Sheets API** no projeto.
+- Na tela de consentimento, inclua o escopo `.../auth/drive.file`. Ele é não sensível e não exige verificação do Google.
+- Em "URIs de redirecionamento autorizados", cadastre `https://lastro-api-73zx.onrender.com/oauth/retorno` (ou o domínio próprio). O Lastro monta essa URL pelo endereço que recebeu o pedido.
+- Enquanto o app estiver em modo "Teste" no Google, só os e-mails cadastrados como testadores conseguem autorizar.
+
 ## Looker Studio, agora chamado Data Studio (gratuito)
 
 Passos conferidos na documentação oficial (`docs/infra/fontes/datastudio-connect-to-postgresql.txt`).

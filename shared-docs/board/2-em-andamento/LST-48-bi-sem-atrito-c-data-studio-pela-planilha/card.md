@@ -2,7 +2,7 @@
 chave: LST-48
 jira: https://adelecrm.atlassian.net/browse/LST-48
 secao: INT
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-backend
 ---
 

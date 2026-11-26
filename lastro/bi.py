@@ -214,7 +214,7 @@ class AcessoBI:
     def acesso(self, tenant: str) -> dict | None:
         with self.banco._dono() as con:
             r = con.execute("SELECT tenant_id, nome, ativo, criado_em, senha_trocada_em, publicado_em, tabelas, "
-                            "chave_hash IS NOT NULL AS chave_ativa, chave_criada_em, chave_usada_em "
+                            "chave_hash IS NOT NULL AS chave_ativa, chave_criada_em, chave_usada_em, planilha_id, planilha_enviada_em "
                             "FROM interno.bi_acessos WHERE tenant_id=%s", (tenant,)).fetchone()
         return dict(r) if r else None
 
@@ -312,6 +312,23 @@ class AcessoBI:
         with self.banco._dono() as con:
             return [r["tablename"] for r in con.execute(
                 "SELECT tablename FROM pg_tables WHERE schemaname = %s ORDER BY tablename", (esquema,))]
+
+    def linhas(self, esquema: str, tabela: str) -> tuple[list[str], list[tuple]]:
+        """Colunas e linhas de uma tabela publicada no BI da empresa (só tabela que existe no schema dela)."""
+        from psycopg import sql
+
+        if tabela not in self.tabelas_publicadas(esquema):
+            raise LookupError("tabela não publicada no BI desta empresa")
+        with self.banco._dono() as con:
+            cur = con.execute(sql.SQL("SELECT * FROM {}.{} LIMIT %s").format(sql.Identifier(esquema), sql.Identifier(tabela)),
+                              (LIMITE_LINHAS,))
+            cols = [d.name for d in cur.description]
+            return cols, [tuple(r[c] for c in cols) for r in cur.fetchall()]
+
+    def marcar_planilha(self, tenant: str, planilha_id: str | None) -> None:
+        with self.banco._dono() as con:
+            con.execute("UPDATE interno.bi_acessos SET planilha_id = %s, planilha_enviada_em = "
+                        "CASE WHEN %s::text IS NULL THEN NULL ELSE now() END WHERE tenant_id = %s", (planilha_id, planilha_id, tenant))
 
     def parquet(self, esquema: str, tabela: str) -> bytes:
         """A tabela publicada no BI da empresa, em Parquet. Lê do Postgres (o que foi publicado), não do disco:

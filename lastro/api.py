@@ -369,6 +369,10 @@ def _url_publica(request: Request) -> str:
 
 
 def _contrato_oauth(saas: str) -> dict:
+    from . import planilha_bi
+
+    if saas == planilha_bi.SAAS:  # destino do BI (LST-48), não é fonte: fica fora do catálogo de conectores
+        return planilha_bi.CONTRATO
     c = saas_servico.CAT.get(saas)
     if not c or c["auth"]["tipo"] != "oauth2_refresh":
         raise HTTPException(404, "sistema sem OAuth2 no catálogo")
@@ -380,7 +384,7 @@ def oauth_iniciar(saas: str, request: Request, s: Annotated[Sessao, Depends(sess
     _papel(s, {"admin"})
     contrato = _contrato_oauth(saas)
     try:
-        app_oauth = oauth.app_do_ambiente(saas, _url_publica(request))
+        app_oauth = oauth.app_do_ambiente(contrato.get("app_oauth", saas), _url_publica(request))
     except oauth.Credencial as e:
         raise HTTPException(409, str(e)) from e
     state = oauth.emitir_state(cfg.segredo, s.tenant, saas, s.email)
@@ -397,12 +401,17 @@ def oauth_retorno(request: Request, state: str = "", code: str = "", error: str 
         saas = carga["s"]
         contrato = _contrato_oauth(saas)
         with _cliente_oauth() as http:
-            tokens = oauth.trocar_codigo(contrato, oauth.app_do_ambiente(saas, _url_publica(request)), code, http)
+            tokens = oauth.trocar_codigo(contrato, oauth.app_do_ambiente(contrato.get("app_oauth", saas), _url_publica(request)), code, http)
         cofre.guardar(oauth.nome_no_cofre(carga["t"], saas), tokens.para_cofre())
     except (oauth.Credencial, HTTPException) as e:
         motivo = e.detail if isinstance(e, HTTPException) else str(e)
         return HTMLResponse(f"<p>Não foi possível concluir a autorização: {html.escape(str(motivo))}</p><p><a href='/'>voltar ao Lastro</a></p>", 400)
     banco.repo(carga["t"], carga["e"], "admin").registrar(carga["e"], "autorizou_conector", {"saas": saas})  # sem token
+    if saas == "planilha_bi":  # primeira carga da planilha já na volta da autorização (LST-48)
+        try:
+            _enviar_planilha(carga["t"], carga["e"])
+        except Exception as e:  # noqa: BLE001  (a autorização valeu; o envio aparece como erro na tela do BI)
+            log.warning("planilha do BI: primeiro envio falhou para %s: %s", carga["t"], type(e).__name__)
     return RedirectResponse("/?autorizado=" + saas, status_code=303)
 
 
@@ -544,6 +553,8 @@ def _republicar(tenant: str, repo: object, pasta: Path) -> None:
         acesso = bi.acesso(tenant)
         if acesso and acesso["ativo"]:
             bi.publicar(tenant, repo, pasta)
+            if _planilha_autorizada(tenant):  # LST-48: a planilha do Data Studio acompanha a aprovação e a carga
+                _enviar_planilha(tenant)
     except BIIndisponivel:
         return
     except Exception as e:  # noqa: BLE001
@@ -556,6 +567,9 @@ def _estado_bi(bi: AcessoBI, tenant: str) -> dict:
         return {"disponivel": True, "ligado": False}
     return {"disponivel": True, "ligado": a["ativo"], "conexao": bi.conexao(a["nome"]),
             "chave_ativa": a.get("chave_ativa", False),
+            "planilha": {"autorizada": bool(cofre.ler(oauth.nome_no_cofre(tenant, "planilha_bi"))), "id": a.get("planilha_id"),
+                         "url": f"https://docs.google.com/spreadsheets/d/{a['planilha_id']}/edit" if a.get("planilha_id") else None,
+                         "enviada_em": a["planilha_enviada_em"].isoformat() if a.get("planilha_enviada_em") else None},
             "chave_criada_em": a["chave_criada_em"].isoformat() if a.get("chave_criada_em") else None,
             "chave_usada_em": a["chave_usada_em"].isoformat() if a.get("chave_usada_em") else None,
             "senha_trocada_em": a["senha_trocada_em"].isoformat(),
@@ -594,6 +608,11 @@ def publicar_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, 
     except BIIndisponivel as e:
         raise HTTPException(409, str(e)) from e
     p.repo.registrar(s.email, "publicou_bi", {"tabelas": len(r["tabelas"]), "avisos": r["avisos"]})
+    if _planilha_autorizada(s.tenant):  # a planilha do Data Studio acompanha cada publicação (LST-48)
+        try:
+            r["planilha"] = _enviar_planilha(s.tenant, s.email)
+        except Exception as e:  # noqa: BLE001
+            r["avisos"] = [*r["avisos"], f"planilha Google não foi atualizada: {e}"]
     return r
 
 
@@ -655,6 +674,72 @@ def bi_https_tabela(tabela: str, x_lastro_chave: Annotated[str | None, Header()]
         raise HTTPException(404, str(e)) from e
     return Response(dados, media_type="application/vnd.apache.parquet",
                     headers={"Content-Disposition": f'attachment; filename="{tabela}.parquet"', "Cache-Control": "no-store"})
+
+
+# ---- BI sem atrito C (LST-48): tabelas prontas numa planilha Google do cliente, para o Data Studio ----------
+
+def _enviar_planilha(tenant: str, email: str = "lastro") -> dict:
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    from . import planilha_bi
+
+    bi = _bi()
+    a = bi.acesso(tenant)
+    if not a or not a["ativo"]:
+        raise BIIndisponivel("ligue o BI da empresa antes de enviar para a planilha")
+    http = _cliente_oauth()
+    try:
+        g = oauth.GerenteToken(planilha_bi.CONTRATO, oauth.app_do_ambiente(planilha_bi.CONTRATO["app_oauth"], ""),
+                               cofre, tenant, planilha_bi.SAAS, http)
+
+        def token(forcar: bool = False) -> str:
+            if forcar:
+                g.forcar_renovacao()
+            return g.token()
+
+        tabelas = {t: bi.linhas(a["nome"], t) for t in bi.tabelas_publicadas(a["nome"]) if t.startswith(planilha_bi.PREFIXO)}
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M")
+        r = planilha_bi.enviar(planilha_bi.Planilha(http, token), tabelas, a.get("planilha_id"), f"Lastro · BI · {tenant}", agora)
+    finally:
+        http.close()
+    bi.marcar_planilha(tenant, r["planilha_id"])
+    banco.repo(tenant, email, "admin").registrar(email, "enviou_planilha_bi", {"abas": len(r["abas"]), "avisos": r["avisos"]})
+    return r
+
+
+def _planilha_autorizada(tenant: str) -> bool:
+    return bool(cofre.ler(oauth.nome_no_cofre(tenant, "planilha_bi")))
+
+
+@app.post("/api/bi/planilha/autorizar")
+def autorizar_planilha(request: Request, s: Annotated[Sessao, Depends(sessao)]) -> dict:
+    """URL do consentimento do Google (escopo drive.file: só a planilha que o Lastro criar)."""
+    _papel(s, {"admin"})
+    return oauth_iniciar("planilha_bi", request, s)
+
+
+@app.post("/api/bi/planilha/enviar")
+def enviar_planilha(s: Annotated[Sessao, Depends(sessao)]) -> dict:
+    from . import planilha_bi
+
+    _papel(s, {"admin"})
+    try:
+        return _enviar_planilha(s.tenant, s.email)
+    except (BIIndisponivel, oauth.Credencial) as e:
+        raise HTTPException(409, str(e)) from e
+    except planilha_bi.ErroPlanilha as e:
+        raise HTTPException(502, str(e)) from e
+
+
+@app.delete("/api/bi/planilha")
+def desconectar_planilha(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    """Esquece a autorização e a planilha. A planilha continua no Drive do cliente (é dele)."""
+    _papel(s, {"admin"})
+    cofre.guardar(oauth.nome_no_cofre(s.tenant, "planilha_bi"), "")
+    _bi().marcar_planilha(s.tenant, None)
+    p.repo.registrar(s.email, "desconectou_planilha_bi", {})
+    return {"autorizada": False}
 
 
 @app.delete("/api/bi/credencial")
