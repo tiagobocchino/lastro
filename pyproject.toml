@@ -20,6 +20,8 @@ dependencies = [
 dev = ["pytest>=8", "jsonschema>=4.23"]
 vetores = ["fastembed>=0.4"]
 postgres = ["psycopg[binary]>=3.2", "psycopg-pool>=3.2"]
+# LST-54: relatórios Python rápidos (Streamlit) com agente LangChain e LLM gratuita (Gemini do AI Studio)
+rapido = ["streamlit>=1.40", "plotly>=5.24", "langchain-core>=0.3", "langchain-google-genai>=2.0"]
 
 [project.scripts]
 lastro = "lastro.cli:main"
