@@ -69,3 +69,9 @@ Gabarito × agentes sem diferença inexplicada, PBIP aberto no Power BI Desktop 
   - valor em texto `R$ …`;
   - painel somando o nº do processo.
 - **Fase 2, BI (25/11):** empresa `gimi-teste` criada em produção, com um usuário robô admin (senha fora do repositório). Fontes, demandas 7 a 10, aprovação e publicação passaram pela API do produto. São 38 tabelas no BI. Os totais conferidos no Postgres batem com o gabarito. Painel do RH falhou: "o gold não tem coluna numérica para medir" (achado 3). Kit com PBIP, HTML e consultas do Data Studio entregue ao Tiago.
+
+## 26/11: empresas com nomes fictícios
+
+- No simulador, as empresas viraram alfa, beta, gama e delta; os totais continuam iguais (2cbcb46).
+- No BI da gimi-teste em produção, a troca foi feita direto no banco, a pedido do Tiago.
+- Publicar o BI de novo volta os nomes antigos até a base ser recarregada pelo simulador atual. Ver `docs/memory/gimi-teste-nomes-no-banco.md`.

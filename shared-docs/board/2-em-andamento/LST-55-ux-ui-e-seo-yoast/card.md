@@ -58,3 +58,10 @@ especialista: engenheiro-frontend
 - Ranking: **top 10 + "outros"**, com o % do total de cada linha.
 - Painel HTML: **com filtros interativos** (empresa, região, ano) dentro do próprio arquivo.
 - Ordem: **painel HTML e Streamlit juntos**, com a mesma estrutura: filtros → 4 cartões → gráfico principal → ranking → tabela de conferência.
+
+## Pronto para fechar (26/11)
+
+- Todos os critérios de aceite estão marcados.
+- Lighthouse no ar depois das imagens em WebP: site 100/100/100/100 no celular, com 184 KB no total.
+- Ajuste de texto pedido pelo Tiago na seção [05] do site: "mapeado em operação real" (d61646c).
+- **Falta:** o "ok" do Tiago para mover o card para Feito.

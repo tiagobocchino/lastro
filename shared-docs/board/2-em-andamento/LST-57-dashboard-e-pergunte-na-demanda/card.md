@@ -51,4 +51,10 @@ especialista: engenheiro-frontend
   - A imagem do Render ganhou o extra `llm` (LangChain e Gemini, sem Streamlit).
 - **Ticket 3.** `GET`, `PUT` e `DELETE /api/conta/llm`: só o admin cadastra; a chave fica no cofre e nunca volta para a tela. Na aba conta, a seção "Modelo de IA do Pergunte" mostra o aviso de padrão não garantido.
 - **Testes:** `test_dashboard_na_demanda_previa_so_para_o_revisor` e `test_pergunte_na_demanda_com_a_chave_do_lastro_ou_do_cliente`, com a LLM espiã. A suíte tem 364 testes passando.
-- **Falta (Tiago):** pôr `GOOGLE_API_KEY` no Render (a chave do Lastro) e validar no ar.
+- **Teste em produção (26/11), demanda 24 da demo, todos os passos ok:** abrir, perguntas, rodar (9 s, 14.030.477,92, auditoria aprovada), prévia bloqueada para quem demandou e liberada para o revisor, aprovar, dashboard com filtros e "Pergunte" (2 s).
+- **Uso real por 2 testadores:**
+  - O designer do painel recusava pedidos simples, e um clique duplo criava visuais repetidos.
+  - Corrigido em 423790f: medida sem agregação, gráfico sem tipo, remover pelo nome, recusa de visual repetido e botões travados durante o pedido.
+  - As medidas calculadas que eles pediram foram para o LST-58.
+- **Erros dos testadores:** ficam registrados em `interno.erros_api` (8e49fd1). Depois de 13h38 de 26/11, nenhum erro novo.
+- **Falta (Tiago):** pôr `GOOGLE_API_KEY` no Render (hoje o "Pergunte" do portal interpreta só por palavras-chave) e validar no ar.
