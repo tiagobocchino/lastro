@@ -38,10 +38,15 @@ TIPOS = {  # DuckDB → Postgres; o que não estiver aqui vai como texto
 }
 
 
+def normalizar_chave(chave: str) -> str:
+    """Espaço nas pontas e maiúscula não contam: o HTTP corta espaços do cabeçalho e o usuário digita a chave à mão."""
+    return (chave or "").strip().lower()
+
+
 def hash_chave(chave: str) -> str:
     import hashlib
 
-    return hashlib.sha256(chave.encode()).hexdigest()
+    return hashlib.sha256(normalizar_chave(chave).encode()).hexdigest()
 
 
 class BIIndisponivel(RuntimeError):
@@ -275,7 +280,7 @@ class AcessoBI:
         atual = self.acesso(tenant)
         if not atual or not atual["ativo"]:
             raise BIIndisponivel("ligue o BI da empresa antes de gerar a chave de leitura")
-        chave = f"lst_{secrets.token_urlsafe(32)}"
+        chave = f"lst_{secrets.token_hex(24)}"  # só minúsculas e números: nada se perde ao copiar ou digitar
         with self.banco._dono() as con:
             con.execute("UPDATE interno.bi_acessos SET chave_hash = %s, chave_criada_em = now(), chave_usada_em = NULL "
                         "WHERE tenant_id = %s", (hash_chave(chave), tenant))
@@ -285,13 +290,19 @@ class AcessoBI:
         with self.banco._dono() as con:
             con.execute("UPDATE interno.bi_acessos SET chave_hash = NULL, chave_criada_em = NULL WHERE tenant_id = %s", (tenant,))
 
-    def pela_chave(self, chave: str) -> dict | None:
-        """Empresa e schema donos da chave, se ela vale (BI ligado). Busca pelo hash: a chave nunca é comparada em claro."""
-        if not chave or not chave.startswith("lst_") or len(chave) > 100:
-            return None
+    def pela_chave(self, chave: str | None, agente: str = "") -> dict | None:
+        """Empresa e schema donos da chave, se ela vale (BI ligado). Busca pelo hash: a chave nunca é comparada em claro.
+        Recusa grava só o motivo (nunca a chave), para o suporte saber se faltou cabeçalho ou a chave não confere."""
+        c = normalizar_chave(chave or "")
+        motivo = "sem_cabecalho" if not c else "prefixo" if not c.startswith("lst_") or len(c) > 100 else None
+        r = None
         with self.banco._dono() as con:
-            r = con.execute("UPDATE interno.bi_acessos SET chave_usada_em = now() WHERE chave_hash = %s AND ativo "
-                            "RETURNING tenant_id, nome", (hash_chave(chave),)).fetchone()
+            if not motivo:
+                r = con.execute("UPDATE interno.bi_acessos SET chave_usada_em = now() WHERE chave_hash = %s AND ativo "
+                                "RETURNING tenant_id, nome", (hash_chave(c),)).fetchone()
+                motivo = None if r else "desconhecida"
+            if motivo:
+                con.execute("INSERT INTO interno.bi_recusas (motivo, agente) VALUES (%s, %s)", (motivo, (agente or "")[:120]))
         return dict(r) if r else None
 
     def tabelas_publicadas(self, esquema: str) -> list[str]:

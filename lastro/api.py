@@ -621,12 +621,12 @@ def revogar_chave_bi(s: Annotated[Sessao, Depends(sessao)], p: Annotated[Platafo
 CABECALHO_CHAVE = "X-Lastro-Chave"
 
 
-def _pela_chave(chave: str | None) -> tuple[AcessoBI, dict]:
+def _pela_chave(chave: str | None, agente: str | None = None) -> tuple[AcessoBI, dict]:
     try:
         bi = _bi()
     except HTTPException:
         raise HTTPException(404, "BI por HTTPS indisponível neste servidor") from None
-    dono = bi.pela_chave(chave or "")
+    dono = bi.pela_chave(chave or "", agente or "")
     if not dono:
         raise HTTPException(401, f"chave de leitura ausente ou inválida (cabeçalho {CABECALHO_CHAVE})")
     return bi, dono
@@ -639,14 +639,16 @@ def bi_https_raiz() -> Response:
 
 
 @app.get("/bi/v1/tabelas")
-def bi_https_tabelas(x_lastro_chave: Annotated[str | None, Header()] = None) -> dict:
-    bi, dono = _pela_chave(x_lastro_chave)
+def bi_https_tabelas(x_lastro_chave: Annotated[str | None, Header()] = None,
+                     user_agent: Annotated[str | None, Header()] = None) -> dict:
+    bi, dono = _pela_chave(x_lastro_chave, user_agent)
     return {"tabelas": bi.tabelas_publicadas(dono["nome"])}
 
 
 @app.get("/bi/v1/{tabela}.parquet")
-def bi_https_tabela(tabela: str, x_lastro_chave: Annotated[str | None, Header()] = None) -> Response:
-    bi, dono = _pela_chave(x_lastro_chave)
+def bi_https_tabela(tabela: str, x_lastro_chave: Annotated[str | None, Header()] = None,
+                    user_agent: Annotated[str | None, Header()] = None) -> Response:
+    bi, dono = _pela_chave(x_lastro_chave, user_agent)
     try:
         dados = bi.parquet(dono["nome"], tabela)
     except LookupError as e:

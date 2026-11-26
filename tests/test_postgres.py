@@ -644,6 +644,12 @@ def test_bi_por_https_com_chave_de_leitura(url_pg, monkeypatch, tmp_path: Path):
     assert c.get("/bi/v1/tabelas").status_code == 401
     assert c.get("/bi/v1/fonte_orcamentos.parquet", headers={"X-Lastro-Chave": "lst_inventada"}).status_code == 401
     assert c.get("/bi/v1/tabelas", headers={"X-Lastro-Chave": chave1}).json() == {"tabelas": ["fonte_orcamentos"]}
+    # tolerância: espaço nas pontas e maiúsculas não contam (o usuário digita a chave à mão no Power BI)
+    assert c.get("/bi/v1/tabelas", headers={"X-Lastro-Chave": "  " + chave1.upper() + " "}).status_code == 200
+    # recusa guarda só o motivo, nunca a chave
+    with modulo.banco._dono() as con:
+        motivos = [r["motivo"] for r in con.execute("SELECT motivo FROM interno.bi_recusas ORDER BY id DESC LIMIT 3")]
+    assert motivos == ["desconhecida", "sem_cabecalho"] or set(motivos) >= {"desconhecida", "sem_cabecalho"}
     resp = c.get("/bi/v1/fonte_orcamentos.parquet", headers={"X-Lastro-Chave": chave1})
     assert resp.status_code == 200 and resp.headers["content-type"] == "application/vnd.apache.parquet"
     arq = tmp_path / "baixado.parquet"
