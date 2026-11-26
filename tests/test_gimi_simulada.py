@@ -24,13 +24,13 @@ def test_reprodutivel_pela_semente(base):
 
 
 def test_formato_bruto_e_sujeiras(base):
-    assert set(base) == {"gimi", "gbl", "gpb", "filial"}
-    c = base["gimi"]["contratos"][0]
+    assert set(base) == {"alfa", "beta", "gama", "delta"}
+    c = base["alfa"]["contratos"][0]
     assert {"id", "numero", "data_criacao", "status", "cliente", "projeto", "vendedor", "grupo", "valores", "produtos"} <= set(c)
     assert isinstance(c["produtos"], list) and {"produto", "quantidade", "valores"} <= set(c["produtos"][0])  # aninhado, como na IApp
     s = gimi.gabarito(base)["sujeiras"]
     assert all(v > 0 for v in s.values()), s  # teste, antes do corte, valor zero e repetidos estão lá
-    nomes = {v["nome"] for v in base["gimi"]["vendedores"]}
+    nomes = {v["nome"] for v in base["alfa"]["vendedores"]}
     assert any(" - (" in n for n in nomes) and any("_" in n for n in nomes)
 
 
@@ -53,19 +53,19 @@ def test_gabarito_fecha_as_contas(base):
 
 
 def test_api_simulada_entrega_pelo_conector_com_paginacao_real(base):
-    sim = Simulador("iapp", dados_base=base["gimi"])
+    sim = Simulador("iapp", dados_base=base["alfa"])
     leitor = Leitor("iapp", {"token": "t", "secret": "s"}, cliente=httpx.Client(transport=sim.transporte()), relogio=sim.relogio)
     ext = leitor.extrair("contratos")
-    assert len(ext.registros) == len(base["gimi"]["contratos"])  # repetidos chegam: deduplicar é trabalho da silver
+    assert len(ext.registros) == len(base["alfa"]["contratos"])  # repetidos chegam: deduplicar é trabalho da silver
     assert leitor.chamadas >= len(ext.registros) // 50  # páginas de 50 (o "offset" da IApp é o tamanho da página)
-    assert ext.registros[0]["produtos"][0]["produto"]["codigo"] == base["gimi"]["contratos"][0]["produtos"][0]["produto"]["codigo"]
+    assert ext.registros[0]["produtos"][0]["produto"]["codigo"] == base["alfa"]["contratos"][0]["produtos"][0]["produto"]["codigo"]
     for ent in ("funcionarios", "vendedores", "grupos", "tarefas", "usuarios", "clientes"):
-        assert len(leitor.extrair(ent).registros) == len(base["gimi"][ent])
+        assert len(leitor.extrair(ent).registros) == len(base["alfa"][ent])
 
 
 def test_exportar(base, tmp_path):
     cont = gimi.exportar(base, tmp_path)
-    assert cont["gimi/contratos"] == len(base["gimi"]["contratos"])
+    assert cont["alfa/contratos"] == len(base["alfa"]["contratos"])
     assert {p.name for p in tmp_path.iterdir()} >= {"bruto", "contratos.csv", "itens.csv", "funcionarios.csv", "gabarito.json"}
 
 
@@ -74,7 +74,7 @@ def test_geografia_no_contrato_sem_mudar_os_totais():
     base = gimi.gerar(36, 3000)
     g = gimi.gabarito(base)
     assert (g["vendido_total"], g["orcado_total"]) == (211290267.16, 532781125.76)  # os mesmos de antes da geografia
-    c = base["gimi"]["contratos"][0]
+    c = base["alfa"]["contratos"][0]
     assert {"cidade", "estado", "regiao"} <= set(c["cliente"]) and {"cidade", "estado", "regiao"} <= set(c["projeto"])
     planos = gimi.contratos_planos(base)
     ok = planos.dropna(subset=["projeto_estado"])

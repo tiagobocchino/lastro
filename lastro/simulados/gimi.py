@@ -24,7 +24,9 @@ from typing import Any
 
 import pandas as pd
 
-EMPRESAS = {"gimi": 687, "gbl": 688, "gpb": 689, "filial": 1256}
+# Nomes fictícios (26/11, pedido do Tiago): os códigos reais das empresas não aparecem nos relatórios de demonstração.
+# Os ids continuam os mesmos e o nome não entra no sorteio: os totais da base não mudam.
+EMPRESAS = {"alfa": 687, "beta": 688, "gama": 689, "delta": 1256}
 CORTE = "2024-01-01"
 INICIO, FIM = date(2023, 7, 1), date(2026, 10, 31)
 STATUS = ["Orçado", "Em negociação", "Aprovado", "Perdido"]
