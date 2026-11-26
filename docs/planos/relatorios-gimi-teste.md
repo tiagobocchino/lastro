@@ -33,6 +33,10 @@
 
 ## Decisões pendentes com o Tiago
 
-1. **LLM do agente:** qual provedor e chave usar. A chave fica no Render ou nos secrets do Streamlit, nunca no repositório nem no chat.
+1. **LLM do agente (decidido em 26/11): gratuita.** "Claude não é gratuito; vamos usar uma LLM gratuita, mesmo que limitada" (regra 5, grátis por padrão).
+   - **Padrão:** Gemini Flash no nível gratuito do Google AI Studio (`langchain-google-genai`).
+   - **Plano B:** Groq gratuito (Llama).
+   - No nível gratuito o provedor pode usar o que recebe, então o agente manda só a pergunta e os nomes das colunas, nunca linhas de dados. Os números saem do SQL do Lastro.
+   - A chave fica nos secrets do Streamlit e no Render.
 2. **Hospedagem do Streamlit:** Community Cloud exige login com GitHub e o deploy feito pelo Tiago.
 3. **Referência visual da GIMI:** usar a estrutura das páginas dos relatórios GIMI do Tiago (Relatório 0 analítico, 5 performance da carteira), só a estrutura, sem dado.
