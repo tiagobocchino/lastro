@@ -89,6 +89,76 @@ def catalogo(con: duckdb.DuckDBPyConnection) -> dict[str, dict[str, Any]]:
     return cat
 
 
+# ---- indicadores (aba "Indicadores", mesmo padrão do painel de entrega: LST-55) -------------------------------------
+
+ANO_SQL = "CAST(substr(ano_mes, 1, 4) AS INTEGER)"
+MES_SQL = "CAST(substr(ano_mes, 6, 2) AS INTEGER)"
+ORDEM_RANKING = ("setor_nome", "_estado", "_regiao", "company")
+
+
+def onde(filtros: dict[str, list[Any]]) -> tuple[str, list[Any]]:
+    """WHERE dos filtros escolhidos. "ano" sai do ano_mes; os demais são colunas permitidas da tabela."""
+    partes, params = [], []
+    for col, valores in filtros.items():
+        if not valores:
+            continue
+        if col != "ano" and not DIMENSAO_PERMITIDA.match(col):
+            raise PlanoInvalido(f"filtro '{col}' não é permitido")
+        alvo = ANO_SQL if col == "ano" else f'"{col}"'
+        partes.append(f"{alvo} IN ({', '.join('?' * len(valores))})")
+        params += list(valores)
+    return (" WHERE " + " AND ".join(partes)) if partes else "", params
+
+
+def _valor(medida: str | None) -> str:
+    return f'sum("{medida}")' if medida else "sum(registros)"
+
+
+def resumo(con: duckdb.DuckDBPyConnection, tabela: str, medida: str | None, filtros: dict[str, list[Any]]) -> dict[str, Any]:
+    """Total, registros, média e o mesmo período do ano anterior (jan até o último mês com dado; grill de 26/11)."""
+    w, p = onde(filtros)
+    total, regs = con.execute(f'SELECT {_valor(medida)}, sum(registros) FROM "{tabela}"{w}', p).fetchall()[0]
+    out: dict[str, Any] = {"total": total or 0, "registros": regs or 0,
+                           "media": (total / regs) if medida and regs else None, "comparacao": None}
+    if "ano_mes" in {r[0] for r in con.execute(f'DESCRIBE "{tabela}"').fetchall()}:
+        e = (" AND " + w.removeprefix(" WHERE ")) if w else ""
+        ult = con.execute(f'SELECT max(ano_mes) FROM "{tabela}" WHERE ano_mes IS NOT NULL{e}', p).fetchall()[0][0]
+        if ult:
+            ano, mes = int(ult[:4]), int(ult[5:7])
+            soma = f'SELECT {_valor(medida)}, count(*) FROM "{tabela}" WHERE {ANO_SQL} = ? AND {MES_SQL} <= ?{e}'
+            atual = con.execute(soma, [ano, mes, *p]).fetchall()[0][0]
+            base, n_base = con.execute(soma, [ano - 1, mes, *p]).fetchall()[0]
+            base = base if n_base else None
+            out["comparacao"] = {"ano": ano, "mes": mes, "atual": atual or 0, "anterior": base,
+                                 "variacao": (atual / base - 1) if atual is not None and base else None}
+    return out
+
+
+def dimensao_do_ranking(dims: list[str]) -> str | None:
+    for chave in ORDEM_RANKING:
+        achou = next((d for d in dims if d == chave or (chave.startswith("_") and d.endswith(chave))), None)
+        if achou:
+            return achou
+    return None
+
+
+def ranking(con: duckdb.DuckDBPyConnection, tabela: str, dim: str, medida: str | None, filtros: dict[str, list[Any]],
+            top: int = 10) -> tuple[list[tuple[str, float, float | None]], list[tuple[str, float, int, float | None]]]:
+    """Top N + "outros" com o % do total, e o detalhe completo (para a tabela de conferência)."""
+    if not DIMENSAO_PERMITIDA.match(dim):
+        raise PlanoInvalido(f"dimensão '{dim}' não é permitida")
+    w, p = onde(filtros)
+    linhas = con.execute(f'SELECT coalesce(CAST("{dim}" AS VARCHAR), \'(vazio)\'), {_valor(medida)} AS v, sum(registros) '
+                         f'FROM "{tabela}"{w} GROUP BY 1 ORDER BY 2 DESC NULLS LAST', p).fetchall()
+    total = sum(v or 0 for _, v, _ in linhas)
+    detalhe = [(k, v or 0, int(r or 0), (v / total) if total and v is not None else None) for k, v, r in linhas]
+    topo = [(k, v, f) for k, v, _, f in detalhe[:top]]
+    if len(detalhe) > top:
+        resto = sum(v for _, v, _, _ in detalhe[top:])
+        topo.append((f"outros ({len(detalhe) - top})", resto, (resto / total) if total else None))
+    return topo, detalhe
+
+
 # ---- plano ------------------------------------------------------------------------------------------------------
 
 @dataclass

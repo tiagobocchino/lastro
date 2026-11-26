@@ -99,7 +99,54 @@ def test_html_estatico_com_os_numeros_do_gold(demanda):
     d, gold = demanda
     h = paineis.html_painel(paineis.inicial(d, gold), gold, "25/11/2026 12:00")
     assert "14.030.477,92" in h and "Eva Martins" in h and "<polyline" in h and "versão 1" in h
-    assert "<script" not in h  # HTML estático, sem código
+    # LST-55: um arquivo só, sem biblioteca externa: filtros pelo cubo embutido, números já desenhados sem script
+    assert 'id="filtros" hidden' in h and 'type="application/json" id="dados"' in h and "<script src" not in h
+    assert "% do total" in h and "18,3%" in h and "<tfoot>" in h
+
+
+def test_cartoes_e_filtros_conferem_com_o_gold(demanda):
+    """As contas do painel (as mesmas que o script refaz ao filtrar) batem com SQL direto no gold."""
+    import duckdb
+
+    from lastro import painel_html
+
+    d, gold = demanda
+    spec = paineis.inicial(d, gold)
+    c = painel_html.cubo(spec, gold)
+    k = painel_html.contas(spec, c)
+    assert k["total"] == pytest.approx(TOTAL_AUDITADO, abs=0.01) and k["v4"]["total"] == pytest.approx(TOTAL_AUDITADO, abs=0.01)
+    assert sum(x[2] for x in k["v4"]["linhas"]) == pytest.approx(1)
+    fato, dim = gold / "fato.parquet", gold / "dim_vendedor.parquet"
+    con = duckdb.connect()  # conexão própria: a padrão do duckdb é do processo inteiro
+    for f in [x for x in c["filtros"] if x != "ano"]:
+        valor = c["valores"][f][0]
+        kf = painel_html.contas(spec, c, {f: valor})
+        sql = (f"SELECT sum(valor_vendido), count(*) FROM read_parquet('{fato}') JOIN read_parquet('{gold / f'dim_{f}.parquet'}') "
+               f"USING ({f}_id) WHERE {f} = ?")
+        total, regs = con.execute(sql, [valor]).fetchall()[0]
+        assert kf["total"] == pytest.approx(total, abs=0.01) and kf["registros"] == regs
+    comp = k["comparacao"]  # mesmo período do ano anterior (grill do Tiago, 26/11)
+    base = con.execute(f"SELECT sum(valor_vendido) FROM read_parquet('{fato}') WHERE year(data) = ? AND month(data) <= ?",
+                       [comp["ano"] - 1, comp["mes"]]).fetchall()[0][0]
+    con.close()
+    assert comp["anterior"] == pytest.approx(base, abs=0.01)
+    assert dim.exists()
+
+
+def test_ranking_mostra_top_10_e_outros(demanda, tmp_path):
+    from lastro import painel_html
+
+    d, gold = demanda
+    spec = paineis.inicial(d, gold)
+    v2 = next(v for v in spec["visuais"] if v["tipo"] == "barras")
+    c = painel_html.cubo(spec, gold)
+    ix = c["colunas"].index(v2["eixo"])
+    for i, linha in enumerate(c["linhas"]):  # 14 vendedores fictícios: cada linha do cubo com um nome próprio
+        linha[ix] = f"vendedor {i % 14:02d}"
+    k = painel_html.contas(spec, c)
+    nomes = [x[0] for x in k[v2["id"]]["linhas"]]
+    assert len(nomes) == 11 and nomes[-1] == "outros (4)"
+    assert sum(x[1] for x in k[v2["id"]]["linhas"]) == pytest.approx(TOTAL_AUDITADO, abs=0.01)
 
 
 def _registro():

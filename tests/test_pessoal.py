@@ -94,7 +94,8 @@ def test_visitante_avisado_e_colunas_pessoais_fora_do_painel(api):
     assert any("cliente_doc" in a and "CPF" in a for a in s["avisos"]) and any("contato" in a and "e-mail" in a for a in s["avisos"])
     opcoes = [o for q in s["perguntas"] for o in q["opcoes"]]
     assert "cliente_doc" not in opcoes and "contato" not in opcoes and "regiao" in opcoes
-    for formato in ("tabela",):
+    for formato in ("tabela", "ranking (barras)", "evolução no tempo", "só o número"):  # o cubo dos filtros vai embutido no HTML (LST-55)
+        s = c.post("/api/demo/sessoes", files={"arquivo": ("clientes.csv", _planilha())}).json()
         p = c.post(f"/api/demo/sessoes/{s['sessao']}/painel", json={"respostas": {"demo:formato": formato}}).json()
         assert "regiao" in p["html"].lower() or "Norte" in p["html"]
         assert CPFS[0] not in p["html"] and "cliente0@gmail.com" not in p["html"]  # nenhum valor pessoal no painel

@@ -41,5 +41,17 @@ especialista: engenheiro-frontend
   - o rastro aparece em "chave: valor", não em JSON;
   - a página caiu de 4.300 px para 2.700 px no desktop e de 6.500 px para 3.800 px no celular.
 - Manual do Streamlit Cloud para o Tiago: `docs/infra/streamlit.md`.
-- Falta: layout novo dos dashboards (seção 4 da auditoria, pede grill) e Lighthouse no ar depois do deploy.
+- Layout novo dos dashboards, conforme o grill:
+  - painel HTML: `lastro/painel_html.py`, com cubo embutido, filtros, 4 cartões, gráfico principal, ranking top 10 + outros e conferência com total; funciona sem JavaScript;
+  - Streamlit: `nucleo.resumo` e `nucleo.ranking`, com a mesma estrutura;
+  - testes conferem os números contra SQL direto no gold;
+  - capturas em `docs/ux/capturas/painel-novo/`.
+- Falta: Lighthouse do site e do portal no ar, depois do deploy.
 - Confirmado pelo Tiago (26/11): "desde 2019" fica no texto e a lixum.labs é a Organization do JSON-LD.
+
+## Grill do layout dos dashboards (26/11, respondido pelo Tiago)
+
+- Comparação dos cartões: **mesmo período do ano anterior**, de janeiro até o último mês com dado (igual ao Power BI de entrega).
+- Ranking: **top 10 + "outros"**, com o % do total de cada linha.
+- Painel HTML: **com filtros interativos** (empresa, região, ano) dentro do próprio arquivo.
+- Ordem: **painel HTML e Streamlit juntos**, com a mesma estrutura: filtros → 4 cartões → gráfico principal → ranking → tabela de conferência.

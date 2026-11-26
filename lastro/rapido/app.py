@@ -73,43 +73,62 @@ if not cat:
 
 aba_kpi, aba_agente = st.tabs(["Indicadores", "Pergunte"])
 
+MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+
 with aba_kpi:
-    tabela = st.selectbox("Relatório", list(cat), format_func=lambda t: cat[t]["assunto"])
-    c = cat[tabela]
-    medida = c["medidas"][0] if c["medidas"] else None
-    filtros = [d for d in c["dimensoes"] if d in ("company",) or d.endswith("_regiao")]
-    where, params = [], []
-    cols_f = st.columns(max(len(filtros), 1))
-    for col, d in zip(cols_f, filtros, strict=False):
-        valores = [r[0] for r in con.execute(f'SELECT DISTINCT "{d}" FROM "{tabela}" WHERE "{d}" IS NOT NULL ORDER BY 1').fetchall()]
-        escolha = col.multiselect(n.nome(d).capitalize(), valores, placeholder="todas")
-        if escolha:
-            where.append(f'"{d}" IN ({", ".join("?" * len(escolha))})')
-            params += escolha
-    filtro_sql = (" WHERE " + " AND ".join(where)) if where else ""
-    total = con.execute(f'SELECT {"sum(" + chr(34) + medida + chr(34) + ")" if medida else "0"}, sum(registros) FROM "{tabela}"{filtro_sql}', params).fetchone()
-    k1, k2, k3 = st.columns(3)
-    if medida:
-        k1.metric(rotulo_total(n.nome(medida)), br(total[0] or 0))
-        k3.metric("Média por registro", br((total[0] or 0) / (total[1] or 1)))
-    k2.metric("Registros", br(total[1] or 0, 0))
-    valor_sql = f'sum("{medida}")' if medida else "sum(registros)"
+    # Mesmo esqueleto do painel de entrega (LST-55): filtros → 4 cartões → gráfico principal + ranking → conferência
+    with st.container(border=True):
+        tabela = st.selectbox("Relatório", list(cat), format_func=lambda t: cat[t]["assunto"])
+        c = cat[tabela]
+        medida = c["medidas"][0] if c["medidas"] else None
+        nomes_f = [d for d in c["dimensoes"] if d == "company" or d.endswith("_regiao")] + (["ano"] if "ano_mes" in c["dimensoes"] else [])
+        filtros: dict[str, list] = {}
+        if nomes_f:
+            cols_f = st.columns(len(nomes_f))
+            for col, d in zip(cols_f, nomes_f, strict=True):
+                expr = n.ANO_SQL if d == "ano" else f'"{d}"'
+                cond = "ano_mes IS NOT NULL" if d == "ano" else f'"{d}" IS NOT NULL'
+                valores = [r[0] for r in con.execute(f'SELECT DISTINCT {expr} FROM "{tabela}" WHERE {cond} ORDER BY 1').fetchall()]
+                filtros[d] = col.multiselect("Ano" if d == "ano" else n.nome(d).capitalize(), valores, placeholder="todos" if d == "ano" else "todas")
     medida_nome = n.nome(medida).capitalize() if medida else "Registros"
-    g1, g2 = st.columns([3, 2])
+    r = n.resumo(con, tabela, medida, filtros)
+    k = st.columns(4)
+    k[0].metric(rotulo_total(n.nome(medida)) if medida else "Registros", br(r["total"], 2 if medida else 0), border=True)
+    k[1].metric("Registros", br(r["registros"], 0), border=True)
+    k[2].metric("Média por registro", br(r["media"]) if r["media"] is not None else "—", border=True)
+    comp = r["comparacao"]
+    if comp:
+        var = comp["variacao"]
+        base = f"{comp['ano'] - 1}: {br(comp['anterior'])}" if comp["anterior"] is not None else f"sem dados de {comp['ano'] - 1}"
+        k[3].metric(f"{comp['ano']} até {MESES[comp['mes'] - 1]} vs mesmo período", br(comp["atual"], 2 if medida else 0),
+                    delta=(f"{var * 100:+.1f}%".replace(".", ",") if var is not None else None), border=True)
+        k[3].caption(base)
+    g1, g2 = st.columns([2, 1])
+    valor_sql = f'sum("{medida}")' if medida else "sum(registros)"
     if "ano_mes" in c["dimensoes"]:
-        df = con.execute(f'SELECT ano_mes AS "Mês", {valor_sql} AS valor FROM "{tabela}"{filtro_sql} GROUP BY 1 ORDER BY 1', params).df()
-        g1.plotly_chart(grafico(px.line(df, x="Mês", y="valor", title="Evolução mensal", color_discrete_sequence=[OURO]), medida_nome), use_container_width=True)
-    geo = next((d for d in c["dimensoes"] if d.endswith("_regiao")), None) or next((d for d in c["dimensoes"] if d == "setor_nome"), None)
-    if geo:
-        df = con.execute(f'SELECT "{geo}" AS dim, {valor_sql} AS valor FROM "{tabela}"{filtro_sql} GROUP BY 1 ORDER BY 2 DESC', params).df()
-        # Participação em barras ordenadas (mais legível que rosca para comparar partes; LST-55)
-        g2.plotly_chart(grafico(px.bar(df, x="valor", y="dim", orientation="h", title=f"Por {n.nome(geo)}", color_discrete_sequence=[OURO],
-                                       labels={"dim": "", "valor": medida_nome}).update_yaxes(autorange="reversed"), ""), use_container_width=True)
-    uf = next((d for d in c["dimensoes"] if d.endswith("_estado")), None)
-    if uf:
-        df = con.execute(f'SELECT "{uf}" AS UF, {valor_sql} AS valor FROM "{tabela}"{filtro_sql} GROUP BY 1 ORDER BY 2 DESC', params).df()
-        st.plotly_chart(grafico(px.bar(df, x="UF", y="valor", title=f"Por {n.nome(uf)}", color_discrete_sequence=[OURO]), medida_nome), use_container_width=True)
-    st.caption("Números somados das tabelas prontas do BI (demandas aprovadas no Lastro). Valores vazios aparecem como vazios.")
+        w, p = n.onde(filtros)
+        df = con.execute(f'SELECT ano_mes AS "Mês", {valor_sql} AS valor FROM "{tabela}"{w} GROUP BY 1 ORDER BY 1', p).df()
+        fig_mes = grafico(px.line(df, x="Mês", y="valor", title="Evolução mensal", color_discrete_sequence=[OURO]), medida_nome)
+        g1.plotly_chart(fig_mes.update_xaxes(type="category", nticks=8), use_container_width=True)  # "2025-10", não "Oct 2025"
+    dim = n.dimensao_do_ranking(c["dimensoes"])
+    if dim:
+        topo, detalhe = n.ranking(con, tabela, dim, medida, filtros)
+        import pandas as pd
+
+        df = pd.DataFrame(topo, columns=["dim", "valor", "parte"])
+        df["rotulo"] = [f"{p * 100:.1f}%".replace(".", ",") if p is not None else "" for p in df["parte"]]
+        fig = px.bar(df, x="valor", y="dim", orientation="h", text="rotulo", title=f"Ranking por {n.nome(dim)} (top 10)".replace("uf ", "UF "),
+                     color_discrete_sequence=[OURO], labels={"dim": "", "valor": medida_nome})
+        fig = grafico(fig.update_yaxes(autorange="reversed").update_traces(textposition="outside", cliponaxis=False), "")
+        g2.plotly_chart(fig.update_layout(margin={"t": 48, "l": 8, "r": 64, "b": 8}), use_container_width=True)
+        st.subheader(f"Conferência por {n.nome(dim)}")
+        rotulo_dim = n.nome(dim)[:1].upper() + n.nome(dim)[1:]  # "UF da obra", não "Uf da obra"
+        tab = pd.DataFrame([(k_, br(v, 2 if medida else 0), br(r_, 0), f"{p * 100:.1f}%".replace(".", ",") if p is not None else "—")
+                            for k_, v, r_, p in detalhe], columns=[rotulo_dim, medida_nome, "Registros", "% do total"])
+        st.dataframe(tab, use_container_width=True, hide_index=True)  # números já no formato 1.234,56
+        st.caption(f"Soma da conferência: {br(sum(v for _, v, _, _ in detalhe), 2 if medida else 0)}, igual ao primeiro cartão.")
+    st.caption("Números somados das tabelas prontas do BI (demandas aprovadas no Lastro). Comparação: janeiro até o último mês com dado, "
+               "contra o mesmo período do ano anterior.")
 
 with aba_agente:
     google = segredo("GOOGLE_API_KEY")

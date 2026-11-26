@@ -23,6 +23,7 @@ from typing import Any
 
 import duckdb
 
+from . import painel_html
 from .agents.construtores import (
     ident,  # o mesmo nome que o Engenheiro dá às colunas do gold
 )
@@ -129,7 +130,9 @@ def para_visitante(demanda: dict, gold: Path, quebra: str | None, periodo: str |
         eixo = periodo if periodo in cat["tempo"] else "ano_mes"
         visuais.append({"id": "v2", "tipo": "linha", "titulo": f"{m['nome']} por {TEMPO[eixo]}", "medida": m["id"], "eixo": eixo})
     spec = {"versao": 1, "demanda": demanda["id"], "titulo": f"{m['nome']}: painel da sua planilha", "medidas": [m], "visuais": visuais,
-            "modo": "demonstracao"}
+            "modo": "demonstracao",
+            # filtros do painel só entre as dimensões liberadas: coluna com dado pessoal nunca vai para o cubo embutido (LST-41/55)
+            "filtros": [*cat["dimensoes"], *(["ano"] if cat["tempo"] else [])]}
     validar(spec, cat)
     return spec
 
@@ -334,6 +337,15 @@ def _origem(spec: dict, gerado_em: str) -> str:
 
 
 def html_painel(spec: dict, gold: Path, gerado_em: str) -> str:
+    """Painel de entrega com filtros, cartões com comparação, ranking e conferência (LST-55, `painel_html`).
+    Se o cubo passar do limite, sai o painel fixo de antes, que não depende do tamanho do gold."""
+    c = painel_html.cubo(spec, gold)
+    if c["grande"]:
+        return _html_fixo(spec, gold, gerado_em)
+    return painel_html.html(spec, gold, _origem(spec, gerado_em), c)
+
+
+def _html_fixo(spec: dict, gold: Path, gerado_em: str) -> str:
     valores = dados(spec, gold)
     blocos = []
     for v in spec["visuais"]:

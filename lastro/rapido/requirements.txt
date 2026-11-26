@@ -1,5 +1,5 @@
 # Streamlit Community Cloud (LST-54): dependências do app lastro/rapido/app.py
-streamlit>=1.40
+streamlit>=1.45
 plotly>=5.24
 duckdb>=1.1
 pyarrow>=15

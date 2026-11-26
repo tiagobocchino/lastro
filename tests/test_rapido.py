@@ -135,3 +135,26 @@ def test_consultas_em_paralelo_com_cursor_por_sessao():
     for t in ts:
         t.join()
     assert erros == []
+
+
+def test_resumo_compara_o_mesmo_periodo_do_ano_anterior():
+    """Grill de 26/11: jan até o último mês com dado contra o mesmo intervalo do ano anterior."""
+    df = pd.DataFrame({"company": ["a", "b", "a", "a", "b", "a"], "ano_mes": ["2025-01", "2025-02", "2025-07", "2026-01", "2026-02", "2026-02"],
+                       "valor": [100.0, 50.0, 999.0, 120.0, 30.0, 30.0], "registros": [1] * 6})
+    con = n.carregar({"painel_9_vendas": _parquet(df)})
+    r = n.resumo(con, "painel_9_vendas", "valor", {})
+    assert r["total"] == pytest.approx(1329) and r["registros"] == 6
+    c = r["comparacao"]  # 2026 até fev (180) contra 2025 até fev (150): julho de 2025 fica fora
+    assert (c["ano"], c["mes"], c["atual"], c["anterior"]) == (2026, 2, 180, 150) and c["variacao"] == pytest.approx(0.2)
+    so_a = n.resumo(con, "painel_9_vendas", "valor", {"company": ["a"]})["comparacao"]
+    assert (so_a["atual"], so_a["anterior"]) == (150, 100)
+    assert n.resumo(con, "painel_9_vendas", "valor", {"ano": [2025]})["total"] == pytest.approx(1149)
+
+
+def test_ranking_top_10_com_outros_e_conferencia(con):
+    topo, detalhe = n.ranking(con, "painel_15_quanto_cada_vendedor_vendeu", "projeto_regiao", "valores_produtos", {}, top=2)
+    assert [t[0] for t in topo] == ["Sudeste", "Sul", "outros (2)"]
+    assert sum(t[1] for t in topo) == pytest.approx(sum(d[1] for d in detalhe)) == pytest.approx(390.5)
+    assert sum(d[3] for d in detalhe) == pytest.approx(1) and sum(d[2] for d in detalhe) == 6
+    with pytest.raises(n.PlanoInvalido):
+        n.ranking(con, "painel_15_quanto_cada_vendedor_vendeu", "cliente_nome", "valores_produtos", {})  # fora do escopo do app rápido

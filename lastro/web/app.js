@@ -554,7 +554,7 @@ async function telaPainel(did, aviso = "") {
   const opts = (lista, rot = (x) => x) => lista.map((x) => `<option value="${esc(x)}">${esc(rot(x))}</option>`).join("");
   alvo.innerHTML = `<h2>Painel <span class="quem">· versão ${s.versao} de ${e.versoes.length}</span></h2>
     <div class="bloco">
-      <iframe id="p-previa" title="Prévia do painel" style="width:100%;height:520px;border:1px solid var(--linha);border-radius:8px;background:var(--sup)"></iframe>
+      <iframe id="p-previa" title="Prévia do painel" sandbox="allow-scripts" style="width:100%;height:min(80vh,900px);border:1px solid var(--linha);border-radius:8px;background:var(--sup)"></iframe>
       <div class="linha-btn"><button class="btn sec" id="p-html">baixar HTML</button><button class="btn sec" id="p-pbi">baixar projeto do Power BI</button><button class="btn sec" id="p-rel">relatório de entrega (Power BI)</button></div>
       <div class="tabela"><table><thead><tr><th>visual</th><th>tipo</th><th>medida</th><th>eixo</th>${pode ? "<th></th>" : ""}</tr></thead><tbody>
         ${s.visuais.map((v) => `<tr><td><code>${esc(v.id)}</code> ${esc(v.titulo)}</td><td>${esc(TIPOS_VISUAL[v.tipo] || v.tipo)}</td><td>${esc(med[v.medida]?.nome || v.medida)}</td><td>${esc(v.eixo || "—")}</td>${pode ? `<td style="text-align:right"><button class="btn sec" data-rem="${esc(v.id)}">remover</button></td>` : ""}</tr>`).join("")}
