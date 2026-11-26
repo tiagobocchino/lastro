@@ -332,7 +332,7 @@ Ponha `id="seguranca"` na `<section>`.
 </div>
 ```
 
-Lista `.sistemas`: os rótulos ficam iguais ("testado em operação real", "pela documentação oficial", "a confirmar no piloto"). Para o Yoast não ler a lista como uma frase gigante nem acusar 8 começos iguais, envolva a lista com `data-nosnippet` e, se o analisador ainda reclamar, transforme a lista em `<ul>`/`<li>` com as mesmas classes `.sis`. É escolha de markup do frontend; o texto não muda.
+Lista `.sistemas`: os rótulos ficam iguais ("mapeado em operação real", "pela documentação oficial", "a confirmar no piloto"). Para o Yoast não ler a lista como uma frase gigante nem acusar 8 começos iguais, envolva a lista com `data-nosnippet` e, se o analisador ainda reclamar, transforme a lista em `<ul>`/`<li>` com as mesmas classes `.sis`. É escolha de markup do frontend; o texto não muda.
 
 ### 4.10 Pergunta 5: `#teste` (demonstração)
 
