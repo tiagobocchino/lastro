@@ -494,7 +494,7 @@ async function telaPainel(did, aviso = "") {
   alvo.innerHTML = `<h2>Painel <span class="quem">· versão ${s.versao} de ${e.versoes.length}</span></h2>
     <div class="bloco">
       <iframe id="p-previa" title="Prévia do painel" style="width:100%;height:520px;border:1px solid var(--linha);border-radius:8px;background:var(--sup)"></iframe>
-      <div class="linha-btn"><button class="btn sec" id="p-html">baixar HTML</button><button class="btn sec" id="p-pbi">baixar projeto do Power BI</button></div>
+      <div class="linha-btn"><button class="btn sec" id="p-html">baixar HTML</button><button class="btn sec" id="p-pbi">baixar projeto do Power BI</button><button class="btn sec" id="p-rel">relatório de entrega (Power BI)</button></div>
       <div class="tabela"><table><thead><tr><th>visual</th><th>tipo</th><th>medida</th><th>eixo</th>${pode ? "<th></th>" : ""}</tr></thead><tbody>
         ${s.visuais.map((v) => `<tr><td><code>${esc(v.id)}</code> ${esc(v.titulo)}</td><td>${esc(TIPOS_VISUAL[v.tipo] || v.tipo)}</td><td>${esc(med[v.medida]?.nome || v.medida)}</td><td>${esc(v.eixo || "—")}</td>${pode ? `<td style="text-align:right"><button class="btn sec" data-rem="${esc(v.id)}">remover</button></td>` : ""}</tr>`).join("")}
       </tbody></table></div>
@@ -515,6 +515,7 @@ async function telaPainel(did, aviso = "") {
   try { $("#p-previa").srcdoc = await (await api(`/api/demandas/${did}/painel/html`)).text(); } catch { /* prévia é conveniência */ }
   $("#p-html").onclick = (ev) => baixarArquivo(`/api/demandas/${did}/painel/html`, ev.target);
   $("#p-pbi").onclick = (ev) => baixarArquivo(`/api/demandas/${did}/painel/powerbi`, ev.target);
+  $("#p-rel").onclick = (ev) => baixarArquivo(`/api/demandas/${did}/relatorio/powerbi`, ev.target);
   if (!pode) return;
   const mudar = async (corpo) => {
     try { const r = await (await api(`/api/demandas/${did}/painel/mudancas`, { method: "POST", json: corpo })).json(); await abrirDemanda(did); await telaPainel(did, `ok:Versão ${r.versao} gravada no rastro.`); }

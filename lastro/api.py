@@ -906,6 +906,40 @@ def painel_powerbi(did: int, request: Request, s: Annotated[Sessao, Depends(sess
                     headers={"Content-Disposition": f'attachment; filename="lastro_demanda_{did}_powerbi.zip"'})
 
 
+@app.get("/api/demandas/{did}/relatorio/powerbi")
+def relatorio_powerbi(did: int, request: Request, s: Annotated[Sessao, Depends(sessao)],
+                      p: Annotated[Plataforma, Depends(plataforma)]) -> Response:
+    """Relatório Power BI de entrega (LST-52): várias páginas sobre a tabela pronta da demanda, lida por HTTPS com a chave."""
+    import io
+    import zipfile
+
+    from . import relatorio_powerbi as rp
+    from .agents.construtores import ident
+
+    d = p.repo.demanda(did)
+    if not d:
+        raise HTTPException(404, "demanda não encontrada")
+    if d["status"] != "aprovada":
+        raise HTTPException(409, "o relatório de entrega sai só de demanda aprovada")
+    bi = _bi()
+    a = bi.acesso(s.tenant)
+    if not a or not a["ativo"]:
+        raise HTTPException(409, "ligue o BI da empresa: o relatório lê a tabela pronta publicada nele")
+    tabela = next((t for t in bi.tabelas_publicadas(a["nome"]) if t.startswith(f"painel_{did}_")), None)
+    if not tabela:
+        raise HTTPException(409, "a tabela pronta desta demanda ainda não foi publicada: clique em publicar no BI")
+    medida = ((d.get("resultado") or {}).get("modelo") or {}).get("medida")
+    arqs = rp.projeto(did, d["pergunta"], tabela, rp.colunas_do_postgres(bi.colunas(a["nome"], tabela)),
+                      ident(medida) if medida else None, _url_publica(request) + "/")
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for caminho, conteudo in arqs.items():
+            z.writestr(caminho, conteudo)
+    p.repo.registrar(s.email, "baixou_relatorio_powerbi", {"tabela": tabela}, did)
+    return Response(buf.getvalue(), media_type="application/zip",
+                    headers={"Content-Disposition": f'attachment; filename="lastro_relatorio_{did}_powerbi.zip"'})
+
+
 # ---- Demonstração do site (LST-39, ADR 0010) ------------------------------------------------
 # Pública e sem login. Desligada por padrão: LASTRO_DEMO=1 liga (produção só depois dos limites do LST-42).
 

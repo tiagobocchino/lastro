@@ -325,6 +325,15 @@ class AcessoBI:
             cols = [d.name for d in cur.description]
             return cols, [tuple(r[c] for c in cols) for r in cur.fetchall()]
 
+    def colunas(self, esquema: str, tabela: str) -> list[tuple[str, str]]:
+        """Nome e tipo (Postgres) de cada coluna de uma tabela publicada, na ordem."""
+        if tabela not in self.tabelas_publicadas(esquema):
+            raise LookupError("tabela não publicada no BI desta empresa")
+        with self.banco._dono() as con:
+            return [(r["column_name"], r["data_type"]) for r in con.execute(
+                "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = %s AND table_name = %s "
+                "ORDER BY ordinal_position", (esquema, tabela))]
+
     def marcar_planilha(self, tenant: str, planilha_id: str | None) -> None:
         with self.banco._dono() as con:
             con.execute("UPDATE interno.bi_acessos SET planilha_id = %s, planilha_enviada_em = "

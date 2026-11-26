@@ -2,7 +2,7 @@
 chave: LST-52
 jira: https://adelecrm.atlassian.net/browse/LST-52
 secao: INT
-status: a-fazer
+status: em-andamento
 especialista: engenheiro-de-dados
 ---
 

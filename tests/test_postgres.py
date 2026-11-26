@@ -757,3 +757,33 @@ def test_planilha_google_do_bi_pelo_portal(banco_pg, url_pg, monkeypatch, tmp_pa
     pub = c.post("/api/bi/publicar", headers=adm).json()
     assert "planilha" not in pub  # desconectada: publicar não mexe mais na planilha
     modulo.banco.fechar()
+
+
+def test_relatorio_powerbi_de_entrega_pelo_portal(banco_pg, url_pg, monkeypatch, tmp_path: Path):
+    """LST-52: o relatório sai da tabela pronta publicada, com as colunas reais do BI, e só de demanda aprovada."""
+    import importlib
+    import io
+    import zipfile
+
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path))
+    monkeypatch.setenv("LASTRO_BANCO_URL", url_pg)
+    import lastro.api as modulo
+
+    modulo = importlib.reload(modulo)
+    t, _, _, did = _empresa_com_gold(banco_pg, carregar())
+    modulo.banco.criar_usuario(t, f"chefe@{t}", "Chefe", "admin", "senha-longa-de-teste")
+    c = TestClient(modulo.app)
+    adm = {"Authorization": "Bearer " + c.post("/api/login", json={"email": f"chefe@{t}", "senha": "senha-longa-de-teste"}).json()["token"]}
+    assert c.get(f"/api/demandas/{did}/relatorio/powerbi", headers=adm).status_code == 409  # BI desligado
+    c.post("/api/bi/credencial", headers=adm)
+    r = c.get(f"/api/demandas/{did}/relatorio/powerbi", headers=adm)
+    assert r.status_code == 200 and r.headers["content-type"] == "application/zip"
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    tab = next(n for n in z.namelist() if "/tables/painel_" in n)
+    tmdl = z.read(tab).decode()
+    assert "measure 'Total valor vendido' = SUM(" in tmdl and '"http://testserver/"' in z.read(
+        f"Lastro_relatorio_{did}.SemanticModel/definition/expressions.tmdl").decode()
+    assert any(n.endswith("pages/visao_geral/page.json") for n in z.namelist())
+    modulo.banco.fechar()
