@@ -2,7 +2,7 @@
 chave: LST-47
 jira: https://adelecrm.atlassian.net/browse/LST-47
 secao: INT
-status: em-andamento
+status: feito
 especialista: engenheiro-backend
 ---
 
@@ -14,7 +14,7 @@ especialista: engenheiro-backend
 
 - [x] `GET /bi/v1/<tabela>.parquet` com chave de leitura do BI por empresa, só leitura, revogável e enviada no cabeçalho
 - [x] PBIP com `Parquet.Document(Web.Contents(...))` e URL base fixa (o `.pbids` saiu: não carrega o cabeçalho da chave e abriria uma conexão que dá 401)
-- [ ] Tiago valida a atualização agendada no Power BI Service sem gateway, com os totais da gimi-teste
+- [x] Tiago valida no Power BI Desktop por HTTPS (26/11, 00:44). O Power BI Service ficou fora por decisão do Tiago: "só isso aqui me basta"
 
 ## Evidência (25/11)
 
@@ -38,3 +38,12 @@ especialista: engenheiro-backend
   - `LASTRO_URL_PUBLICA` no Render aponta para um host que não existe (afetava também o retorno do OAuth). O endereço agora vem do próprio pedido.
   - Id com vazio saía DOUBLE e coluna toda vazia saía NULL. O tipo agora vem da coluna no Postgres.
 - **Falta:** o Tiago valida no Power BI Service a atualização sem gateway (kit com a chave criada por ele no SQL Editor).
+
+## Fechamento (26/11)
+
+- O Power BI Desktop do Tiago carregou a gimi-teste pela chave de leitura, sem certificado.
+- O teste no Power BI Service (atualização agendada sem gateway) **não foi feito**, por decisão do Tiago. Quando alguém publicar no Service, siga `docs/infra/bi.md`. Se der erro, leia `interno.bi_recusas` (nota `docs/memory/power-bi-chave-de-leitura.md`).
+- Ajustes feitos no caminho:
+  - migração 0011 (motivo de recusa);
+  - chave tolerante a espaço, maiúscula, aspas e caractere invisível;
+  - chave do portal só com minúsculas e números.
