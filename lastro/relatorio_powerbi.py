@@ -119,18 +119,22 @@ def projeto(did: int, pergunta: str, tabela: str, colunas: dict[str, str], medid
     estado = next((c for c in ("projeto_estado", "cliente_estado") if tem(c)), None)
 
     # ---- medidas (DAX): só soma, contagem e média; comparação com o mesmo período do ano anterior ----------------
-    med: list[tuple[str, str, str]] = [("Registros", f"SUM({_tmdl_nome(t)}[registros])", "#,##0")]
+    med: list[tuple[str, str, str]] = [("Nº de registros", f"SUM({_tmdl_nome(t)}[registros])", "#,##0")]
     if principal:
         tot = f"Total {rotulo(principal).lower()}"
         med += [(tot, f"SUM({_tmdl_nome(t)}[{principal}])", "#,##0.00"),
-                ("Média por registro", f"DIVIDE([{tot}], [Registros])", "#,##0.00"),
+                ("Média por registro", f"DIVIDE([{tot}], [Nº de registros])", "#,##0.00"),
                 (f"% do {tot.lower()}", f"DIVIDE([{tot}], CALCULATE([{tot}], ALLSELECTED({_tmdl_nome(t)})))", "0.0%")]
         for c in valores:
             if c != principal and c != "quantidade":
                 med.append((f"Total {rotulo(c).lower()}", f"SUM({_tmdl_nome(t)}[{c}])", "#,##0.00"))
         if "quantidade" in valores:
-            med.append(("Quantidade", f"SUM({_tmdl_nome(t)}[quantidade])", "#,##0"))
-    kpi = f"Total {rotulo(principal).lower()}" if principal else "Registros"
+            med.append(("Quantidade total", f"SUM({_tmdl_nome(t)}[quantidade])", "#,##0"))
+    kpi = f"Total {rotulo(principal).lower()}" if principal else "Nº de registros"
+    # No Power BI medida e coluna da mesma tabela não podem ter o mesmo nome, nem com caixa diferente (achado do Tiago, 26/11)
+    colidem = {m for m, _, _ in med} & set(colunas) | {m for m, _, _ in med if m.lower() in {c.lower() for c in colunas}}
+    if colidem:
+        raise ValueError(f"medida com o mesmo nome de coluna: {sorted(colidem)}")
     if tem_data:
         med += [(f"{kpi} ano anterior", f"CALCULATE([{kpi}], SAMEPERIODLASTYEAR(Calendario[Date]))", "#,##0.00"),
                 ("Var. vs ano anterior", f"DIVIDE([{kpi}] - [{kpi} ano anterior], [{kpi} ano anterior])", "+0.0%;-0.0%;0.0%")]
@@ -195,7 +199,7 @@ def projeto(did: int, pergunta: str, tabela: str, colunas: dict[str, str], medid
                            objetos={"data": [{"properties": {"mode": _lit("Dropdown")}}]}))
 
     def cartoes(pg: _Pagina, y: int = 80) -> None:
-        cs = [kpi, "Registros"] + (["Média por registro"] if principal else []) + (["Var. vs ano anterior"] if tem_data else [])
+        cs = [kpi, "Nº de registros"] + (["Média por registro"] if principal else []) + (["Var. vs ano anterior"] if tem_data else [])
         w = (LARGURA - 40 - 10 * (len(cs) - 1)) // len(cs)
         for i, m in enumerate(cs):
             pg.add(_visual("card", 20 + i * (w + 10), y, w, 96, {"Values": [_proj(t, m, True)]}, m))
@@ -218,8 +222,8 @@ def projeto(did: int, pergunta: str, tabela: str, colunas: dict[str, str], medid
         barras(pg, dims[0], 790, 190, 470, 510)
     status = next((d for d in dims if "status" in d), None)
     if status:
-        pg.add(_visual("funnel", 20, 450, 760, 250, {"Category": [_proj(t, status)], "Y": [_proj(t, "Registros", True)]},
-                       f"Registros por {rotulo(status).lower()}", ordem={"field": _campo(t, "Registros", True), "direction": "Descending"}))
+        pg.add(_visual("funnel", 20, 450, 760, 250, {"Category": [_proj(t, status)], "Y": [_proj(t, "Nº de registros", True)]},
+                       f"Nº de registros por {rotulo(status).lower()}", ordem={"field": _campo(t, "Nº de registros", True), "direction": "Descending"}))
     elif "company" in colunas:
         pg.add(_visual("donutChart", 20, 450, 760, 250, {"Category": [_proj(t, "company")], "Y": [_proj(t, kpi, True)]},
                        f"{kpi} por empresa"))
@@ -232,7 +236,7 @@ def projeto(did: int, pergunta: str, tabela: str, colunas: dict[str, str], medid
         if tem_data:
             pg.add(_visual("pivotTable", 650, 80, 610, 360, {"Rows": [_proj(t, d)], "Columns": [_proj("Calendario", "Ano")],
                                                               "Values": [_proj(t, kpi, True)]}, f"{rotulo(d)} × ano"))
-            pg.add(_visual("tableEx", 650, 450, 610, 250, {"Values": [_proj(t, d), _proj(t, kpi, True), _proj(t, "Registros", True)]
+            pg.add(_visual("tableEx", 650, 450, 610, 250, {"Values": [_proj(t, d), _proj(t, kpi, True), _proj(t, "Nº de registros", True)]
                                                             + ([_proj(t, f"% do {kpi.lower()}", True)] if principal else [])},
                            f"{rotulo(d)}: participação"))
         paginas.append(pg)
@@ -245,14 +249,14 @@ def projeto(did: int, pergunta: str, tabela: str, colunas: dict[str, str], medid
         if estado:
             barras(pg, estado, 430, 80, 830, 300, "clusteredColumnChart")
         geo_cols = [c for c in (regiao, estado, estado and estado.replace("_estado", "_cidade")) if c and c in colunas]
-        pg.add(_visual("tableEx", 20, 390, 1240, 310, {"Values": [_proj(t, c) for c in geo_cols] + [_proj(t, kpi, True), _proj(t, "Registros", True)]},
+        pg.add(_visual("tableEx", 20, 390, 1240, 310, {"Values": [_proj(t, c) for c in geo_cols] + [_proj(t, kpi, True), _proj(t, "Nº de registros", True)]},
                        "Detalhe por local"))
         paginas.append(pg)
     # 4. Detalhe: a tabela para conferência, com os mesmos números dos cartões
     pg = _Pagina("detalhe", "Detalhe")
     faixa_de_filtros(pg)
     cols_det = ([_proj(t, "data")] if tem_data else []) + [_proj(t, d) for d in dims[:4]]
-    pg.add(_visual("tableEx", 20, 80, 1240, 620, {"Values": cols_det + [_proj(t, kpi, True), _proj(t, "Registros", True)]}, "Detalhe para conferência"))
+    pg.add(_visual("tableEx", 20, 80, 1240, 620, {"Values": cols_det + [_proj(t, kpi, True), _proj(t, "Nº de registros", True)]}, "Detalhe para conferência"))
     paginas.append(pg)
 
     arqs[f"{rp}/definition.pbir"] = _json({"$schema": SCHEMAS["pbir"], "version": "4.0", "datasetReference": {"byPath": {"path": f"../{sm}"}}})

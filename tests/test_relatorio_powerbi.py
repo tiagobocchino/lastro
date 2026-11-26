@@ -71,9 +71,9 @@ def test_relatorio_de_rh_sem_valor_conta_registros_e_tem_paginas_por_setor_e_car
     jsons = _validar(arqs)
     pgs = jsons["Lastro_relatorio_18.Report/definition/pages/pages.json"]["pageOrder"]
     titulos = [jsons[f"Lastro_relatorio_18.Report/definition/pages/{p}/page.json"]["displayName"] for p in pgs]
-    assert titulos == ["Visão geral", "Registros por setor", "Registros por cargo", "Detalhe"]
+    assert titulos == ["Visão geral", "Nº de registros por setor", "Nº de registros por cargo", "Detalhe"]
     tab = arqs["Lastro_relatorio_18.SemanticModel/definition/tables/painel_18_rh.tmdl"]
-    assert "measure Registros = SUM(painel_18_rh[registros])" in tab and "Total" not in tab.split("column")[0]
+    assert "measure 'Nº de registros' = SUM(painel_18_rh[registros])" in tab and "Total" not in tab.split("column")[0]
 
 
 def test_coluna_de_um_valor_so_nao_vira_pagina():
@@ -85,3 +85,15 @@ def test_coluna_de_um_valor_so_nao_vira_pagina():
     pgs = jsons["Lastro_relatorio_15.Report/definition/pages/pages.json"]["pageOrder"]
     assert pgs == ["visao_geral", "por_vendedor_nome", "por_cliente_nome", "por_grupo_nome", "geografia", "detalhe"]
     assert not any(d["visual"]["visualType"] == "funnel" for k, d in jsons.items() if k.endswith("visual.json"))  # status de um valor só
+
+
+def test_nenhuma_medida_tem_o_nome_de_uma_coluna():
+    """O Power BI recusa abrir o projeto se medida e coluna da mesma tabela tiverem o mesmo nome (sem diferenciar caixa)."""
+    itens = rp.colunas_do_postgres([("id", "bigint"), ("company", "text"), ("produto_descricao", "text"), ("data", "date"),
+                                    ("quantidade", "bigint"), ("valores_total", "double precision"), ("registros", "integer")])
+    for cols, med in ((VENDAS, "valores_produtos"), (RH, None), (itens, "valores_total")):
+        arqs = rp.projeto(1, "Quanto por produto?", "painel_1_x", cols, med, "https://lastro.exemplo/")
+        tab = arqs["Lastro_relatorio_1.SemanticModel/definition/tables/painel_1_x.tmdl"]
+        medidas = {m.strip("'").lower() for m in re.findall(r"^\tmeasure (.+?) = ", tab, re.MULTILINE)}
+        colunas = {c.strip("'").lower() for c in re.findall(r"^\tcolumn (.+)$", tab, re.MULTILINE)}
+        assert not medidas & colunas, medidas & colunas
