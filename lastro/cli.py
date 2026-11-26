@@ -47,6 +47,22 @@ def preparar_demo() -> tuple[Plataforma, int]:
     return Plataforma(cfg, repo), fid
 
 
+def contas_demo() -> str:
+    """Contas de teste (ana, rui e admin @demo.lastro) ao subir o servidor.
+
+    - Fora de produção: sempre existem.
+    - Em produção: só com LASTRO_CONTAS_DEMO=1 no Render, durante a fase de testes (pedido do Tiago, 26/11; card de remoção
+      no board). Sem a variável, as contas que existirem são trancadas (senha aleatória). Desligar a variável basta.
+    """
+    if os.environ.get("LASTRO_AMBIENTE", "local") != "producao" or os.environ.get("LASTRO_CONTAS_DEMO") == "1":
+        preparar_demo()
+        return "ligadas"
+    banco = abrir_banco(carregar())
+    for email, _, _ in DEMO_USUARIOS:
+        banco.trancar_usuario(DEMO_TENANT, email)
+    return "trancadas"
+
+
 def demo() -> None:
     plat, fid = preparar_demo()
     pergunta = "Quanto cada vendedor vendeu, em valor vendido, nos contratos fechados?"
@@ -92,8 +108,7 @@ def main(argv: list[str] | None = None) -> None:
     elif a.cmd == "serve":
         import uvicorn  # noqa: PLC0415
 
-        if os.environ.get("LASTRO_AMBIENTE", "local") != "producao":
-            preparar_demo()  # contas de demonstração só fora de produção
+        contas_demo()
         uvicorn.run("lastro.api:app", host="0.0.0.0", port=a.porta)
     elif a.cmd == "cargas":
         from .banco import abrir_banco as _abrir  # noqa: PLC0415

@@ -311,6 +311,15 @@ class BancoSqlite:
     def criar_usuario(self, tenant_id: str, email: str, nome: str, papel: str, senha: str) -> None:
         criar_usuario(self.con, tenant_id, email, nome, papel, senha)
 
+    def trancar_usuario(self, tenant_id: str, email: str) -> bool:
+        """Bloqueia o login trocando a senha por uma aleatória que ninguém conhece. Não apaga: o rastro aponta para o usuário."""
+        import secrets
+
+        c = self.con.execute("UPDATE usuarios SET senha_hash=? WHERE email=? AND tenant_id=?",
+                             (hash_senha(secrets.token_urlsafe(32)), email.lower(), tenant_id))
+        self.con.commit()
+        return c.rowcount > 0
+
     def autenticar(self, email: str, senha: str) -> dict | None:
         u = autenticar(self.con, email, senha)
         return dict(u) if u else None

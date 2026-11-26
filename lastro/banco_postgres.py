@@ -97,6 +97,15 @@ class BancoPostgres:
             if r is None:
                 raise PermissionError("este e-mail já pertence a outra empresa")
 
+    def trancar_usuario(self, tenant_id: str, email: str) -> bool:
+        """Bloqueia o login trocando a senha por uma aleatória que ninguém conhece. Não apaga: o rastro aponta para o usuário."""
+        import secrets
+
+        with self._dono() as con:
+            r = con.execute("UPDATE usuarios SET senha_hash=%s WHERE email=%s AND tenant_id=%s RETURNING email",
+                            (hash_senha(secrets.token_urlsafe(32)), email.lower(), tenant_id)).fetchone()
+        return r is not None
+
     def autenticar(self, email: str, senha: str) -> dict | None:
         with self._dono() as con:
             u = con.execute("SELECT * FROM usuarios WHERE email=%s", (email.lower(),)).fetchone()
