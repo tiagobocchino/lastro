@@ -36,6 +36,17 @@ INTERNOS = ["Aline Castro", "Bruno Teles", "Carla Moura", "Diego Vaz", "Elisa Ra
 GRUPOS = ["Construtoras (A)", "Incorporadoras (A)", "Revendas (B)", "Arquitetos (B)", "Consumidor final (C)", "Governo"]
 SEGMENTOS = ["Construtora", "Incorporadora", "Revenda", "Arquitetura", "Pessoa física", "Público"]
 UFS = ["DF", "GO", "SP", "MG", "BA", "PR", "SC"]
+# Região do IBGE pela UF (fato geográfico, não regra de negócio). O IApp entrega estado e região no contrato.
+REGIOES = {"DF": "Centro-Oeste", "GO": "Centro-Oeste", "MT": "Centro-Oeste", "MS": "Centro-Oeste", "SP": "Sudeste", "MG": "Sudeste",
+           "RJ": "Sudeste", "ES": "Sudeste", "BA": "Nordeste", "PE": "Nordeste", "CE": "Nordeste", "PR": "Sul", "SC": "Sul",
+           "RS": "Sul", "PA": "Norte", "AM": "Norte", "TO": "Norte"}
+CIDADES = {"DF": ["Brasília", "Taguatinga", "Ceilândia"], "GO": ["Goiânia", "Anápolis", "Rio Verde"], "MT": ["Cuiabá"], "MS": ["Campo Grande"],
+           "SP": ["São Paulo", "Campinas", "Ribeirão Preto", "Santos"], "MG": ["Belo Horizonte", "Uberlândia", "Contagem"],
+           "RJ": ["Rio de Janeiro", "Niterói"], "ES": ["Vitória"], "BA": ["Salvador", "Feira de Santana"], "PE": ["Recife"], "CE": ["Fortaleza"],
+           "PR": ["Curitiba", "Londrina", "Maringá"], "SC": ["Florianópolis", "Joinville", "Blumenau"], "RS": ["Porto Alegre", "Caxias do Sul"],
+           "PA": ["Belém"], "AM": ["Manaus"], "TO": ["Palmas"]}
+# Obra pode ser em outro estado que o do cliente (construtora de Brasília com obra em Goiânia); peso maior para o Centro-Oeste e o Sudeste.
+UFS_OBRA = ["DF"] * 6 + ["GO"] * 5 + ["SP"] * 5 + ["MG"] * 4 + ["MT", "MS", "RJ", "RJ", "ES", "BA", "BA", "PE", "CE", "PR", "PR", "SC", "RS", "PA", "AM", "TO"]
 # Classificação por prefixo de SKU (o mesmo tipo de regra do transform_products): fora da lista = material avulso.
 CATEGORIAS_SKU = {"ESQ": "Esquadria", "POR": "Porta", "JAN": "Janela", "VID": "Vidro", "PEL": "Pele de vidro", "FAC": "Fachada"}
 PREFIXOS_AVULSOS = ["ACE", "PAR", "KIT"]
@@ -91,8 +102,11 @@ def _empresa(chave: str, eid: int, rnd: random.Random, contratos_n: int) -> dict
                          "documento": _cnpj(rnd), "segmento": seg,
                          "endereco": {"cidade": rnd.choice(["Brasília", "Goiânia", "Anápolis", "Taguatinga", "Uberlândia"]), "uf": rnd.choice(UFS)},
                          "grupo": rnd.choice(grupos) if rnd.random() > .08 else None})
+    for cl in clientes:  # cidade coerente com a UF (Random próprio por cliente: a sequência do `rnd` não muda)
+        cl["endereco"]["cidade"] = random.Random(cl["id"]).choice(CIDADES[cl["endereco"]["uf"]])
+        cl["endereco"]["regiao"] = REGIOES[cl["endereco"]["uf"]]
     clientes.append({"id": base + 1999, "nome": "TESTE CLIENTE SISTEMA", "documento": None, "segmento": None,
-                     "endereco": {"cidade": None, "uf": None}, "grupo": None})
+                     "endereco": {"cidade": None, "uf": None, "regiao": None}, "grupo": None})
     # ---- contratos (orçamentos) com produtos aninhados ---------------------------------------
     contratos, item_id = [], base * 10
     for i in range(1, contratos_n + 1):
@@ -111,10 +125,17 @@ def _empresa(chave: str, eid: int, rnd: random.Random, contratos_n: int) -> dict
         valor = round(sum(p["valores"]["total"] for p in produtos), 2)
         vend = rnd.choice(vendedores) if rnd.random() > .04 else None
         projeto = f"{rnd.choice(PROJETOS)} {rnd.choice(SOBRENOMES)} {rnd.randint(1, 40)}"
+        geo = random.Random(base * 10 + i)  # geografia (LST-51) sem consumir o `rnd`: os totais de antes continuam os mesmos
+        uf_cli = cli["endereco"]["uf"]
+        uf_obra = uf_cli if geo.random() < .65 else geo.choice(UFS_OBRA)
+        obra = {"cidade": geo.choice(CIDADES[uf_obra]), "estado": uf_obra, "regiao": REGIOES[uf_obra]}
+        if geo.random() < .03:  # obra sem local cadastrado (acontece no sistema de origem)
+            obra = {"cidade": None, "estado": None, "regiao": None}
         c = {"id": base * 10 + i, "numero": f"{chave.upper()}-{criado.year}-{i:05d}", "data_criacao": criado.strftime("%Y-%m-%d %H:%M:%S"),
              "status": {"id": STATUS.index(status) + 1, "nome": status},
-             "cliente": {"id": cli["id"], "nome": cli["nome"], "documento": cli["documento"]},
-             "projeto": {"nome": projeto}, "vendedor": {"id": vend["id"], "nome": vend["nome"]} if vend else None,
+             "cliente": {"id": cli["id"], "nome": cli["nome"], "documento": cli["documento"], "cidade": cli["endereco"]["cidade"],
+                         "estado": uf_cli, "regiao": REGIOES.get(uf_cli)},
+             "projeto": {"nome": projeto, **obra}, "vendedor": {"id": vend["id"], "nome": vend["nome"]} if vend else None,
              "grupo": cli["grupo"], "valores": {"produtos": valor, "desconto": round(valor * rnd.choice([0, 0, .03, .05]), 2)},
              "data_aprovacao": (criado + timedelta(days=rnd.randint(3, 60))).strftime("%Y-%m-%d") if status == "Aprovado" else None,
              "motivo_perda": rnd.choice(MOTIVOS_PERDA) if status == "Perdido" else None, "produtos": produtos}
@@ -238,6 +259,11 @@ def gabarito(base: dict) -> dict[str, Any]:
         "vendido_por_vendedor": r2(aprov.groupby("vendedor")["valores_produtos"].sum().sort_values(ascending=False)),
         "vendido_por_classe": r2(aprov.groupby("classe")["valores_produtos"].sum()),
         "vendido_por_empresa": r2(aprov.groupby("company")["valores_produtos"].sum()),
+        "vendido_por_regiao": r2(aprov.groupby("projeto_regiao")["valores_produtos"].sum().sort_values(ascending=False)),
+        "vendido_por_uf": r2(aprov.groupby("projeto_estado")["valores_produtos"].sum().sort_values(ascending=False)),
+        "vendido_sem_local": round(float(aprov.loc[aprov["projeto_regiao"].isna(), "valores_produtos"].sum()), 2),
+        "orcado_por_regiao": r2(cart.groupby("projeto_regiao")["valores_produtos"].sum().sort_values(ascending=False)),
+        "vendido_por_regiao_cliente": r2(aprov.groupby("cliente_regiao")["valores_produtos"].sum().sort_values(ascending=False)),
         "funil": {k: int(v) for k, v in cart["status_nome"].value_counts().items()},
         "taxa_conversao_pct": round(100 * (fechados["status_nome"] == "Aprovado").mean(), 1),
         "vendido_por_categoria": r2(itens.groupby("categoria")["total"].sum()),
@@ -265,7 +291,8 @@ def exportar(base: dict, destino: Path) -> dict[str, int]:
             contagem[f"{emp}/{ent}"] = len(regs)
     contratos_planos(base).to_csv(destino / "contratos.csv", index=False)
     itens = [{"contrato_id": c["id"], "company": emp, "contrato_status": c["status"]["nome"], "contrato_data": c["data_criacao"],
-              "cliente_nome": c["cliente"]["nome"], "projeto_nome": c["projeto"]["nome"], "valor_contrato": c["valores"]["produtos"],
+              "cliente_nome": c["cliente"]["nome"], "projeto_nome": c["projeto"]["nome"], "projeto_estado": c["projeto"].get("estado"),
+              "projeto_regiao": c["projeto"].get("regiao"), "valor_contrato": c["valores"]["produtos"],
               **pd.json_normalize(p, sep="_").iloc[0].to_dict()} for emp, ents in base.items() for c in ents["contratos"] for p in c["produtos"]]
     pd.DataFrame(itens).to_csv(destino / "itens.csv", index=False)
     func = [f | {"company": emp} for emp, ents in base.items() for f in ents["funcionarios"]]

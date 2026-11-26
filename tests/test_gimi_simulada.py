@@ -67,3 +67,19 @@ def test_exportar(base, tmp_path):
     cont = gimi.exportar(base, tmp_path)
     assert cont["gimi/contratos"] == len(base["gimi"]["contratos"])
     assert {p.name for p in tmp_path.iterdir()} >= {"bruto", "contratos.csv", "itens.csv", "funcionarios.csv", "gabarito.json"}
+
+
+def test_geografia_no_contrato_sem_mudar_os_totais():
+    """LST-51: estado e região do cliente e da obra no contrato bruto; os totais conferidos pelo Tiago não mudam."""
+    base = gimi.gerar(36, 3000)
+    g = gimi.gabarito(base)
+    assert (g["vendido_total"], g["orcado_total"]) == (211290267.16, 532781125.76)  # os mesmos de antes da geografia
+    c = base["gimi"]["contratos"][0]
+    assert {"cidade", "estado", "regiao"} <= set(c["cliente"]) and {"cidade", "estado", "regiao"} <= set(c["projeto"])
+    planos = gimi.contratos_planos(base)
+    ok = planos.dropna(subset=["projeto_estado"])
+    assert (ok["projeto_regiao"] == ok["projeto_estado"].map(gimi.REGIOES)).all()  # região coerente com a UF
+    assert all(cid in gimi.CIDADES[uf] for cid, uf in zip(ok["projeto_cidade"], ok["projeto_estado"], strict=True))
+    assert 0 < planos["projeto_estado"].isna().mean() < .06  # obra sem local existe, como no sistema de origem
+    assert round(sum(g["vendido_por_regiao"].values()) + g["vendido_sem_local"], 2) == g["vendido_total"]
+    assert set(g["vendido_por_regiao"]) == {"Centro-Oeste", "Sudeste", "Sul", "Nordeste", "Norte"}
