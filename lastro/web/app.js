@@ -157,14 +157,14 @@ async function abrirDemanda(id) {
   const rastro = d.eventos?.length ? rastroHtml(d.eventos) : "";
   if (d.resposta && d.status === "aprovada") {
     const r = partesResultado(d);
-    html += `<nav class="ancoras" aria-label="Nesta demanda"><a href="#sec-painel">dashboard</a><a href="#sec-resposta">resposta</a><a href="#aud">auditoria</a><a href="#como">como chegamos aqui</a><a href="#rastro">rastro</a></nav>
-      ${r.total}<div id="sec-painel"><div id="painel-dem"></div></div>${r.resposta}<div id="conversa-dem"></div>
+    html += `<nav class="ancoras" aria-label="Nesta demanda"><a href="#sec-painel">dashboard</a><a href="#sec-pergunte">pergunte</a><a href="#sec-resposta">resposta</a><a href="#aud">auditoria</a><a href="#como">como chegamos aqui</a><a href="#rastro">rastro</a></nav>
+      ${r.total}<div id="sec-painel"><div id="painel-dem"></div></div>${perguntaHtml()}${r.resposta}<div id="conversa-dem"></div>
       ${dobra("aud", r.auditoriaTitulo, r.auditoria)}${r.camada2}${dobra("como", "Como chegamos aqui", r.como)}${rastro ? dobra("rastro", "Rastro dos agentes", rastro) : ""}`;
   } else {
     if (d.resposta) {
       const r = partesResultado(d);  // em revisão: a auditoria fica aberta, é o que o revisor confere
       const previa = d.status === "em_revisao" && ["revisor", "admin"].includes(sessao.papel)
-        ? `<h2>Dashboard <span class="status em_revisao">prévia · aguardando revisão</span></h2><div class="bloco"><p class="quem">Só revisor e admin veem esta prévia. Depois da aprovação, o dashboard aparece para todos da empresa.</p>${molduraDashboard("dash-previa")}</div>` : "";
+        ? `<h2>Dashboard <span class="status em_revisao">prévia · aguardando revisão</span></h2><div class="bloco"><p class="quem">Só revisor e admin veem esta prévia. Depois da aprovação, o dashboard aparece para todos da empresa.</p>${molduraDashboard("dash-previa")}</div>${perguntaHtml()}` : "";
       html += `${r.total}${previa}${r.resposta}<h2>${r.auditoriaTitulo}</h2>${r.auditoria}${r.camada2}<h2>Como chegamos aqui</h2>${r.como}`;
     }
     if (rastro) html += `<h2>Rastro dos agentes</h2>${rastro}`;
@@ -176,6 +176,7 @@ async function abrirDemanda(id) {
   if ($("#b-exec")) $("#b-exec").onclick = () => executar(d.id);
   document.querySelectorAll("[data-baixar]").forEach((b) => (b.onclick = () => baixar(d.id, b.dataset.baixar)));
   if ($("#f-rev")) $("#f-rev").onsubmit = (e) => revisar(e, d.id);
+  ligarPergunte(d.id);
   if ($("#dash-previa")) await carregarDashboard(d.id, "dash-previa");
   if ($("#painel-dem")) await telaPainel(d.id);
   if ($("#conversa-dem")) await telaConversa(d.id);
@@ -408,9 +409,29 @@ async function telaConta() {
   const admin = sessao.papel === "admin";
   $("#lado").innerHTML = `<p class="quem"><b>${esc(sessao.nome)}</b><br>${esc(sessao.papel)} · ${esc(sessao.tenant)}</p>`;
   const exporta = admin || sessao.papel === "demandante";
-  $("#painel").innerHTML = formSenha("Trocar minha senha", "Senha atual") + (admin ? `<div id="bi"></div><div id="equipe"></div>` : "") + (exporta && !admin ? `<div id="exportar"></div>` : "");
+  $("#painel").innerHTML = formSenha("Trocar minha senha", "Senha atual") + (admin ? `<div id="bi"></div><div id="ia"></div><div id="equipe"></div>` : "") + (exporta && !admin ? `<div id="exportar"></div>` : "");
   ligarFormSenha(() => { $("#s-msg").className = "ok"; $("#s-msg").textContent = "Senha trocada."; $("#f-senha").reset(); });
-  if (admin) { await telaBI(); await telaEquipe(); } else if (exporta) await telaExportar($("#exportar"));
+  if (admin) { await telaBI(); await telaIA(); await telaEquipe(); } else if (exporta) await telaExportar($("#exportar"));
+}
+
+// ---- Modelo de IA do "Pergunte" (LST-57): chave do Lastro por padrão ou a da empresa ---------------------------------------
+async function telaIA(aviso = "") {
+  const e = await (await api("/api/conta/llm")).json();
+  $("#ia").innerHTML = `<div class="bloco"><h2>Modelo de IA do "Pergunte"</h2>
+    <p class="quem">${e.propria ? `Sua empresa usa a própria chave${e.modelo ? ` (modelo <code>${esc(e.modelo)}</code>)` : ""}.` : "Hoje o \"Pergunte\" usa o Gemini gratuito com a chave do Lastro, sujeito aos limites do plano gratuito."}
+      Só a pergunta e os nomes das colunas vão ao modelo; os números saem do SQL do Lastro.</p>
+    <p class="aviso">Com a chave da sua empresa, o padrão de construção dos gráficos só é garantido nos modelos do Lastro ou nos pacotes com implementação no seu modelo. Fora disso, o resultado pode variar.</p>
+    <form id="f-ia" class="duas-col" style="align-items:end">
+      <label for="ia-chave">Chave de API do Google AI Studio<input id="ia-chave" type="password" autocomplete="off" required placeholder="cole a chave da sua empresa"></label>
+      <label for="ia-modelo">Modelo <small>opcional, ex.: gemini-flash-latest</small><input id="ia-modelo" type="text" value="${esc(e.modelo || "")}"></label>
+      <div class="linha-btn"><button class="btn" type="submit">usar a chave da empresa</button>${e.propria ? '<button class="btn sec" type="button" id="ia-apagar">voltar para a chave do Lastro</button>' : ""}</div>
+    </form><p class="${aviso.startsWith("ok:") ? "ok" : "erro-msg"}" id="ia-msg" role="status">${esc(aviso.replace(/^ok:/, ""))}</p></div>`;
+  $("#f-ia").onsubmit = async (ev) => {
+    ev.preventDefault();
+    try { await api("/api/conta/llm", { method: "PUT", json: { chave: $("#ia-chave").value, modelo: $("#ia-modelo").value } }); await telaIA("ok:Chave guardada no cofre. Ela não aparece mais nesta tela."); }
+    catch (err) { $("#ia-msg").className = "erro-msg"; $("#ia-msg").textContent = err.message; }
+  };
+  if ($("#ia-apagar")) $("#ia-apagar").onclick = async () => { try { await api("/api/conta/llm", { method: "DELETE" }); await telaIA("ok:Voltamos para a chave do Lastro."); } catch (err) { $("#ia-msg").textContent = err.message; } };
 }
 
 async function telaEquipe(nova = null) {
@@ -542,6 +563,48 @@ async function telaBI(nova = null, teste = null, chave = null) {
 // ---- Painel da demanda (LST-34) -----------------------------------------------------------
 const TIPOS_VISUAL = { kpi: "número (KPI)", barras: "barras", linha: "linha no tempo", tabela: "tabela" };
 const AGREG = { soma: "soma", media: "média", contagem: "contagem", distintos: "distintos", minimo: "mínimo", maximo: "máximo" };
+
+// ---- "Pergunte" na demanda (LST-57): pedido em português → gráfico sobre os dados desta demanda ----------------------------
+function perguntaHtml() {
+  return `<h2 id="sec-pergunte">Pergunte</h2><div class="bloco"><form id="f-perg" class="linha-btn" style="align-items:end">
+      <label for="perg-txt" style="flex:1 1 280px">O que você quer ver nesta demanda?<input id="perg-txt" type="text" required maxlength="300" placeholder="ex.: valor vendido por estado por mês"></label>
+      <button class="btn ouro" type="submit" id="perg-ir">ver gráfico</button></form><div id="perg-res" aria-live="polite"></div></div>`;
+}
+
+function graficoPergunta(r) {
+  const iv = r.colunas.length - 1, vals = r.linhas.map((l) => Number(l[iv]) || 0);
+  if (!r.linhas.length) return '<p class="quem">Nenhum dado para este pedido.</p>';
+  if (r.colunas.length === 1) return `<div class="total">${num(vals[0])}</div>`;
+  if (r.por_mes && r.colunas.length === 2) {
+    const maior = Math.max(...vals) || 1, n = Math.max(vals.length - 1, 1);
+    const pts = vals.map((v, i) => `${(100 * i / n).toFixed(2)},${(100 - 92 * v / maior).toFixed(2)}`).join(" ");
+    return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="${esc(r.titulo)}" style="width:100%;height:220px;border-bottom:1px solid var(--linha)"><polyline points="${pts}" fill="none" stroke="var(--ouro)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+      <div class="quem" style="display:flex;justify-content:space-between"><span>${esc(r.linhas[0][0])}</span><span>máx. ${num(maior)}</span><span>${esc(r.linhas[r.linhas.length - 1][0])}</span></div>`;
+  }
+  if (r.colunas.length === 2) {
+    const maior = Math.max(...vals.map(Math.abs)) || 1, tot = vals.reduce((a, v) => a + v, 0);
+    return `<div style="display:grid;gap:6px">${r.linhas.slice(0, 15).map((l, i) => `<div style="display:grid;grid-template-columns:minmax(80px,30%) 1fr auto;gap:8px;align-items:center;font-size:13px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(l[0])}">${esc(l[0] ?? "(vazio)")}</span><div class="barra" style="width:${(100 * Math.abs(vals[i]) / maior).toFixed(1)}%"></div><b class="n" style="font:500 12px var(--f-dado)">${num(vals[i])}${r.agregacao !== "media" && tot ? ` <span class="quem">${(100 * vals[i] / tot).toFixed(1).replace(".", ",")}%</span>` : ""}</b></div>`).join("")}</div>${r.linhas.length > 15 ? `<p class="quem">Mostrando 15 de ${r.linhas.length}; todos na tabela abaixo.</p>` : ""}`;
+  }
+  return "";
+}
+
+function ligarPergunte(did) {
+  const f = $("#f-perg");
+  if (!f) return;
+  f.onsubmit = async (ev) => {
+    ev.preventDefault();
+    const b = $("#perg-ir"), alvo = $("#perg-res");
+    b.disabled = true; b.textContent = "montando…"; alvo.innerHTML = '<div class="bloco esqueleto" style="height:120px;margin-top:12px"></div>';
+    try {
+      const r = await (await api(`/api/demandas/${did}/pergunte`, { method: "POST", json: { pergunta: $("#perg-txt").value } })).json();
+      alvo.innerHTML = `<h3 style="margin:14px 0 8px;font:600 16px var(--f-disp)">${esc(r.titulo)}</h3>${r.avisos.map((a) => `<p class="aviso">${esc(a)}</p>`).join("")}
+        ${graficoPergunta(r)}
+        <details style="margin-top:10px"><summary class="quem">ver a tabela e como calculei</summary><div class="tabela"><table><thead><tr>${r.colunas.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${r.linhas.map((l) => `<tr>${l.map((v) => `<td class="${typeof v === "number" ? "n" : ""}">${num(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div><pre>${esc(r.sql)}</pre></details>
+        <p class="quem" style="margin-top:8px">${esc(r.aviso_modelo)}</p>`;
+    } catch (err) { alvo.innerHTML = `<p class="erro-msg" role="alert">${esc(err.message)}</p>`; }
+    finally { b.disabled = false; b.textContent = "ver gráfico"; }
+  };
+}
 
 // ---- Dashboard da demanda (LST-57): HTML do Lastro numa moldura isolada (sem acesso à sessão do portal) ----------------
 function molduraDashboard(id) {

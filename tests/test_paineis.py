@@ -295,3 +295,57 @@ def test_dashboard_na_demanda_previa_so_para_o_revisor(api_aprovada):
     c.post(f"/api/demandas/{did}/painel", headers=ana)
     c.post(f"/api/demandas/{did}/painel/mudancas", headers=ana, json={"pedido": "adicione um gráfico de barras de valor vendido por estado"})
     assert "por estado" in c.get(f"/api/demandas/{did}/dashboard", headers=rui).text  # o personalizado vale para todos
+
+
+def test_pergunte_na_demanda_com_a_chave_do_lastro_ou_do_cliente(api_aprovada, monkeypatch):
+    """LST-57: pedido em português vira gráfico sobre os dados da demanda; a LLM só vê a pergunta e os nomes das colunas."""
+    from langchain_core.language_models.fake_chat_models import FakeListChatModel
+
+    from lastro.rapido import nucleo
+
+    _, c, cab, ana, rui, did = api_aprovada
+    adm = cab("adm@acme")
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    assert c.post(f"/api/demandas/{did}/pergunte", headers=ana, json={"pergunta": "valor vendido por vendedor"}).status_code == 403
+    r = c.post(f"/api/demandas/{did}/pergunte", headers=rui, json={"pergunta": "valor vendido por vendedor"}).json()  # prévia
+    assert r["origem"] == "palavras-chave" and r["dimensao"] == "vendedor" and r["grafico"] == "barras"
+    assert sum(linha[-1] for linha in r["linhas"]) == pytest.approx(TOTAL_AUDITADO, abs=0.05)  # confere com a resposta auditada
+    c.post(f"/api/demandas/{did}/revisao", headers=rui, json={"aprovado": True, "parecer": "ok"})
+
+    visto: list[str] = []
+    usado: list[tuple[str, str]] = []
+
+    class Espiao(FakeListChatModel):
+        def _call(self, messages, *a, **k):
+            visto.append("\n".join(str(m.content) for m in messages))
+            return super()._call(messages, *a, **k)
+
+    def falso(chave, modelo):
+        usado.append((chave, modelo))
+        plano = (f'{{"tabela": "painel_{did}_demanda", "agregacao": "soma", "medida": "valor_vendido", '
+                 '"dimensao": "estado", "por_mes": false, "grafico": "barras", "titulo": "Vendido por estado"}')
+        return Espiao(responses=[plano])
+
+    monkeypatch.setattr(nucleo, "modelo_gemini", falso)
+    monkeypatch.setenv("GOOGLE_API_KEY", "chave-do-lastro-de-teste-0123456789")
+    r = c.post(f"/api/demandas/{did}/pergunte", headers=ana, json={"pergunta": "quanto vendemos em cada estado?"}).json()
+    assert r["origem"] == "lastro" and "limites do plano gratuito" in r["aviso_modelo"] and r["titulo"] == "Vendido por estado"
+    assert usado[-1][0] == "chave-do-lastro-de-teste-0123456789"
+    assert "quanto vendemos em cada estado?" in visto[-1] and "estado" in visto[-1]
+    for dado in ("Eva Martins", "2567582", "14030477"):  # nenhum valor da demanda vai ao provedor
+        assert dado not in visto[-1]
+
+    # chave própria do cliente: só o admin cadastra; a chave nunca volta para a tela
+    corpo = {"chave": "chave-do-cliente-abcdefghijklmnop", "modelo": "gemini-modelo-do-cliente"}
+    assert c.put("/api/conta/llm", headers=ana, json=corpo).status_code == 403
+    assert c.put("/api/conta/llm", headers=adm, json={"chave": "curta"}).status_code == 400
+    assert c.put("/api/conta/llm", headers=adm, json=corpo).status_code == 200
+    estado = c.get("/api/conta/llm", headers=ana).json()
+    assert estado["propria"] and estado["modelo"] == "gemini-modelo-do-cliente" and "abcdefghijklmnop" not in str(estado)
+    r = c.post(f"/api/demandas/{did}/pergunte", headers=ana, json={"pergunta": "quanto vendemos em cada estado?"}).json()
+    assert r["origem"] == "cliente" and "não é garantido" not in r["aviso_modelo"] and "só é garantido" in r["aviso_modelo"]
+    assert usado[-1] == ("chave-do-cliente-abcdefghijklmnop", "gemini-modelo-do-cliente")
+    assert c.get("/api/conta/llm", headers=cab("adm@outra")).json()["propria"] is False  # outra empresa não herda a chave
+    assert c.delete("/api/conta/llm", headers=adm).json() == {"propria": False}
+    acoes = [e for e in c.get(f"/api/demandas/{did}", headers=ana).json()["eventos"] if e["acao"] == "pergunte"]
+    assert len(acoes) == 3 and "chave-do" not in str(acoes)  # rastro sem chave

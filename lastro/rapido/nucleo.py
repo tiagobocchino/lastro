@@ -282,9 +282,11 @@ def interpretar_simples(pergunta: str, cat: dict[str, dict[str, Any]]) -> Plano:
             "empresa": "company" if "company" in c["dimensoes"] else None, "setor": "setor_nome" if "setor_nome" in c["dimensoes"] else None,
             "status": "status_nome" if "status_nome" in c["dimensoes"] else None}
     dimensao = next((d for k, d in dims.items() if k in q and d), None)
+    if not dimensao:  # demanda do portal (LST-57): qualquer dimensão do modelo, pelo nome ("por vendedor", "por segmento")
+        dimensao = next((d for d in c["dimensoes"] if d != "ano_mes" and _sem_acento(nome(d)).split()[0][:6] in q), None)
     por_mes = bool(re.search(r"\b(mes|mensal|evolu|tempo|ao longo)", q)) and "ano_mes" in c["dimensoes"]
     contagem = bool(re.search(r"\b(quant|numero de|qtd)", q)) or not c["medidas"]
-    medida = None if contagem else c["medidas"][0]
+    medida = None if contagem else next((m for m in c["medidas"] if _sem_acento(nome(m)) in q), c["medidas"][0])
     grafico = "linha" if por_mes else ("barras" if dimensao else "numero")
     return validar(Plano(tabela=tabela, agregacao="contagem" if contagem else ("media" if "media" in q else "soma"), medida=medida,
                          dimensao=dimensao, por_mes=por_mes, grafico=grafico), cat)

@@ -913,6 +913,79 @@ def mudar_painel(did: int, dados: MudancaPainel, s: Annotated[Sessao, Depends(se
 PAPEIS_DA_PREVIA = ("revisor", "admin")
 
 
+def _demanda_visivel(did: int, s: Sessao, p: Plataforma) -> dict:
+    """Dashboard e 'Pergunte' (LST-57): aprovada para todos da empresa; em revisão, só revisor e admin (prévia)."""
+    d = p.repo.demanda(did)  # o repo já é da empresa do login: outra empresa recebe 404
+    if not d:
+        raise HTTPException(404, "demanda não encontrada")
+    if d["status"] == "em_revisao":
+        if s.papel not in PAPEIS_DA_PREVIA:
+            raise HTTPException(403, "o dashboard aparece depois que o revisor de negócio aprovar a demanda")
+    elif d["status"] != "aprovada":
+        raise HTTPException(409, "o dashboard nasce do resultado conferido: rode a demanda antes")
+    return d
+
+
+def _nome_llm(tenant: str) -> str:
+    return f"lastro:{tenant}:llm:gemini"
+
+
+class Pergunta(BaseModel):
+    pergunta: str
+
+
+@app.post("/api/demandas/{did}/pergunte")
+def pergunte(did: int, dados: Pergunta, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> dict:
+    """Pedido em português → gráfico sobre os dados da demanda. A LLM só vê a pergunta e os nomes das colunas."""
+    from . import paineis
+    from . import pergunte as pg
+    from .rapido import nucleo
+
+    d = _demanda_visivel(did, s, p)
+    gold = p.pasta_demanda(did) / "gold"
+    try:
+        cat = paineis.catalogo(gold, d["resultado"]["modelo"])
+    except paineis.PedidoInvalido as e:
+        raise HTTPException(409, str(e)) from e
+    proprio = json.loads(cofre.ler(_nome_llm(s.tenant)) or "{}")
+    try:
+        r = pg.responder(did, gold, cat, dados.pergunta, proprio.get("chave") or None, proprio.get("modelo") or None)
+    except nucleo.PlanoInvalido as e:
+        raise HTTPException(400, str(e)) from e
+    p.repo.registrar("analista", "pergunte", {"pergunta": dados.pergunta[:300], "titulo": r["titulo"], "interpretado_por": r["origem"],
+                                             "pedido_por": s.email}, did)
+    return r
+
+
+class ModeloProprio(BaseModel):
+    chave: str
+    modelo: str | None = None
+
+
+@app.get("/api/conta/llm")
+def ver_llm(s: Annotated[Sessao, Depends(sessao)]) -> dict:
+    """Se a empresa usa a própria chave de IA (LST-57). A chave nunca volta para a tela."""
+    proprio = json.loads(cofre.ler(_nome_llm(s.tenant)) or "{}")
+    return {"propria": bool(proprio.get("chave")), "modelo": proprio.get("modelo"), "lastro_disponivel": bool(os.environ.get("GOOGLE_API_KEY"))}
+
+
+@app.put("/api/conta/llm")
+def guardar_llm(dados: ModeloProprio, s: Annotated[Sessao, Depends(sessao)]) -> dict:
+    _papel(s, {"admin"})
+    chave = dados.chave.strip()
+    if len(chave) < 20 or any(c.isspace() for c in chave):
+        raise HTTPException(400, "isso não parece uma chave de API: confira e cole de novo")
+    cofre.guardar(_nome_llm(s.tenant), json.dumps({"chave": chave, "modelo": (dados.modelo or "").strip() or None}))
+    return {"propria": True, "modelo": (dados.modelo or "").strip() or None}
+
+
+@app.delete("/api/conta/llm")
+def apagar_llm(s: Annotated[Sessao, Depends(sessao)]) -> dict:
+    _papel(s, {"admin"})
+    cofre.guardar(_nome_llm(s.tenant), "")
+    return {"propria": False}
+
+
 @app.get("/api/demandas/{did}/dashboard", response_class=HTMLResponse)
 def dashboard(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> str:
     """Dashboard da demanda no portal (LST-57): mesmo padrão do Streamlit, montado na hora a partir do gold da demanda.
@@ -924,14 +997,7 @@ def dashboard(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plat
 
     from . import paineis
 
-    d = p.repo.demanda(did)  # o repo já é da empresa do login: outra empresa recebe 404
-    if not d:
-        raise HTTPException(404, "demanda não encontrada")
-    if d["status"] == "em_revisao":
-        if s.papel not in PAPEIS_DA_PREVIA:
-            raise HTTPException(403, "o dashboard aparece depois que o revisor de negócio aprovar a demanda")
-    elif d["status"] != "aprovada":
-        raise HTTPException(409, "o dashboard nasce do resultado conferido: rode a demanda antes")
+    d = _demanda_visivel(did, s, p)
     gold = p.pasta_demanda(did) / "gold"
     try:
         spec = (paineis.atual(p.pasta_demanda(did)) if d["status"] == "aprovada" else None) or paineis.inicial(d, gold)

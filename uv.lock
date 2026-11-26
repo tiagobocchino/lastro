@@ -869,6 +869,10 @@ dev = [
     { name = "jsonschema" },
     { name = "pytest" },
 ]
+llm = [
+    { name = "langchain-core" },
+    { name = "langchain-google-genai" },
+]
 postgres = [
     { name = "psycopg", extra = ["binary"] },
     { name = "psycopg-pool" },
@@ -890,7 +894,9 @@ requires-dist = [
     { name = "fastembed", marker = "extra == 'vetores'", specifier = ">=0.4" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "jsonschema", marker = "extra == 'dev'", specifier = ">=4.23" },
+    { name = "langchain-core", marker = "extra == 'llm'", specifier = ">=0.3" },
     { name = "langchain-core", marker = "extra == 'rapido'", specifier = ">=0.3" },
+    { name = "langchain-google-genai", marker = "extra == 'llm'", specifier = ">=2.0" },
     { name = "langchain-google-genai", marker = "extra == 'rapido'", specifier = ">=2.0" },
     { name = "openpyxl", specifier = ">=3.1" },
     { name = "pandas", specifier = ">=2.2" },
@@ -904,7 +910,7 @@ requires-dist = [
     { name = "streamlit", marker = "extra == 'rapido'", specifier = ">=1.40" },
     { name = "uvicorn", specifier = ">=0.30" },
 ]
-provides-extras = ["dev", "vetores", "postgres", "rapido"]
+provides-extras = ["dev", "vetores", "postgres", "rapido", "llm"]
 
 [[package]]
 name = "loguru"

@@ -28,3 +28,5 @@ services:
         value: "1"
       - key: LASTRO_URL_PUBLICA      # https://lastro-api-73zx.onrender.com ou o domínio próprio
         sync: false
+      - key: GOOGLE_API_KEY          # Gemini gratuito do Lastro para o "Pergunte" do portal (LST-57); sem ela, palavras-chave
+        sync: false

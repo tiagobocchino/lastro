@@ -14,11 +14,11 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=secret,id=ca,required=false \
     if [ -f /run/secrets/ca ]; then export SSL_CERT_FILE=/run/secrets/ca; fi; \
-    uv sync --frozen --no-dev --extra postgres --no-install-project --no-cache
+    uv sync --frozen --no-dev --extra postgres --extra llm --no-install-project --no-cache
 COPY lastro ./lastro
 RUN --mount=type=secret,id=ca,required=false \
     if [ -f /run/secrets/ca ]; then export SSL_CERT_FILE=/run/secrets/ca; fi; \
-    uv sync --frozen --no-dev --extra postgres --no-cache
+    uv sync --frozen --no-dev --extra postgres --extra llm --no-cache
 
 FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PATH="/app/.venv/bin:$PATH" LASTRO_HOME=/dados PORT=8080
