@@ -35,5 +35,11 @@ especialista: engenheiro-frontend
   - painel HTML sem coluna vazia (A1);
   - Streamlit com o tema da marca (`.streamlit/config.toml`), título visível no escuro (C3), textos em PT e números no formato brasileiro, barras no lugar da rosca (A8, M10 em parte);
   - Power BI: paleta com 3:1 sobre branco e cores good/bad/neutral (M9); desvio da Segoe UI registrado no `BRAND.md`.
-- Falta: reordenar a demanda aprovada (A6), layout novo dos dashboards (seção 4 da auditoria, pede grill) e Lighthouse no ar depois do deploy.
+- Demanda aprovada reordenada (A6):
+  - ordem nova: total com selo da auditoria, painel, resposta, conversa;
+  - auditoria, "como chegamos aqui" e rastro ficam recolhidos e têm links de atalho no topo;
+  - o rastro aparece em "chave: valor", não em JSON;
+  - a página caiu de 4.300 px para 2.700 px no desktop e de 6.500 px para 3.800 px no celular.
+- Manual do Streamlit Cloud para o Tiago: `docs/infra/streamlit.md`.
+- Falta: layout novo dos dashboards (seção 4 da auditoria, pede grill) e Lighthouse no ar depois do deploy.
 - Confirmado pelo Tiago (26/11): "desde 2019" fica no texto e a lixum.labs é a Organization do JSON-LD.

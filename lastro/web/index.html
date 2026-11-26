@@ -69,6 +69,12 @@ th { white-space: nowrap }
 .contrato td { white-space: normal; overflow-wrap: anywhere }
 @media (max-width: 760px) { .grade { grid-template-columns: 1fr } aside { border-right: 0; border-bottom: 1px solid var(--linha) } }
 @media (max-width: 480px) { header .quem .papel { display: none } header .linha-btn { flex-wrap: nowrap } header .quem { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0 } }
+.ancoras { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 16px } .ancoras a { font: 12px var(--f-dado); color: var(--quieta); text-decoration: none; border: 1px solid var(--linha); border-radius: 99px; padding: 6px 12px; min-height: 32px } .ancoras a:hover { color: var(--tinta); border-color: var(--campo) }
+.selo-aud { margin: 4px 0 0 }
+details.dobra { margin-top: 8px } details.dobra > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: 44px }
+details.dobra > summary::-webkit-details-marker { display: none } details.dobra > summary::before { content: "+"; font: 500 18px var(--f-dado); color: var(--quieta); width: 14px }
+details.dobra[open] > summary::before { content: "−" } details.dobra > summary h2 { margin: 18px 0 10px }
+[id^="sec-"], details.dobra { scroll-margin-top: 16px }
 .esqueleto { background: linear-gradient(90deg, var(--sup) 0, var(--sup-2) 50%, var(--sup) 100%); background-size: 200% 100% }
 @media (prefers-reduced-motion: no-preference) { .esqueleto { animation: brilho 1.2s linear infinite } @keyframes brilho { to { background-position: -200% 0 } } }
 @media (prefers-reduced-motion: no-preference) { .bloco { animation: sobe .25s ease-out } @keyframes sobe { from { transform: translateY(4px) } to { transform: none } } }

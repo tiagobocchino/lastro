@@ -154,11 +154,22 @@ async function abrirDemanda(id) {
   let html = `<p class="rot">demanda ${d.id} · <span class="status ${d.status}">${NOMES[d.status] || d.status}</span></p><h1>${esc(d.pergunta)}</h1>`;
   if (d.status === "grill") html += grillHtml(d);
   if (d.status === "pronta") html += `<div class="bloco"><p>Grill respondido. Os agentes vão modelar, construir o pipeline no sandbox, responder e auditar.</p><div class="linha-btn"><button class="btn ouro" id="b-exec">rodar agentes</button></div><p class="erro-msg" id="msg"></p></div>`;
-  if (d.resposta) html += resultadoHtml(d);
-  if (d.status === "aprovada") html += `<div id="painel-dem"></div><div id="conversa-dem"></div>`;
-  if (d.eventos?.length) html += `<h2>Rastro dos agentes</h2><div class="bloco rastro">${d.eventos.map((e) => `<div><b>${esc(e.ator.split("@")[0])}</b><span>${esc(e.acao)} · ${esc(e.detalhe.slice(0, 220))}</span></div>`).join("")}</div>`;
+  const rastro = d.eventos?.length ? rastroHtml(d.eventos) : "";
+  if (d.resposta && d.status === "aprovada") {
+    const r = partesResultado(d);
+    html += `<nav class="ancoras" aria-label="Nesta demanda"><a href="#sec-painel">painel</a><a href="#sec-resposta">resposta</a><a href="#aud">auditoria</a><a href="#como">como chegamos aqui</a><a href="#rastro">rastro</a></nav>
+      ${r.total}<div id="sec-painel"><div id="painel-dem"></div></div>${r.resposta}<div id="conversa-dem"></div>
+      ${dobra("aud", r.auditoriaTitulo, r.auditoria)}${r.camada2}${dobra("como", "Como chegamos aqui", r.como)}${rastro ? dobra("rastro", "Rastro dos agentes", rastro) : ""}`;
+  } else {
+    if (d.resposta) {
+      const r = partesResultado(d);  // em revisão: a auditoria fica aberta, é o que o revisor confere
+      html += `${r.total}${r.resposta}<h2>${r.auditoriaTitulo}</h2>${r.auditoria}${r.camada2}<h2>Como chegamos aqui</h2>${r.como}`;
+    }
+    if (rastro) html += `<h2>Rastro dos agentes</h2>${rastro}`;
+  }
   p.innerHTML = html;
   if (matchMedia("(max-width: 760px)").matches) p.scrollIntoView({ block: "start", behavior: suave() });  // no celular a lista fica acima (A4)
+  document.querySelectorAll(".ancoras a").forEach((a) => (a.onclick = () => { const alvo = $(a.getAttribute("href")); if (alvo?.tagName === "DETAILS") alvo.open = true; }));
   if ($("#f-grill")) $("#f-grill").onsubmit = (e) => enviarGrill(e, d);
   if ($("#b-exec")) $("#b-exec").onclick = () => executar(d.id);
   document.querySelectorAll("[data-baixar]").forEach((b) => (b.onclick = () => baixar(d.id, b.dataset.baixar)));
@@ -189,27 +200,48 @@ async function executar(id) {
   catch (err) { $("#msg").textContent = err.message; b.disabled = false; b.textContent = "rodar agentes"; }
 }
 
-function resultadoHtml(d) {
+// Partes da demanda com resposta. Aprovada: o que importa primeiro (número, painel, resposta), a prova recolhida embaixo (LST-55, A6).
+function partesResultado(d) {
   const r = d.resposta, a = d.auditoria, m = d.modelo;
   const iv = r.colunas.findIndex((c) => c.startsWith("total_"));
   const maior = iv >= 0 ? Math.max(...r.linhas.map((l) => Math.abs(l[iv] || 0)), 0) : 0;
   const tabela = `<div class="tabela"><table><thead><tr>${r.colunas.map((c) => `<th>${esc(c)}</th>`).join("")}${iv >= 0 ? "<th></th>" : ""}</tr></thead><tbody>${r.linhas.map((l) => `<tr>${l.map((v) => `<td class="${typeof v === "number" ? "n" : ""}">${num(v)}</td>`).join("")}${iv >= 0 && maior ? `<td style="width:28%"><div class="barra" style="width:${(100 * Math.abs(l[iv] || 0) / maior).toFixed(1)}%"></div></td>` : ""}</tr>`).join("")}</tbody></table></div>`;
   const checks = a.checagens.map((c) => `<tr><td class="${c.ok ? "ok" : c.nivel}">${c.ok ? "ok" : c.nivel}</td><td>${esc(c.checagem)}</td><td>${esc(c.detalhe)}</td></tr>`).join("");
+  const avisos = a.checagens.filter((c) => !c.ok).length;
+  const selo = `${plural(a.checagens.length, "checagem", "checagens")} · ${plural(avisos, "aviso", "avisos")} · ${a.aprovado_camada1 ? "camada 1 aprovada" : "camada 1 com erro"}${d.revisao?.aprovado ? ` · aprovada por ${esc(d.revisao.revisor.split("@")[0])}` : ""}`;
   const podeRevisar = d.status === "em_revisao" && ["revisor", "admin"].includes(sessao.papel);
-  return `${r.total != null ? `<div class="bloco"><p class="rot" style="margin:0">total de ${esc(r.medida)}</p><div class="total">${num(r.total)}</div></div>` : ""}
-    <h2>Resposta</h2><div class="bloco">${tabela}</div>
-    <h2>Auditoria técnica · camada 1 <span class="${a.aprovado_camada1 ? "ok" : "erro"}" style="font:600 13px var(--f-dado)">${a.aprovado_camada1 ? "aprovada" : "com erro"}</span></h2>
-    <div class="bloco tabela"><table class="chk"><tbody>${checks}</tbody></table></div>
-    <h2>Camada 2 · revisor de negócio</h2>
-    <div class="bloco"><p>Abra o notebook no Google Colab, refaça as contas e compare com a tabela acima.</p>
+  return {
+    total: r.total != null ? `<div class="bloco"><p class="rot" style="margin:0">total de ${esc(r.medida)}</p><div class="total">${num(r.total)}</div><p class="quem selo-aud">${selo}</p></div>` : "",
+    resposta: `<h2 id="sec-resposta">Resposta</h2><div class="bloco">${tabela}</div>`,
+    auditoriaTitulo: `Auditoria técnica · camada 1 <span class="${a.aprovado_camada1 ? "ok" : "erro"}" style="font:600 13px var(--f-dado)">${a.aprovado_camada1 ? "aprovada" : "com erro"}</span>`,
+    auditoria: `<div class="bloco tabela"><table class="chk"><tbody>${checks}</tbody></table></div>`,
+    camada2: `<h2>Camada 2 · revisor de negócio</h2>
+    <div class="bloco"><p>Abra o notebook no Google Colab, refaça as contas e compare com a tabela da resposta.</p>
       <div class="linha-btn"><button class="btn sec" data-baixar="notebook">baixar notebook do Colab</button><button class="btn sec" data-baixar="relatorio">baixar relatório</button><button class="btn sec" data-baixar="pipeline">baixar pipeline.py</button></div>
       <p class="quem" style="margin:12px 0 6px">Levar para a nuvem da empresa (o mesmo pipeline, no SQL de cada uma):</p>
       <div class="linha-btn"><button class="btn sec" data-baixar="bigquery">Google BigQuery</button><button class="btn sec" data-baixar="azure">Azure SQL / Fabric</button><button class="btn sec" data-baixar="athena">AWS Athena</button></div>
       ${d.revisao ? `<p><b>${esc(d.revisao.revisor)}</b> ${d.revisao.aprovado ? "aprovou" : "reprovou"}: ${esc(d.revisao.parecer || "(sem parecer)")}</p>` : ""}
       ${podeRevisar ? `<form id="f-rev" style="display:grid;gap:10px"><label for="parecer">Parecer<textarea id="parecer" placeholder="Ex.: números conferem com o notebook; regra de status correta."></textarea></label>
         <div class="linha-btn"><button class="btn ouro" type="submit" value="1">aprovar entrega</button><button class="btn sec" type="submit" value="0">reprovar</button></div><p class="erro-msg" id="msg-r"></p></form>`
-        : d.status === "em_revisao" ? `<p class="quem">Aguardando um revisor de negócio. Entre como rui@demo.lastro para revisar.</p>` : ""}</div>
-    <h2>Como chegamos aqui</h2><div class="bloco"><p class="quem">medida <code>${esc(m.medida)}</code> · data <code>${esc(m.data)}</code> · chave <code>${esc(m.chave)}</code> · filtro <code>${esc(m.filtro || "nenhum")}</code><br>dimensões: ${esc(m.dimensoes.join(", "))}<br>playbook consultado: <code>${esc(m.playbook)}</code></p><pre>${esc(r.sql)}</pre></div>`;
+        : d.status === "em_revisao" ? `<p class="quem">Aguardando um revisor de negócio.</p>` : ""}</div>`,
+    como: `<div class="bloco"><p class="quem">medida <code>${esc(m.medida)}</code> · data <code>${esc(m.data)}</code> · chave <code>${esc(m.chave)}</code> · filtro <code>${esc(m.filtro || "nenhum")}</code><br>dimensões: ${esc(m.dimensoes.join(", "))}<br>playbook consultado: <code>${esc(m.playbook)}</code></p><pre>${esc(r.sql)}</pre></div>`,
+  };
+}
+
+// Detalhe do rastro legível: {"linhas": 612} vira "linhas: 612" em vez de JSON cru.
+function detalheLegivel(txt) {
+  let o;
+  try { o = JSON.parse(txt); } catch { return txt; }
+  if (!o || typeof o !== "object" || Array.isArray(o)) return txt;
+  return Object.entries(o).map(([k, v]) => `${k.replace(/_/g, " ")}: ${typeof v === "object" ? JSON.stringify(v) : v}`).join(" · ");
+}
+
+function rastroHtml(eventos) {
+  return `<div class="bloco rastro">${eventos.map((e) => `<div><b>${esc(e.ator.split("@")[0])}</b><span>${esc(e.acao.replace(/_/g, " "))} · ${esc(detalheLegivel(e.detalhe).slice(0, 260))}</span></div>`).join("")}</div>`;
+}
+
+function dobra(id, titulo, corpo, aberto = false) {
+  return `<details class="dobra" id="${id}"${aberto ? " open" : ""}><summary><h2>${titulo}</h2></summary>${corpo}</details>`;
 }
 
 async function revisar(e, id) {
