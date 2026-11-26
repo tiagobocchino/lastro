@@ -39,8 +39,9 @@ TIPOS = {  # DuckDB → Postgres; o que não estiver aqui vai como texto
 
 
 def normalizar_chave(chave: str) -> str:
-    """Espaço nas pontas e maiúscula não contam: o HTTP corta espaços do cabeçalho e o usuário digita a chave à mão."""
-    return (chave or "").strip().lower()
+    """Espaço, aspas e caractere invisível nas pontas e maiúscula não contam: o HTTP corta espaços do cabeçalho e o
+    usuário cola a chave à mão no Power BI (achado de 26/11: o valor chegava sem começar por lst_)."""
+    return (chave or "").strip().strip("\"'\u200b\ufeff\u00a0").strip().lower()
 
 
 def hash_chave(chave: str) -> str:
@@ -302,7 +303,9 @@ class AcessoBI:
                                 "RETURNING tenant_id, nome", (hash_chave(c),)).fetchone()
                 motivo = None if r else "desconhecida"
             if motivo:
-                con.execute("INSERT INTO interno.bi_recusas (motivo, agente) VALUES (%s, %s)", (motivo, (agente or "")[:120]))
+                # pista sem a chave: tamanho e os 3 primeiros caracteres só quando nem começa com lst_ (então não é chave)
+                pista = f" | tam={len(c)} inicio={c[:3]!r}" if motivo == "prefixo" else ""
+                con.execute("INSERT INTO interno.bi_recusas (motivo, agente) VALUES (%s, %s)", (motivo, (agente or "")[:120] + pista))
         return dict(r) if r else None
 
     def tabelas_publicadas(self, esquema: str) -> list[str]:
