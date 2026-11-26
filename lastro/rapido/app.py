@@ -17,9 +17,10 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # no Streamlit Cloud o app roda como script
 from lastro.rapido import nucleo as n
 
-OURO, TINTA = "#B58324", "#111820"
+OURO = "#B58324"
 PALETA = ["#B58324", "#2F5D7C", "#8E98A3", "#A4602F", "#4F7A5A", "#56606B", "#C9A15B", "#3E4A57"]
-st.set_page_config(page_title="Lastro · relatórios rápidos", page_icon="📊", layout="wide")
+MARCA = Path(__file__).resolve().parents[2] / "site" / "marca" / "favicon-32.png"
+st.set_page_config(page_title="Lastro · relatórios rápidos", page_icon=str(MARCA) if MARCA.exists() else None, layout="wide")
 
 
 def br(v: float, casas: int = 2) -> str:
@@ -38,9 +39,20 @@ def conexao(api: str, chave: str):
     return n.carregar(n.baixar(api, chave))
 
 
-st.markdown(f"<h2 style='margin-bottom:0;color:{TINTA}'>Lastro · relatórios rápidos</h2>"
-            "<p style='color:#56606B;margin-top:4px'>KPIs gerais por empresa, setor, região/UF e mês. "
-            "O detalhe por cliente, vendedor e produto está nos relatórios do Power BI e do Looker.</p>", unsafe_allow_html=True)
+# Cores vêm do tema (.streamlit/config.toml): nada fixo no texto, para não sumir no tema escuro (LST-55, C3).
+st.title("Lastro · relatórios rápidos")
+st.caption("KPIs gerais por empresa, setor, região/UF e mês. O detalhe por cliente, vendedor e produto está nos relatórios do Power BI e do Looker.")
+
+
+def grafico(fig, medida_nome: str):
+    """Plotly no padrão brasileiro (1.234,56) e com o nome da medida no eixo, em vez de "valor"."""
+    fig.update_layout(separators=",.", font_family="IBM Plex Sans, Segoe UI, sans-serif", margin={"t": 48, "l": 8, "r": 8, "b": 8},
+                      yaxis_title=medida_nome, legend_title_text="")
+    return fig
+
+
+def rotulo_total(nome: str) -> str:
+    return nome.capitalize() if nome.lower().startswith("total") else f"Total de {nome}"
 
 api = segredo("LASTRO_API") or "https://lastro-api-73zx.onrender.com"
 chave = segredo("LASTRO_CHAVE")
@@ -70,7 +82,7 @@ with aba_kpi:
     cols_f = st.columns(max(len(filtros), 1))
     for col, d in zip(cols_f, filtros, strict=False):
         valores = [r[0] for r in con.execute(f'SELECT DISTINCT "{d}" FROM "{tabela}" WHERE "{d}" IS NOT NULL ORDER BY 1').fetchall()]
-        escolha = col.multiselect(n.nome(d).capitalize(), valores)
+        escolha = col.multiselect(n.nome(d).capitalize(), valores, placeholder="todas")
         if escolha:
             where.append(f'"{d}" IN ({", ".join("?" * len(escolha))})')
             params += escolha
@@ -78,23 +90,25 @@ with aba_kpi:
     total = con.execute(f'SELECT {"sum(" + chr(34) + medida + chr(34) + ")" if medida else "0"}, sum(registros) FROM "{tabela}"{filtro_sql}', params).fetchone()
     k1, k2, k3 = st.columns(3)
     if medida:
-        k1.metric(f"Total de {n.nome(medida)}", br(total[0] or 0))
+        k1.metric(rotulo_total(n.nome(medida)), br(total[0] or 0))
         k3.metric("Média por registro", br((total[0] or 0) / (total[1] or 1)))
     k2.metric("Registros", br(total[1] or 0, 0))
     valor_sql = f'sum("{medida}")' if medida else "sum(registros)"
+    medida_nome = n.nome(medida).capitalize() if medida else "Registros"
     g1, g2 = st.columns([3, 2])
     if "ano_mes" in c["dimensoes"]:
         df = con.execute(f'SELECT ano_mes AS "Mês", {valor_sql} AS valor FROM "{tabela}"{filtro_sql} GROUP BY 1 ORDER BY 1', params).df()
-        g1.plotly_chart(px.line(df, x="Mês", y="valor", title="Evolução mensal", color_discrete_sequence=[OURO]), use_container_width=True)
+        g1.plotly_chart(grafico(px.line(df, x="Mês", y="valor", title="Evolução mensal", color_discrete_sequence=[OURO]), medida_nome), use_container_width=True)
     geo = next((d for d in c["dimensoes"] if d.endswith("_regiao")), None) or next((d for d in c["dimensoes"] if d == "setor_nome"), None)
     if geo:
         df = con.execute(f'SELECT "{geo}" AS dim, {valor_sql} AS valor FROM "{tabela}"{filtro_sql} GROUP BY 1 ORDER BY 2 DESC', params).df()
-        g2.plotly_chart(px.pie(df, names="dim", values="valor", title=f"Por {n.nome(geo)}", hole=.5, color_discrete_sequence=PALETA),
-                        use_container_width=True)
+        # Participação em barras ordenadas (mais legível que rosca para comparar partes; LST-55)
+        g2.plotly_chart(grafico(px.bar(df, x="valor", y="dim", orientation="h", title=f"Por {n.nome(geo)}", color_discrete_sequence=[OURO],
+                                       labels={"dim": "", "valor": medida_nome}).update_yaxes(autorange="reversed"), ""), use_container_width=True)
     uf = next((d for d in c["dimensoes"] if d.endswith("_estado")), None)
     if uf:
         df = con.execute(f'SELECT "{uf}" AS UF, {valor_sql} AS valor FROM "{tabela}"{filtro_sql} GROUP BY 1 ORDER BY 2 DESC', params).df()
-        st.plotly_chart(px.bar(df, x="UF", y="valor", title=f"Por {n.nome(uf)}", color_discrete_sequence=[OURO]), use_container_width=True)
+        st.plotly_chart(grafico(px.bar(df, x="UF", y="valor", title=f"Por {n.nome(uf)}", color_discrete_sequence=[OURO]), medida_nome), use_container_width=True)
     st.caption("Números somados das tabelas prontas do BI (demandas aprovadas no Lastro). Valores vazios aparecem como vazios.")
 
 with aba_agente:

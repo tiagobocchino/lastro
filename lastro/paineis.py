@@ -374,6 +374,7 @@ h1 {{ font:700 26px/1.2 var(--f-disp); margin:0 0 4px; text-wrap:balance }} h2 {
 .quieta {{ color:var(--quieta); font-size:13px; margin:0 0 18px }}
 .grade {{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap:14px }}
 .bloco {{ background:var(--sup); border:1px solid var(--linha); border-radius:10px; padding:16px; min-width:0 }} .largo {{ grid-column:1/-1 }}
+.bloco.kpi {{ align-self:start }} @media (min-width: 900px) {{ .bloco.barras {{ grid-column:span 2 }} }}
 .kpi {{ font:700 34px var(--f-disp); font-variant-numeric:tabular-nums }}
 .barras {{ display:grid; gap:6px }} .linha-b {{ display:grid; grid-template-columns:minmax(80px, 30%) 1fr auto; gap:8px; align-items:center; font-size:13px }}
 .linha-b span {{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }} .linha-b i {{ height:10px; background:var(--ouro); border-radius:2px; min-width:2px }}

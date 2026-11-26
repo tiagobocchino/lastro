@@ -1,0 +1,15 @@
+# Tema do app de relatórios rápidos (LST-54/LST-55): tokens da marca (BRAND.md). O Streamlit Community Cloud
+# lê este arquivo na raiz do repositório. Segredos NÃO vão aqui: ficam em Settings → Secrets no Streamlit Cloud.
+[theme]
+base = "light"
+primaryColor = "#B58324"
+backgroundColor = "#EEF1F3"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#111820"
+font = "sans serif"
+
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false

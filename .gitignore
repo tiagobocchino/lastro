@@ -8,3 +8,6 @@ __pycache__/
 .pytest_cache/
 private-docs/
 worktrees/
+
+# Streamlit: só o config.toml é versionado
+.streamlit/secrets.toml

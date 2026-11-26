@@ -127,6 +127,12 @@ class Login(BaseModel):
     senha: str
 
 
+@app.get("/api/config")
+def config_publica() -> dict:
+    """O que a tela de login precisa saber antes de alguém entrar (LST-55, A5): contas de demonstração só fora de produção."""
+    return {"contas_demo": os.environ.get("LASTRO_AMBIENTE", "local") != "producao"}
+
+
 @app.post("/api/login")
 def login(dados: Login) -> dict:
     u = banco.autenticar(dados.email, dados.senha)

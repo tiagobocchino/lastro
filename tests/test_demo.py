@@ -465,3 +465,24 @@ def test_site_tem_seo_e_ids_da_demo():
     assert len(re.findall(r"<h1[ >]", html)) == 1
     for arq in ("img/og-lastro.jpg", "marca/favicon-32.png", "marca/apple-touch-icon.png"):
         assert (RAIZ / "site" / arq).exists()
+
+
+def test_config_publica_so_oferece_contas_de_demo_fora_de_producao(api, monkeypatch):
+    """LST-55 (A5): a tela de login só mostra e pré-preenche as contas de teste fora de produção."""
+    _, c, _ = api
+    assert c.get("/api/config").json() == {"contas_demo": True}
+    monkeypatch.setenv("LASTRO_AMBIENTE", "producao")
+    assert c.get("/api/config").json() == {"contas_demo": False}
+
+
+def test_tema_do_power_bi_tem_contraste_e_cores_de_estado():
+    """LST-55 (M9): toda cor de série com 3:1 sobre branco; verde e vermelho só como good/bad."""
+    from lastro.relatorio_powerbi import TEMA
+
+    def luz(h: str) -> float:
+        c = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+    assert all((1.05) / (luz(cor) + 0.05) >= 3 for cor in TEMA["dataColors"])
+    assert {"good", "bad", "neutral"} <= TEMA.keys() and TEMA["good"] not in TEMA["dataColors"]

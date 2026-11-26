@@ -26,6 +26,8 @@ Neutros puxados para o azul-grafite. O ouro é o único acento; verde, vermelho 
 - **Bricolage Grotesque** (700): títulos e números grandes.
 - **IBM Plex Sans**: texto.
 - **IBM Plex Mono**: dados, rótulos, SQL, status.
+- **Onde moram:** os arquivos `woff2` ficam em `site/fontes/` (licença OFL) e são servidos pelo próprio Lastro no site e no portal, sem Google Fonts.
+- **Desvio aceito:** o Power BI usa Segoe UI. O Power BI Service só mostra as fontes da lista dele, e a Bricolage não está nela. A marca entra pelas cores do tema (`relatorio_powerbi.TEMA`).
 
 ## Voz
 

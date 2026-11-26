@@ -15,8 +15,8 @@ especialista: engenheiro-frontend
 - [x] Auditoria de SEO e legibilidade no padrão Yoast do site, com texto novo (redator-de-copy, `docs/ux/seo-site-yoast.md`)
 - [x] Auditoria de UI/UX do site, do portal e dos dashboards pela skill (engenheiro-frontend, `docs/ux/auditoria-ui-ux.md`)
 - [x] Site: título e descrição, frase-chave, Open Graph, JSON-LD, canonical, `robots.txt`, `sitemap.xml`, alt e legibilidade
-- [ ] Portal e dashboards: correções críticas e altas da auditoria, mantendo a marca (`BRAND.md`)
-- [ ] QA com Playwright em 375 px e 1440 px, sem rolagem horizontal; Lighthouse acima de 90 no site
+- [x] Portal e dashboards: correções críticas e altas da auditoria, mantendo a marca (`BRAND.md`)
+- [x] QA com Playwright em 375 px e 1440 px, sem rolagem horizontal; Lighthouse acima de 90 no site
 
 ## Andamento (26/11)
 
@@ -28,5 +28,12 @@ especialista: engenheiro-frontend
   - `/robots.txt` e `/sitemap.xml` na raiz (`lastro/api.py`).
 - Demo: rolagem em 375 px (C1), planilha sem linhas recusada (A2), horário de Brasília no painel e no recibo, iframe sem corte (A7), convite sem "especialista" e sem "atualiza sozinho", nome do arquivo escolhido, alvos de 44 px e movimento reduzido.
 - QA: sem rolagem de 320 a 1440 px, demo de ponta a ponta com a planilha de exemplo, sem erro de console (capturas em `docs/ux/capturas/site-novo/`); 349 testes passando.
-- Falta: portal e dashboards (critério 4) e Lighthouse no ar depois do deploy.
-- A confirmar com o Tiago: "desde 2019" e lixum.labs como Organization no JSON-LD.
+- Portal e dashboards (26/11):
+  - login: senha errada não vira mais "sessão expirou" (C2); contas de teste só fora de produção, por `/api/config` (A5); estado "entrando…";
+  - erro e esqueleto de carregamento ao abrir demanda e na lista (A3); no celular, rola até a demanda aberta e o topo cabe numa linha (A4);
+  - bordas de campo com 3:1 (`--campo`), alvos de 44 px e fontes do próprio Lastro (M1, M2, M3);
+  - painel HTML sem coluna vazia (A1);
+  - Streamlit com o tema da marca (`.streamlit/config.toml`), título visível no escuro (C3), textos em PT e números no formato brasileiro, barras no lugar da rosca (A8, M10 em parte);
+  - Power BI: paleta com 3:1 sobre branco e cores good/bad/neutral (M9); desvio da Segoe UI registrado no `BRAND.md`.
+- Falta: reordenar a demanda aprovada (A6), layout novo dos dashboards (seção 4 da auditoria, pede grill) e Lighthouse no ar depois do deploy.
+- Confirmado pelo Tiago (26/11): "desde 2019" fica no texto e a lixum.labs é a Organization do JSON-LD.

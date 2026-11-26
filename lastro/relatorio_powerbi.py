@@ -22,7 +22,10 @@ TIPO_TMDL = {"bigint": "int64", "integer": "int64", "smallint": "int64", "double
 FORA_DOS_EIXOS = re.compile(r"(^id$|_id$|documento|^ano$|^mes$|^ano_mes$|^registros$|^data$)")
 TEMA = {
     "name": "Lastro",
-    "dataColors": ["#B58324", "#2F5D7C", "#8E98A3", "#A4602F", "#4F7A5A", "#56606B", "#C9A15B", "#3E4A57", "#7A8D9C", "#D6B677"],
+    # Contraste mínimo de 3:1 sobre branco (WCAG 1.4.11); verde e vermelho só como estado (good/bad), nunca como série (LST-55)
+    "dataColors": ["#B58324", "#2F5D7C", "#A4602F", "#56606B", "#7A5A1A", "#3E4A57", "#7A8D9C", "#8A6214"],
+    "good": "#2E6B4E", "bad": "#A3392B", "neutral": "#56606B",
+    "maximum": "#B58324", "center": "#F4EAD3", "minimum": "#FFFFFF",
     "background": "#FFFFFF", "foreground": "#111820", "tableAccent": "#B58324",
     "textClasses": {"title": {"fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#111820"},
                     "callout": {"fontFace": "Segoe UI Semibold", "fontSize": 26, "color": "#111820"},

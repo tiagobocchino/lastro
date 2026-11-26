@@ -16,7 +16,7 @@ async function api(caminho, opcoes = {}) {
   if (sessao) cab.Authorization = `Bearer ${sessao.token}`;
   if (opcoes.json !== undefined) { cab["Content-Type"] = "application/json"; opcoes.body = JSON.stringify(opcoes.json); }
   const r = await fetch(caminho, { ...opcoes, headers: cab });
-  if (r.status === 401) { sair(); throw new Error("Sua sessão expirou. Entre de novo."); }
+  if (r.status === 401 && cab.Authorization) { sair(); throw new Error("Sua sessão expirou. Entre de novo."); }
   if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || `Erro ${r.status}`); }
   return r;
 }
@@ -27,30 +27,41 @@ function sair() { sessao = null; try { sessionStorage.removeItem("lastro"); } ca
 
 function logo() { return `<span class="logo"><svg width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true"><rect x="8" y="8" width="32" height="32" rx="3" stroke="var(--tinta)" stroke-width="6"/><rect x="24" y="24" width="32" height="32" rx="3" stroke="var(--prata)" stroke-width="6"/><rect x="27" y="27" width="10" height="10" fill="var(--ouro)"/></svg>lastro</span>`; }
 
-function telaLogin(msg = "") {
-  $("#app").innerHTML = `<div class="login"><form class="bloco" id="f-login">
+let contasDemo = null;  // /api/config: contas de demonstração só fora de produção (LST-55, A5)
+
+async function telaLogin(msg = "") {
+  if (contasDemo === null) {
+    try { contasDemo = Boolean((await (await fetch("/api/config")).json()).contas_demo); } catch { contasDemo = false; }
+  }
+  $("#app").innerHTML = `<div class="login"><form class="bloco" id="f-login" novalidate>
     ${logo()}
     <div><h1>Entrar</h1><p class="quem">Cada empresa tem o seu espaço. Você só vê os dados da sua.</p></div>
-    <label for="email">E-mail<input id="email" type="email" required value="ana@demo.lastro" autocomplete="username"></label>
-    <label for="senha">Senha<input id="senha" type="password" required value="demo1234" autocomplete="current-password"></label>
-    <button class="btn" type="submit">entrar</button>
-    <p class="erro-msg" id="msg">${esc(msg)}</p>
-    <div class="dica">Contas de teste (senha demo1234):<br>ana@demo.lastro · demandante<br>rui@demo.lastro · revisor de negócio<br>admin@demo.lastro · admin</div>
+    <label for="email">E-mail<input id="email" type="email" required ${contasDemo ? 'value="ana@demo.lastro"' : ""} autocomplete="username"></label>
+    <label for="senha">Senha<input id="senha" type="password" required ${contasDemo ? 'value="demo1234"' : ""} autocomplete="current-password"></label>
+    <button class="btn" type="submit" id="b-entrar">entrar</button>
+    <p class="erro-msg" id="msg" role="alert">${esc(msg)}</p>
+    ${contasDemo ? '<div class="dica">Contas de teste (senha demo1234):<br>ana@demo.lastro · demandante<br>rui@demo.lastro · revisor de negócio<br>admin@demo.lastro · admin</div>' : ""}
   </form></div>`;
   $("#f-login").onsubmit = async (e) => {
     e.preventDefault();
+    const b = $("#b-entrar");
+    if (!$("#email").value.trim() || !$("#senha").value) { $("#msg").textContent = "Preencha o e-mail e a senha."; return; }
+    b.disabled = true; b.textContent = "entrando…"; $("#msg").textContent = "";
     try {
-      const r = await api("/api/login", { method: "POST", json: { email: $("#email").value, senha: $("#senha").value } });
+      const r = await api("/api/login", { method: "POST", json: { email: $("#email").value.trim(), senha: $("#senha").value } });
       sessao = await r.json();
       guardar();
       sessao.trocar_senha ? telaTrocaObrigatoria() : telaPrincipal();
-    } catch (err) { $("#msg").textContent = err.message; }
+    } catch (err) {
+      $("#msg").textContent = /inválid/.test(err.message) ? "E-mail ou senha não conferem. Confira e tente de novo." : err.message;
+      b.disabled = false; b.textContent = "entrar"; $("#senha").select();
+    }
   };
 }
 
 async function telaPrincipal() {
   $("#app").innerHTML = `<header>${logo()}<div class="linha-btn" style="align-items:center">
-      <span class="quem"><b>${esc(sessao.nome)}</b> · ${esc(sessao.papel)} · ${esc(sessao.tenant)}</span>
+      <span class="quem"><b>${esc(sessao.nome)}</b><span class="papel"> · ${esc(sessao.papel)} · ${esc(sessao.tenant)}</span></span>
       <button class="btn sec" id="sair">sair</button></div></header>
     <div class="grade"><aside><div class="abas"><button class="aba ativa" id="aba-dem">demandas</button><button class="aba" id="aba-con">conectores</button><button class="aba" id="aba-conta">conta</button></div><div id="lado"><button class="btn" id="nova">nova demanda</button>
       <p class="rot" style="margin:12px 0 0">demandas</p><div id="lista"></div></div></aside>
@@ -78,12 +89,19 @@ async function telaPrincipal() {
 }
 
 async function carregarLista() {
-  const ds = await (await api("/api/demandas")).json();
+  let ds;
+  try { ds = await (await api("/api/demandas")).json(); }
+  catch (err) {
+    $("#lista").innerHTML = `<p class="erro-msg" role="alert">${esc(err.message)}</p><button class="btn sec" id="b-lista-de-novo">tentar de novo</button>`;
+    $("#b-lista-de-novo").onclick = carregarLista;
+    return;
+  }
   $("#lista").innerHTML = ds.length ? ds.map((d) => `<button class="item" data-id="${d.id}"><span>${esc(d.pergunta)}</span><span class="status ${d.status}">${NOMES[d.status] || d.status}</span></button>`).join("")
     : `<p class="quem">Nenhuma demanda ainda. Comece pela primeira pergunta.</p>`;
   document.querySelectorAll(".item").forEach((b) => (b.onclick = () => abrirDemanda(Number(b.dataset.id))));
   marcarLista();
-  const problemas = (await (await api("/api/cargas")).json()).filter((k) => k.ultimo_status === "falhou" || k.ultimo_status === "cota");
+  let problemas = [];
+  try { problemas = (await (await api("/api/cargas")).json()).filter((k) => k.ultimo_status === "falhou" || k.ultimo_status === "cota"); } catch { /* o aviso de cargas é extra */ }
   if (problemas.length) $("#lista").insertAdjacentHTML("afterbegin", `<button class="aviso-portal" id="b-aviso-cargas"><b>${plural(problemas.length, "carga não atualizou", "cargas não atualizaram")}</b><span>${esc(problemas[0].fonte)}: ${esc(problemas[0].ultimo_aviso)}</span></button>`);
   if ($("#b-aviso-cargas")) $("#b-aviso-cargas").onclick = () => telaConectores(problemas[0].saas);
 }
@@ -119,10 +137,20 @@ async function telaNova() {
   };
 }
 
+const suave = () => (matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
+
 async function abrirDemanda(id) {
   atual = id; marcarLista();
-  const d = await (await api(`/api/demandas/${id}`)).json();
   const p = $("#painel");
+  p.setAttribute("aria-busy", "true");
+  p.innerHTML = `<p class="rot">demanda ${id}</p><div class="bloco esqueleto" style="height:120px"></div><div class="bloco esqueleto" style="height:220px"></div>`;
+  let d;
+  try { d = await (await api(`/api/demandas/${id}`)).json(); }
+  catch (err) {
+    p.innerHTML = `<p class="rot">demanda ${id}</p><div class="bloco"><p class="erro-msg" role="alert">Não consegui abrir esta demanda: ${esc(err.message)}</p><div class="linha-btn"><button class="btn sec" id="b-de-novo">tentar de novo</button></div></div>`;
+    $("#b-de-novo").onclick = () => abrirDemanda(id);
+    return;
+  } finally { p.removeAttribute("aria-busy"); }
   let html = `<p class="rot">demanda ${d.id} · <span class="status ${d.status}">${NOMES[d.status] || d.status}</span></p><h1>${esc(d.pergunta)}</h1>`;
   if (d.status === "grill") html += grillHtml(d);
   if (d.status === "pronta") html += `<div class="bloco"><p>Grill respondido. Os agentes vão modelar, construir o pipeline no sandbox, responder e auditar.</p><div class="linha-btn"><button class="btn ouro" id="b-exec">rodar agentes</button></div><p class="erro-msg" id="msg"></p></div>`;
@@ -130,6 +158,7 @@ async function abrirDemanda(id) {
   if (d.status === "aprovada") html += `<div id="painel-dem"></div><div id="conversa-dem"></div>`;
   if (d.eventos?.length) html += `<h2>Rastro dos agentes</h2><div class="bloco rastro">${d.eventos.map((e) => `<div><b>${esc(e.ator.split("@")[0])}</b><span>${esc(e.acao)} · ${esc(e.detalhe.slice(0, 220))}</span></div>`).join("")}</div>`;
   p.innerHTML = html;
+  if (matchMedia("(max-width: 760px)").matches) p.scrollIntoView({ block: "start", behavior: suave() });  // no celular a lista fica acima (A4)
   if ($("#f-grill")) $("#f-grill").onsubmit = (e) => enviarGrill(e, d);
   if ($("#b-exec")) $("#b-exec").onclick = () => executar(d.id);
   document.querySelectorAll("[data-baixar]").forEach((b) => (b.onclick = () => baixar(d.id, b.dataset.baixar)));

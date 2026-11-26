@@ -1,8 +1,16 @@
-/* Lastro · tokens da marca. Camadas do medalhão viram a paleta: bronze, prata, ouro. */
+/* Lastro · tokens da marca. Camadas do medalhão viram a paleta: bronze, prata, ouro.
+   Fontes servidas pelo próprio Lastro (site/fontes, licença OFL), sem Google Fonts (LST-55). */
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 500 700; font-display: swap; src: url(/site/fontes/bricolage-grotesque-latin-600-normal.woff2) format('woff2') }
+@font-face { font-family: 'Bricolage Grotesque'; font-weight: 800; font-display: swap; src: url(/site/fontes/bricolage-grotesque-latin-800-normal.woff2) format('woff2') }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 400; font-display: swap; src: url(/site/fontes/ibm-plex-sans-latin-400-normal.woff2) format('woff2') }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 500; font-display: swap; src: url(/site/fontes/ibm-plex-sans-latin-500-normal.woff2) format('woff2') }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 600 700; font-display: swap; src: url(/site/fontes/ibm-plex-sans-latin-600-normal.woff2) format('woff2') }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 400; font-display: swap; src: url(/site/fontes/ibm-plex-mono-latin-400-normal.woff2) format('woff2') }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500 600; font-display: swap; src: url(/site/fontes/ibm-plex-mono-latin-500-normal.woff2) format('woff2') }
 :root {
   --chao: #EEF1F3; --sup: #FFFFFF; --sup-2: #F6F8F9; --tinta: #111820; --quieta: #56606B; --linha: #D6DCE2;
   --ouro: #B58324; --ouro-tx: #8A6214; --ouro-f: #F4EAD3; --bronze: #A4602F; --prata: #8E98A3;
-  --ok: #2E6B4E; --erro: #A3392B; --aviso: #8D6210;
+  --ok: #2E6B4E; --erro: #A3392B; --aviso: #8D6210; --campo: #8C959F; --sobre-ouro: #1A1408;
   --f-disp: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
   --f-texto: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
   --f-dado: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
@@ -10,11 +18,11 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --chao: #0D1116; --sup: #151B22; --sup-2: #1B222B; --tinta: #E7ECF1; --quieta: #98A3AE; --linha: #26303A;
   --ouro: #E1B24F; --ouro-tx: #E8C06A; --ouro-f: #2E2716; --bronze: #C98552; --prata: #AEB7C0;
-  --ok: #7CC4A0; --erro: #F08A7C; --aviso: #E7C06B; color-scheme: dark; } }
+  --ok: #7CC4A0; --erro: #F08A7C; --aviso: #E7C06B; --campo: #5E6974; color-scheme: dark; } }
 :root[data-theme="dark"] {
   --chao: #0D1116; --sup: #151B22; --sup-2: #1B222B; --tinta: #E7ECF1; --quieta: #98A3AE; --linha: #26303A;
   --ouro: #E1B24F; --ouro-tx: #E8C06A; --ouro-f: #2E2716; --bronze: #C98552; --prata: #AEB7C0;
-  --ok: #7CC4A0; --erro: #F08A7C; --aviso: #E7C06B; color-scheme: dark; }
+  --ok: #7CC4A0; --erro: #F08A7C; --aviso: #E7C06B; --campo: #5E6974; color-scheme: dark; }
 
 .aviso-oauth { border-left: 3px solid var(--ouro); padding-left: 14px; display: grid; gap: 8px }
 .aviso-carga { white-space: normal; color: var(--aviso); font-size: 13px }
