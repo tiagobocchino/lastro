@@ -46,7 +46,10 @@ especialista: engenheiro-frontend
   - Streamlit: `nucleo.resumo` e `nucleo.ranking`, com a mesma estrutura;
   - testes conferem os números contra SQL direto no gold;
   - capturas em `docs/ux/capturas/painel-novo/`.
-- Falta: Lighthouse do site e do portal no ar, depois do deploy.
+- Lighthouse no ar (26/11, commit 7ce52ff):
+  - site: 99/100/100/100 no celular e 100 nas quatro no desktop;
+  - portal: 100/100/100, com SEO 63 por causa do `noindex`, que é proposital: o portal não deve ser indexado.
+- Imagens do site em WebP com versão de 800 px (de 45% a 85% menores) e atributos de tamanho certos; cache longo para fontes (1 ano) e imagens (7 dias).
 - Confirmado pelo Tiago (26/11): "desde 2019" fica no texto e a lixum.labs é a Organization do JSON-LD.
 
 ## Grill do layout dos dashboards (26/11, respondido pelo Tiago)

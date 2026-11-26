@@ -486,3 +486,14 @@ def test_tema_do_power_bi_tem_contraste_e_cores_de_estado():
 
     assert all((1.05) / (luz(cor) + 0.05) >= 3 for cor in TEMA["dataColors"])
     assert {"good", "bad", "neutral"} <= TEMA.keys() and TEMA["good"] not in TEMA["dataColors"]
+
+
+def test_site_serve_fontes_e_imagens_com_cache_longo(api):
+    """LST-55: fontes por um ano, imagens por uma semana; o HTML do site continua sem cache longo."""
+    _, c, _ = api
+    f = c.get("/site/fontes/ibm-plex-sans-latin-400-normal.woff2")
+    i = c.get("/site/img/resposta-800.webp")
+    h = c.get("/site/")
+    assert f.status_code == 200 and "immutable" in f.headers["cache-control"]
+    assert i.status_code == 200 and "max-age=604800" in i.headers["cache-control"]
+    assert "max-age" not in h.headers.get("cache-control", "")

@@ -49,6 +49,21 @@ from fastapi.middleware.gzip import GZipMiddleware
 app.add_middleware(GZipMiddleware, minimum_size=1024)  # site, portal e painéis em HTML/JS comprimidos
 
 
+CACHE_ESTATICO = (("/site/fontes/", "public, max-age=31536000, immutable"),  # woff2 nunca muda de conteúdo
+                  ("/site/img/", "public, max-age=604800"), ("/site/marca/", "public, max-age=604800"))  # podem ser trocadas
+
+
+@app.middleware("http")
+async def cache_estatico(request, call_next):
+    """Cache longo para fontes e imagens do site e do portal (LST-55: Lighthouse "uses-long-cache-ttl")."""
+    resposta = await call_next(request)
+    for prefixo, politica in CACHE_ESTATICO:
+        if request.url.path.startswith(prefixo) and resposta.status_code == 200:
+            resposta.headers["Cache-Control"] = politica
+            break
+    return resposta
+
+
 NAO_MEDIR = ("/saude", "/web/", "/site", "/favicon", "/robots.txt", "/sitemap.xml")
 
 
