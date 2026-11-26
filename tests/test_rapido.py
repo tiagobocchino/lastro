@@ -158,3 +158,42 @@ def test_ranking_top_10_com_outros_e_conferencia(con):
     assert sum(d[3] for d in detalhe) == pytest.approx(1) and sum(d[2] for d in detalhe) == 6
     with pytest.raises(n.PlanoInvalido):
         n.ranking(con, "painel_15_quanto_cada_vendedor_vendeu", "cliente_nome", "valores_produtos", {})  # fora do escopo do app rápido
+
+
+def test_app_relatorio_sem_medida_rh_abre_sem_erro(con, monkeypatch):
+    """26/11: no relatório de RH (sem coluna de valor) a conferência tinha duas colunas "Registros" e o st.dataframe quebrava."""
+    from streamlit.testing.v1 import AppTest
+
+    vendas = con.execute('SELECT * FROM "painel_15_quanto_cada_vendedor_vendeu"').df()
+    rh = con.execute('SELECT * FROM "painel_18_quantos_funcionarios_ativos"').df()
+    monkeypatch.setattr(n, "baixar", lambda api, chave: {"painel_15_quanto_cada_vendedor_vendeu": _parquet(vendas),
+                                                         "painel_18_quantos_funcionarios_ativos": _parquet(rh)})
+    at = AppTest.from_file("../lastro/rapido/app.py", default_timeout=60)
+    at.secrets["LASTRO_CHAVE"] = "lst_teste"
+    at.run()
+    at.selectbox[0].select("painel_18_quantos_funcionarios_ativos").run()
+    assert not at.exception, at.exception
+    rotulos = [m.label for m in at.metric]
+    assert rotulos.count("Registros") == 1 and "Média por registro" not in rotulos
+    assert {m.label: m.value for m in at.metric}["Registros"] == "4"
+    tabela = at.dataframe[0].value
+    assert list(tabela.columns) == ["Setor", "Registros", "% do total"]
+
+
+def test_aba_pergunte_responde_sobre_rh_e_uma_aba_nao_derruba_a_outra(con, monkeypatch):
+    from streamlit.testing.v1 import AppTest
+
+    vendas = con.execute('SELECT * FROM "painel_15_quanto_cada_vendedor_vendeu"').df()
+    rh = con.execute('SELECT * FROM "painel_18_quantos_funcionarios_ativos"').df()
+    monkeypatch.setattr(n, "baixar", lambda api, chave: {"painel_15_quanto_cada_vendedor_vendeu": _parquet(vendas),
+                                                         "painel_18_quantos_funcionarios_ativos": _parquet(rh)})
+    at = AppTest.from_file("../lastro/rapido/app.py", default_timeout=60)
+    at.secrets["LASTRO_CHAVE"] = "lst_teste"
+    at.run()
+    at.text_input[0].input("quantos funcionários por setor").run()
+    assert not at.exception, at.exception
+    assert any("setor" in s.value.lower() for s in at.subheader)
+    monkeypatch.setattr(n, "resumo", lambda *a, **k: 1 / 0)  # indicadores quebram: o Pergunte continua respondendo
+    at.run()
+    assert not at.exception and any("não carregou" in e.value for e in at.error)
+    assert any("setor" in s.value.lower() for s in at.subheader)

@@ -8,6 +8,7 @@ Segredos (Streamlit Cloud → Settings → Secrets, ou .streamlit/secrets.toml l
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -75,7 +76,7 @@ aba_kpi, aba_agente = st.tabs(["Indicadores", "Pergunte"])
 
 MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 
-with aba_kpi:
+def indicadores() -> None:
     # Mesmo esqueleto do painel de entrega (LST-55): filtros → 4 cartões → gráfico principal + ranking → conferência
     with st.container(border=True):
         tabela = st.selectbox("Relatório", list(cat), format_func=lambda t: cat[t]["assunto"])
@@ -92,17 +93,21 @@ with aba_kpi:
                 filtros[d] = col.multiselect("Ano" if d == "ano" else n.nome(d).capitalize(), valores, placeholder="todos" if d == "ano" else "todas")
     medida_nome = n.nome(medida).capitalize() if medida else "Registros"
     r = n.resumo(con, tabela, medida, filtros)
-    k = st.columns(4)
-    k[0].metric(rotulo_total(n.nome(medida)) if medida else "Registros", br(r["total"], 2 if medida else 0), border=True)
-    k[1].metric("Registros", br(r["registros"], 0), border=True)
-    k[2].metric("Média por registro", br(r["media"]) if r["media"] is not None else "—", border=True)
+    # Sem coluna de valor (ex.: RH), a medida é a contagem: um cartão "Registros" só, sem média (26/11)
     comp = r["comparacao"]
+    k = st.columns((3 if medida else 1) + (1 if comp else 0))
+    if medida:
+        k[0].metric(rotulo_total(n.nome(medida)), br(r["total"]), border=True)
+        k[1].metric("Registros", br(r["registros"], 0), border=True)
+        k[2].metric("Média por registro", br(r["media"]) if r["media"] is not None else "—", border=True)
+    else:
+        k[0].metric("Registros", br(r["registros"], 0), border=True)
     if comp:
         var = comp["variacao"]
         base = f"{comp['ano'] - 1}: {br(comp['anterior'])}" if comp["anterior"] is not None else f"sem dados de {comp['ano'] - 1}"
-        k[3].metric(f"{comp['ano']} até {MESES[comp['mes'] - 1]} vs mesmo período", br(comp["atual"], 2 if medida else 0),
+        k[-1].metric(f"{comp['ano']} até {MESES[comp['mes'] - 1]} vs mesmo período", br(comp["atual"], 2 if medida else 0),
                     delta=(f"{var * 100:+.1f}%".replace(".", ",") if var is not None else None), border=True)
-        k[3].caption(base)
+        k[-1].caption(base)
     g1, g2 = st.columns([2, 1])
     valor_sql = f'sum("{medida}")' if medida else "sum(registros)"
     if "ano_mes" in c["dimensoes"]:
@@ -123,14 +128,17 @@ with aba_kpi:
         g2.plotly_chart(fig.update_layout(margin={"t": 48, "l": 8, "r": 64, "b": 8}), use_container_width=True)
         st.subheader(f"Conferência por {n.nome(dim)}")
         rotulo_dim = n.nome(dim)[:1].upper() + n.nome(dim)[1:]  # "UF da obra", não "Uf da obra"
-        tab = pd.DataFrame([(k_, br(v, 2 if medida else 0), br(r_, 0), f"{p * 100:.1f}%".replace(".", ",") if p is not None else "—")
-                            for k_, v, r_, p in detalhe], columns=[rotulo_dim, medida_nome, "Registros", "% do total"])
+        pct = lambda p: f"{p * 100:.1f}%".replace(".", ",") if p is not None else "—"
+        if medida:
+            tab = pd.DataFrame([(k_, br(v), br(r_, 0), pct(p)) for k_, v, r_, p in detalhe], columns=[rotulo_dim, medida_nome, "Registros", "% do total"])
+        else:  # sem coluna de valor: a medida já é a contagem de registros
+            tab = pd.DataFrame([(k_, br(r_, 0), pct(p)) for k_, _, r_, p in detalhe], columns=[rotulo_dim, "Registros", "% do total"])
         st.dataframe(tab, use_container_width=True, hide_index=True)  # números já no formato 1.234,56
         st.caption(f"Soma da conferência: {br(sum(v for _, v, _, _ in detalhe), 2 if medida else 0)}, igual ao primeiro cartão.")
     st.caption("Números somados das tabelas prontas do BI (demandas aprovadas no Lastro). Comparação: janeiro até o último mês com dado, "
                "contra o mesmo período do ano anterior.")
 
-with aba_agente:
+def pergunte() -> None:
     google = segredo("GOOGLE_API_KEY")
     st.caption("Agente LangChain com Gemini gratuito" if google else "Sem chave do Gemini: interpretação por palavras-chave. "
                "Com GOOGLE_API_KEY nos secrets, um agente LangChain interpreta o pedido.")
@@ -159,6 +167,20 @@ with aba_agente:
             else:
                 st.plotly_chart(px.bar(df, x=plano.dimensao, y="valor", color_discrete_sequence=[OURO]), use_container_width=True)
             with st.expander("Como calculei"):
-                q, p = n.sql(plano)
+                q, _ = n.sql(plano)
                 st.code(q, language="sql")
                 st.caption("O modelo de linguagem só recebeu o pedido e os nomes das colunas; os números saem deste SQL, rodado no Lastro.")
+
+
+def aba_segura(aba, desenhar) -> None:
+    """Uma aba com erro não derruba a outra: as duas rodam no mesmo script (26/11, RH quebrava o "Pergunte")."""
+    with aba:
+        try:
+            desenhar()
+        except Exception:
+            logging.getLogger("lastro.rapido").exception("aba falhou")
+            st.error("Esta parte do relatório não carregou. O erro foi registrado; as outras abas continuam funcionando.")
+
+
+aba_segura(aba_kpi, indicadores)
+aba_segura(aba_agente, pergunte)
