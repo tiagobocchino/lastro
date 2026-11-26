@@ -177,14 +177,21 @@ def mudar(spec: dict, op: dict, cat: dict) -> tuple[dict, str]:
         novo["medidas"].append({"id": mid, "nome": nome, "coluna": coluna, "agregacao": agg})
         frase = f"adicionou a medida '{nome}' ({agg} de {coluna})"
     elif tipo == "adicionar_visual":
+        extra = ""
+        if (nova := op.get("medida_nova")) and not any(m["id"] == nova["id"] for m in novo["medidas"]):
+            novo["medidas"].append(nova)  # "gráfico de média de valor orçado": cria a medida e o visual numa versão só
+            extra = f" e a medida '{nova['nome']}'"
         vid = f"v{1 + max([int(v['id'][1:]) for v in novo['visuais'] if v['id'][1:].isdigit()] or [0])}"
         v = {"id": vid, "tipo": op.get("tipo", ""), "medida": op.get("medida", "")}
         if op.get("eixo"):
             v["eixo"] = _slug(op["eixo"])
+        igual = next((x for x in novo["visuais"] if (x["tipo"], x["medida"], x.get("eixo")) == (v["tipo"], v["medida"], v.get("eixo"))), None)
+        if igual:  # 26/11: um clique duplo criou v6 e v7 iguais
+            raise PedidoInvalido(f"esse visual já existe no painel: {igual['id']} ({igual['titulo']})")
         med = next((m for m in novo["medidas"] if m["id"] == v["medida"]), None)
         v["titulo"] = op.get("titulo") or (f"{med['nome'] if med else v['medida']}" + (f" por {v['eixo']}" if v.get("eixo") else ""))
         novo["visuais"].append(v)
-        frase = f"adicionou o visual {vid} ({v['tipo']}: {v['titulo']})"
+        frase = f"adicionou o visual {vid} ({v['tipo']}: {v['titulo']}){extra}"
     elif tipo == "remover_visual":
         antes = len(novo["visuais"])
         novo["visuais"] = [v for v in novo["visuais"] if v["id"] != op.get("id")]
@@ -220,35 +227,83 @@ def mudar(spec: dict, op: dict, cat: dict) -> tuple[dict, str]:
     return novo, frase
 
 
+AGG = r"(soma|m[eé]dia|contagem|distintos|m[ií]nimo|m[aá]ximo)"
 PADRAO_MEDIDA = re.compile(
-    r"(?:nova medida|adicion\w* (?:a |uma )?medida)\s*(?:\"([^\"]+)\"\s*)?(?:=|:|com|de)?\s*(soma|m[eé]dia|contagem|distintos|m[ií]nimo|m[aá]ximo)\s+(?:de|do|da|dos|das)\s+([\w ]+)", re.IGNORECASE)
+    r"(?:nova medida|adicion\w* (?:a |uma )?medida)\s*(?:\"([^\"]+)\"\s*)?(?:=|:|com|de)?\s*" + AGG + r"\s+(?:de|do|da|dos|das)\s+([\w ]+)",
+    re.IGNORECASE)
+PADRAO_MEDIDA_SIMPLES = re.compile(r"(?:nova medida|adicion\w* (?:a |uma )?medida)\s+(?:de |do |da |dos |das )?([\w ]+)$", re.IGNORECASE)
+TIPO_VISUAL = r"(gr[aá]fico de barras|barras|gr[aá]fico de linha|linha|tabela|kpi|cart[aã]o|n[uú]mero|gr[aá]fico)"
 PADRAO_VISUAL = re.compile(
-    r"(?:adicion\w*|cri\w*|inclu\w*|coloc\w*)\s+(?:um |uma )?(gr[aá]fico de barras|barras|gr[aá]fico de linha|linha|tabela|kpi|cart[aã]o)\s+(?:de|do|da|com)\s+([\w ]+?)\s+por\s+([\w ]+)$", re.IGNORECASE)
-PADRAO_REMOVER = re.compile(r"(?:remov\w*|tir\w*|apag\w*)\s+(?:o )?(?:visual )?(v\d+)", re.IGNORECASE)
+    r"(?:adicion\w*|cri\w*|inclu\w*|coloc\w*|mostr\w*)\s+(?:um |uma |o |a )?" + TIPO_VISUAL
+    + r"\s+(?:de|do|da|com)\s+([\w ]+?)(?:\s+por\s+([\w ]+))?$", re.IGNORECASE)
+PADRAO_REMOVER = re.compile(r"(?:remov\w*|tir\w*|apag\w*|exclu\w*)\s+(?:o )?(?:visual )?(v\d+)\b", re.IGNORECASE)
+PADRAO_REMOVER_NOME = re.compile(
+    r"(?:remov\w*|tir\w*|apag\w*|exclu\w*)\s+(?:um dos |uma das |o |a |os |as )?(?:gr[aá]ficos?|visua(?:l|is)|tabelas?|cart(?:ão|ões|ao|oes))\s+(?:de |do |da )?([\w ]+)$",
+    re.IGNORECASE)
+# Medidas calculadas que o designer ainda não monta (26/11: conversão vendido ÷ orçado, variação mês a mês, mês até hoje)
+PADRAO_CALCULADA = re.compile(r"convers|taxa|dividid|raz[aã]o|percentual|%|m[eê]s passado|m[eê]s anterior|mesmo dia| x ", re.IGNORECASE)
+
+
+def _medida_do_texto(texto: str, spec: dict, cat: dict) -> tuple[str, dict | None]:
+    """Medida do painel pelo nome ("valor vendido", "média de valor orçado"); se não houver, a que o texto descreve."""
+    alvo = _slug(texto)
+    existente = next((x["id"] for x in spec["medidas"] if alvo in (x["id"], _slug(x["nome"]), _slug(x["coluna"]))), None)
+    if existente:
+        return existente, None
+    m = re.match(AGG + r"\s+(?:de|do|da|dos|das)\s+(.+)", texto.strip(), re.IGNORECASE)
+    agg, coluna = (_slug(m.group(1)), _achar(m.group(2), cat["tipos"])) if m else ("soma", _achar(texto, cat["tipos"]))
+    if coluna not in cat["tipos"]:
+        raise PedidoInvalido(f"não achei '{texto}' no painel nem nos dados; medidas: {[x['nome'] for x in spec['medidas']]}")
+    nova = {"id": f"{coluna}_{agg}", "nome": f"{AGREGACOES[agg][2]} de {_nome(coluna).lower()}", "coluna": coluna, "agregacao": agg}
+    existente = next((x["id"] for x in spec["medidas"] if x["id"] == nova["id"]), None)
+    return (existente, None) if existente else (nova["id"], nova)
 
 
 def interpretar(pedido: str, spec: dict, cat: dict) -> dict:
     """Pedido em português → operação. Determinístico (sem LLM): o que não reconhece, recusa com exemplos."""
     t = re.sub(r"\s+", " ", pedido.strip().rstrip("."))
+    if m := PADRAO_REMOVER.search(t):
+        return {"op": "remover_visual", "id": m.group(1).lower()}
+    if m := PADRAO_REMOVER_NOME.search(t):
+        alvo = _slug(m.group(1))
+        achados = [v for v in spec["visuais"] if alvo in _slug(v["titulo"]) or _slug(v["titulo"]) in alvo]
+        if not achados:
+            raise PedidoInvalido(f"não achei esse visual; os do painel são: {', '.join(v['id'] + ' ' + v['titulo'] for v in spec['visuais'])}")
+        return {"op": "remover_visual", "id": achados[-1]["id"]}  # se há repetidos, sai o mais novo
+    if PADRAO_CALCULADA.search(t):
+        raise PedidoInvalido(
+            "esse pedido precisa de uma medida calculada (razão entre duas colunas, como vendido ÷ orçado, ou variação entre "
+            "períodos, como mês contra mês anterior). O designer ainda não monta esse tipo: o pedido ficou anotado para a equipe "
+            "do Lastro. Por enquanto dá para pôr as duas medidas lado a lado, por exemplo: 'adicione um gráfico de linha de valor "
+            "orçado por mês'")
     if m := PADRAO_MEDIDA.search(t):
         nome, agg, coluna = m.group(1), _slug(m.group(2)), _achar(m.group(3), cat["tipos"])
         return {"op": "adicionar_medida", "coluna": coluna, "agregacao": agg} | ({"nome": nome} if nome else {})
     if m := PADRAO_VISUAL.search(t):
-        tipo = {"g": "barras", "b": "barras", "l": "linha", "t": "tabela", "k": "kpi", "c": "kpi"}[_slug(m.group(1))[0]]
-        if "linha" in _slug(m.group(1)):
+        palavra = _slug(m.group(1))
+        med, nova = _medida_do_texto(m.group(2), spec, cat)
+        eixo = _slug(m.group(3)) if m.group(3) else None
+        eixo = {"mes": "ano_mes", "meses": "ano_mes", "ano_mes": "ano_mes", "ano": "ano", "anos": "ano"}.get(eixo, eixo) if eixo else None
+        if "linha" in palavra:
             tipo = "linha"
-        alvo = _slug(m.group(2))
-        med = next((x["id"] for x in spec["medidas"] if alvo in (x["id"], _slug(x["nome"]), _slug(x["coluna"]))), None)
-        if not med:
-            raise PedidoInvalido(f"não achei a medida '{m.group(2)}' no painel; medidas: {[x['nome'] for x in spec['medidas']]}")
-        eixo = _slug(m.group(3))
-        eixo = {"mes": "ano_mes", "meses": "ano_mes", "ano_mes": "ano_mes", "ano": "ano", "anos": "ano"}.get(eixo, eixo)
-        return {"op": "adicionar_visual", "tipo": tipo, "medida": med, "eixo": eixo}
-    if m := PADRAO_REMOVER.search(t):
-        return {"op": "remover_visual", "id": m.group(1).lower()}
+        elif "barras" in palavra:
+            tipo = "barras"
+        elif palavra.startswith("tabela"):
+            tipo = "tabela"
+        elif palavra in ("kpi", "cartao", "numero"):
+            tipo = "kpi"
+        else:  # "gráfico de X": barras com eixo (linha se for no tempo), cartão sem eixo
+            tipo = ("linha" if eixo in TEMPO else "barras") if eixo else "kpi"
+        if tipo == "kpi":
+            eixo = None
+        op = {"op": "adicionar_visual", "tipo": tipo, "medida": med} | ({"eixo": eixo} if eixo else {})
+        return op | ({"medida_nova": nova} if nova else {})
+    if m := PADRAO_MEDIDA_SIMPLES.search(t):  # "nova medida de valor orçado": soma, a agregação mais comum
+        return {"op": "adicionar_medida", "coluna": _achar(m.group(1), cat["tipos"]), "agregacao": "soma"}
     raise PedidoInvalido(
         "não entendi o pedido. Exemplos: 'nova medida média de valor orçado', "
-        "'adicione um gráfico de barras de valor vendido por estado', 'remova o v3'")
+        "'adicione um gráfico de barras de valor vendido por estado', 'adicione um gráfico de valor orçado', "
+        "'remova o gráfico de valor vendido por estado' ou 'remova o v3'")
 
 
 def _achar(texto: str, colunas: dict) -> str:

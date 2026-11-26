@@ -665,8 +665,13 @@ async function telaPainel(did, aviso = "") {
   $("#p-rel").onclick = (ev) => baixarArquivo(`/api/demandas/${did}/relatorio/powerbi`, ev.target);
   if (!pode) return;
   const mudar = async (corpo) => {
+    const botoes = [...document.querySelectorAll("#painel-dem button")];
+    if (botoes.some((b) => b.dataset.ocupado)) return;  // 26/11: cliques repetidos criavam o mesmo visual duas vezes
+    botoes.forEach((b) => { b.dataset.ocupado = "1"; b.disabled = true; });
+    $("#p-msg").className = "quem"; $("#p-msg").textContent = "o designer está aplicando o pedido…";
     try { const r = await (await api(`/api/demandas/${did}/painel/mudancas`, { method: "POST", json: corpo })).json(); await abrirDemanda(did); await telaPainel(did, `ok:Versão ${r.versao} gravada no rastro.`); }
     catch (err) { $("#p-msg").className = "erro-msg"; $("#p-msg").textContent = err.message; }
+    finally { botoes.forEach((b) => { delete b.dataset.ocupado; b.disabled = false; }); }
   };
   $("#p-pedir").onsubmit = (ev) => { ev.preventDefault(); mudar({ pedido: $("#p-texto").value }); };
   $("#p-visual").onsubmit = (ev) => { ev.preventDefault(); const op = { op: "adicionar_visual", tipo: $("#p-tipo").value, medida: $("#p-med").value }; if ($("#p-eixo").value) op.eixo = $("#p-eixo").value; mudar({ op }); };

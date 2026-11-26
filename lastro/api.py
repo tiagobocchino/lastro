@@ -88,7 +88,7 @@ async def medir(request, call_next):
                 await run_in_threadpool(banco.registrar_metrica, status, ms)
                 # erros que alguém viu (26/11): 401 de quem não está logado não conta
                 sem_login = status == 401 and "authorization" not in request.headers and request.url.path != "/api/login"
-                if status >= 400 and not sem_login:
+                if status >= 400 and not sem_login and request.method != "HEAD":  # HEAD / é a verificação do Render
                     rota = getattr(request.scope.get("route"), "path", request.url.path)
                     await run_in_threadpool(banco.registrar_erro, request.method, rota, status, getattr(request.state, "erro", None))
             except Exception as e:  # noqa: BLE001

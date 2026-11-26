@@ -349,3 +349,32 @@ def test_pergunte_na_demanda_com_a_chave_do_lastro_ou_do_cliente(api_aprovada, m
     assert c.delete("/api/conta/llm", headers=adm).json() == {"propria": False}
     acoes = [e for e in c.get(f"/api/demandas/{did}", headers=ana).json()["eventos"] if e["acao"] == "pergunte"]
     assert len(acoes) == 3 and "chave-do" not in str(acoes)  # rastro sem chave
+
+
+def test_pedidos_reais_dos_testadores_ao_designer(demanda):
+    """26/11, demanda 19 da demo: 48 pedidos recusados com 'não entendi'. As frases abaixo são as que o testador escreveu."""
+    d, gold = demanda
+    cat = paineis.catalogo(gold, d["resultado"]["modelo"])
+    spec = paineis.inicial(d, gold)
+
+    def aplica(pedido):
+        nonlocal spec
+        spec, frase = paineis.mudar(spec, paineis.interpretar(pedido, spec, cat), cat)
+        return frase
+
+    assert "Soma de valor orcado" in aplica("nova medida de valor orçado")  # sem agregação: soma
+    frase = aplica("adicione um gráfico de média de valor orçado")  # sem tipo nem eixo: cartão, criando a medida junto
+    assert "kpi" in frase and "medida 'Média de valor orcado'" in frase
+    assert "barras" in aplica("adicione um gráfico de barras de media de valor orçado por vendedor")
+    with pytest.raises(paineis.PedidoInvalido, match="já existe no painel"):  # o clique duplo não duplica mais
+        aplica("adicione um gráfico de barras de media de valor orçado por vendedor")
+    antes = [v["id"] for v in spec["visuais"]]
+    assert "removeu" in aplica("remova um dos gráficos de média de valor orçado por vendedor")  # pelo nome
+    assert len(spec["visuais"]) == len(antes) - 1
+    assert "linha" in aplica("adicione um gráfico de valor orçado por mês")
+    for pedido in ("nova medida valor vendido dividido por valor orçado",
+                   "adicione um gráfico de conversão mês a mês com valor vendido x valor orçado",
+                   "adicione um gráfico de evoução mes a mes com o % de evolução",
+                   "Adicione os valores de evolulção mensal comparando os valores desse mês x valores do mês passado até o mesmo dia"):
+        with pytest.raises(paineis.PedidoInvalido, match="medida calculada"):  # resposta específica, não 'não entendi'
+            paineis.interpretar(pedido, spec, cat)
