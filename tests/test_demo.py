@@ -94,6 +94,7 @@ def _xlsx(df: pd.DataFrame) -> bytes:
     ("dados.txt", b"a,b\n1,2\n", "CSV ou Excel"),
     ("grande.csv", b"a,b\n" + b"1,2\n" * (5 * 1024 * 1024 // 4 + 10), "5 MB"),
     ("quebrado.xlsx", b"isto nao e excel", "não consegui ler"),
+    ("so-cabecalho.csv", b"empresa,valor\n", "não tem linhas"),
 ])
 def test_recusas_nao_deixam_nada(api, nome, conteudo, trecho):
     _, c, base = api
@@ -431,3 +432,36 @@ def test_funil_no_painel_de_operacao():
     h = renderizar(dados, datetime(2026, 11, 25, 18, tzinfo=ZoneInfo("America/Sao_Paulo")))
     assert "Funil da demonstração do site" in h and "75,0% da etapa anterior" in h and "20,0% da etapa anterior" in h
     assert "Funil da demonstração" in renderizar(vazio, datetime(2026, 11, 25, 18, tzinfo=ZoneInfo("America/Sao_Paulo")))  # sem dados ainda, não quebra
+
+
+def test_site_publica_robots_e_sitemap_na_raiz(api):
+    """LST-55: só o site é indexável; o sitemap aponta para o próprio host do pedido."""
+    _, c, _ = api
+    r = c.get("/robots.txt", headers={"host": "exemplo.com.br", "x-forwarded-proto": "https"})
+    assert r.status_code == 200 and "Allow: /site/" in r.text and "Disallow: /api/" in r.text
+    assert "Sitemap: https://exemplo.com.br/sitemap.xml" in r.text
+    s = c.get("/sitemap.xml", headers={"host": "exemplo.com.br", "x-forwarded-proto": "https"})
+    assert s.status_code == 200 and "<loc>https://exemplo.com.br/site/</loc>" in s.text and "<lastmod>" in s.text
+
+
+def test_site_tem_seo_e_ids_da_demo():
+    """O HTML do site carrega o SEO do LST-55 e mantém os ids de que o demo.js depende."""
+    import json
+    import re
+
+    html = (RAIZ / "site" / "index.html").read_text(encoding="utf-8")
+    titulo = re.search(r"<title>(.*?)</title>", html).group(1)
+    desc = re.search(r'name="description" content="(.*?)"', html).group(1)
+    assert titulo.lower().startswith("dashboard para empresas") and len(titulo) <= 60
+    assert 120 <= len(desc) <= 156
+    for trecho in ('rel="canonical"', 'og:image" content="', 'twitter:card', "fontes/bricolage"):
+        assert trecho in html
+    grafo = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.DOTALL).group(1))["@graph"]
+    faq = next(n for n in grafo if n["@type"] == "FAQPage")
+    for q in faq["mainEntity"]:  # a resposta marcada para o Google é idêntica ao texto visível
+        assert f"<h3>{q['name']}</h3></summary><p>{q['acceptedAnswer']['text']}</p>" in html
+    for i in ("palco", "t-envio", "t-arquivo", "t-exemplo", "t-aceite", "t-analisar", "t-erro", "t-nome", "copiar", "email-txt"):
+        assert f'id="{i}"' in html
+    assert len(re.findall(r"<h1[ >]", html)) == 1
+    for arq in ("img/og-lastro.jpg", "marca/favicon-32.png", "marca/apple-touch-icon.png"):
+        assert (RAIZ / "site" / arq).exists()

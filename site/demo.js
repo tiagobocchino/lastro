@@ -11,6 +11,8 @@
   let sessao = null;
   let ultimo = null;
   let formatoChave = null;
+  const plural = (n, um, varios) => `${n.toLocaleString("pt-BR")} ${n === 1 ? um : varios}`;
+  const suave = () => (matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
 
   async function chamar(caminho, opcoes = {}) {
     const r = await fetch(caminho, opcoes);
@@ -63,17 +65,19 @@
     };
     $("#t-envio").onsubmit = (ev) => { ev.preventDefault(); enviar(false); };
     $("#t-exemplo").onclick = () => enviar(true);
+    const nome = () => { const f = $("#t-arquivo").files[0]; $("#t-nome").textContent = f ? f.name : "nenhum arquivo escolhido"; };
+    $("#t-arquivo").onchange = nome;
     const zona = $("#t-envio");
     zona.ondragover = (ev) => { ev.preventDefault(); zona.classList.add("sobre"); };
     zona.ondragleave = () => zona.classList.remove("sobre");
-    zona.ondrop = (ev) => { ev.preventDefault(); zona.classList.remove("sobre"); if (ev.dataTransfer.files[0]) $("#t-arquivo").files = ev.dataTransfer.files; };
+    zona.ondrop = (ev) => { ev.preventDefault(); zona.classList.remove("sobre"); if (ev.dataTransfer.files[0]) { $("#t-arquivo").files = ev.dataTransfer.files; nome(); } };
   }
 
   function mostrarPerguntas(r) {
     const p = r.perfil;
     palco.innerHTML = `
       <h3>2. O que o Lastro entendeu</h3>
-      <p><b>${p.linhas.toLocaleString("pt-BR")} linhas</b> e <b>${p.colunas.length} colunas</b>:</p>
+      <p><b>${plural(p.linhas, "linha", "linhas")}</b> e <b>${plural(p.colunas.length, "coluna", "colunas")}</b>:</p>
       <div class="chips">${p.colunas.map((c) => `<span class="chip">${esc(c.nome)} · <b>${esc(PAPEL[c.papel] || c.papel)}</b></span>`).join("")}</div>
       ${(r.avisos || []).map((a) => `<p class="nota"><span><b>Dado pessoal.</b> ${esc(a)}</span></p>`).join("")}
       <form id="t-perguntas" style="display:grid;gap:14px">
@@ -114,7 +118,7 @@
   }
 
   function reciboHtml(rc) {
-    const hora = new Date(rc.apagado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const hora = new Date(rc.apagado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }) + " (Brasília)";
     return `<div class="recibo"><b>${rc.conferido ? "Apagamos tudo" : "Apagamento pendente"} às ${esc(hora)}</b>
       <span>${rc.arquivos} arquivos · ${rc.tabelas} tabelas · ${bytes(rc.bytes)} · ${rc.conferido ? "conferido: a pasta da análise não existe mais" : "a varredura apaga em até 15 min"}</span></div>`;
   }
@@ -129,7 +133,7 @@
       <div class="acoes"><button class="cta" type="button" id="t-baixar">baixar o painel (HTML)</button></div>`}
       ${reciboHtml(r.recibo)}
       <div class="convite">
-        <p><b>Isso foi uma planilha, uma vez.</b> No Lastro contratado, o painel liga direto nos seus sistemas (Sienge, Omie, Bling…), atualiza sozinho todo dia, passa pela revisão de um especialista e abre no seu Power BI ou Looker Studio.</p>
+        <p><b>Isso foi uma planilha, uma vez.</b> No Lastro contratado, o painel liga direto nos seus sistemas (Sienge, Omie, Bling…), passa pela revisão de alguém do seu time e abre no seu Power BI ou Looker Studio.</p>
         <div class="acoes"><a class="cta ouro" href="https://wa.me/${WHATS}?text=${msg}" target="_blank" rel="noopener">conversar no WhatsApp</a><button class="cta leve" type="button" id="t-outra">testar outra planilha</button></div>
       </div>`;
     if (!r.erro) {
@@ -144,7 +148,7 @@
     // Funil anônimo (LST-44): só o formato do painel, nunca os dados
     const whats = palco.querySelector('a[href^="https://wa.me/"]');
     if (whats) whats.addEventListener("click", () => { try { navigator.sendBeacon?.("/api/demo/contato", new Blob([JSON.stringify({ visual: formatoChave })], { type: "application/json" })); } catch { /* o clique segue */ } });
-    palco.scrollIntoView({ behavior: "smooth", block: "start" });
+    palco.scrollIntoView({ behavior: suave(), block: "start" });
   }
 
   function mostrarRecibo(rc) {

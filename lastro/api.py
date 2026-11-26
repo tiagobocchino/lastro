@@ -49,7 +49,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 app.add_middleware(GZipMiddleware, minimum_size=1024)  # site, portal e painéis em HTML/JS comprimidos
 
 
-NAO_MEDIR = ("/saude", "/web/", "/site", "/favicon")
+NAO_MEDIR = ("/saude", "/web/", "/site", "/favicon", "/robots.txt", "/sitemap.xml")
 
 
 @app.middleware("http")
@@ -326,6 +326,10 @@ if SITE.exists():  # site de apresentação servido pelo Render até existir dom
 # ---- Conectores SaaS: catálogo, teste de conexão, importação, Postman e sandbox -------------
 
 from datetime import date as _date  # noqa: E402
+from datetime import datetime as _datetime
+from zoneinfo import ZoneInfo as _ZoneInfo
+
+_FUSO_SITE = _ZoneInfo("America/Sao_Paulo")
 
 from fastapi import Request  # noqa: E402
 from fastapi.responses import JSONResponse, Response  # noqa: E402
@@ -355,6 +359,30 @@ def catalogo_saas(s: Annotated[Sessao, Depends(sessao)]) -> list[dict]:
 
 def _cliente_oauth() -> httpx.Client:  # trocado nos testes pelo transporte do simulador
     return httpx.Client(timeout=30)
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots(request: Request) -> Response:
+    """SEO do site (LST-55): só o site é indexável; API, portal e sandbox ficam fora."""
+    base = _url_publica(request)
+    corpo = (f"User-agent: *\nAllow: /site/\nDisallow: /api/\nDisallow: /web/\nDisallow: /sandbox/\nDisallow: /bi/\n\n"
+             f"Sitemap: {base}/sitemap.xml\n")
+    return Response(corpo, media_type="text/plain; charset=utf-8")
+
+
+@app.get("/sitemap.xml", include_in_schema=False)
+def sitemap(request: Request) -> Response:
+    """Uma URL por página do site; lastmod = data do arquivo publicado."""
+    base = _url_publica(request)
+    urls = []
+    for pagina in sorted(SITE.glob("**/index.html")) if SITE.exists() else []:
+        caminho = pagina.parent.relative_to(SITE).as_posix()
+        loc = f"{base}/site/" + (f"{caminho}/" if caminho != "." else "")
+        dia = _datetime.fromtimestamp(pagina.stat().st_mtime, tz=_FUSO_SITE).date().isoformat()
+        urls.append(f"  <url><loc>{loc}</loc><lastmod>{dia}</lastmod></url>")
+    corpo = ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+             + "\n".join(urls) + "\n</urlset>\n")
+    return Response(corpo, media_type="application/xml")
 
 
 def _url_publica(request: Request) -> str:

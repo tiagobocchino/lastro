@@ -372,7 +372,7 @@ def html_painel(spec: dict, gold: Path, gerado_em: str) -> str:
 main {{ max-width:1100px; margin:0 auto; padding-block:28px 64px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)) }}
 h1 {{ font:700 26px/1.2 var(--f-disp); margin:0 0 4px; text-wrap:balance }} h2 {{ font:600 15px var(--f-disp); margin:0 0 10px }}
 .quieta {{ color:var(--quieta); font-size:13px; margin:0 0 18px }}
-.grade {{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px }}
+.grade {{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap:14px }}
 .bloco {{ background:var(--sup); border:1px solid var(--linha); border-radius:10px; padding:16px; min-width:0 }} .largo {{ grid-column:1/-1 }}
 .kpi {{ font:700 34px var(--f-disp); font-variant-numeric:tabular-nums }}
 .barras {{ display:grid; gap:6px }} .linha-b {{ display:grid; grid-template-columns:minmax(80px, 30%) 1fr auto; gap:8px; align-items:center; font-size:13px }}

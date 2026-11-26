@@ -212,6 +212,11 @@ class Demos:
             self._log("abrir_falhou", inicio, len(conteudo), None, erro=type(e).__name__)
             raise ErroDemo("não consegui ler a planilha: confira se a primeira linha tem os nomes das colunas") from e
         perfil = next(iter(d["resultado"]["perfis"].values()))
+        if perfil["linhas"] == 0:  # LST-55 (A2): arquivo sem linhas não vira painel vazio
+            plat.repo.apagar()  # type: ignore[attr-defined]
+            shutil.rmtree(pasta, ignore_errors=True)
+            self._log("recusou_vazia", inicio, len(conteudo), len(perfil["colunas"]))
+            raise ErroDemo("a planilha não tem linhas com dados: confira se a primeira linha tem os nomes das colunas")
         if perfil["linhas"] <= self.max_linhas:
             self.evento("subiu", duracao_ms=int((time.perf_counter() - inicio) * 1000), faixa_tamanho=faixa(len(conteudo)),
                         n_colunas=len(perfil["colunas"]))
@@ -258,7 +263,7 @@ class Demos:
             perfil = next(iter(d["resultado"]["perfis"].values()))
             spec = paineis.para_visitante(d, gold, escolhas.get("demo:quebra"), PERIODOS.get(escolhas.get("demo:periodo", "")),
                                           FORMATOS[escolhas["demo:formato"]], excluir=set(pessoais(perfil)))
-            html = paineis.html_painel(spec, gold, datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"))
+            html = paineis.html_painel(spec, gold, datetime.now(FUSO).strftime("%d/%m/%Y %H:%M") + " (Brasília)")
             aud = d["resultado"]["auditoria"]
             resultado = {"html": html, "visuais": [v["titulo"] for v in spec["visuais"]],
                          "auditoria": {"aprovada": bool(aud["aprovado_camada1"]), "checagens": len(aud.get("checagens", []))},
