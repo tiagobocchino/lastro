@@ -197,3 +197,25 @@ def test_aba_pergunte_responde_sobre_rh_e_uma_aba_nao_derruba_a_outra(con, monke
     at.run()
     assert not at.exception and any("não carregou" in e.value for e in at.error)
     assert any("setor" in s.value.lower() for s in at.subheader)
+
+
+def test_gemini_fora_do_ar_cai_nas_palavras_chave_com_aviso(con):
+    """26/11: o Google desligou o gemini-2.0-flash e o app mostrava o 404 cru; agora interpreta por palavras-chave e avisa."""
+
+    class Desligado:
+        def invoke(self, *a, **k):
+            raise RuntimeError("404 NOT_FOUND: model is no longer available")
+
+        def with_structured_output(self, *a, **k):
+            return self
+
+        def __or__(self, outro):
+            return self
+
+        def __ror__(self, outro):
+            return self
+
+    cat = n.catalogo(con)
+    p = n.interpretar("vendas por região", cat, Desligado())
+    assert p.dimensao == "projeto_regiao" and any("palavras-chave" in a for a in p.avisos)
+    assert n.MODELO_GEMINI == "gemini-flash-latest"

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import io
 import json
+import logging
 import re
 import unicodedata
 from dataclasses import dataclass, field
@@ -289,7 +290,28 @@ def interpretar_simples(pergunta: str, cat: dict[str, dict[str, Any]]) -> Plano:
                          dimensao=dimensao, por_mes=por_mes, grafico=grafico), cat)
 
 
-def modelo_gemini(chave: str, modelo: str = "gemini-2.0-flash") -> Any:
+# "gemini-flash-latest" acompanha o Flash atual do Google: o "gemini-2.0-flash" fixo foi desligado e quebrou o app (26/11).
+# Para fixar uma versão, use o segredo GEMINI_MODELO no Streamlit.
+MODELO_GEMINI = "gemini-flash-latest"
+
+
+def interpretar(pergunta: str, cat: dict[str, dict[str, Any]], llm: Any | None) -> Plano:
+    """Com modelo: agente LangChain. Se o provedor falhar (modelo desligado, cota, rede), cai nas palavras-chave e avisa.
+    Pedido fora do escopo (PlanoInvalido) não cai: a mesma validação vale para os dois caminhos."""
+    if llm is None:
+        return interpretar_simples(pergunta, cat)
+    try:
+        return interpretar_llm(pergunta, cat, llm)
+    except PlanoInvalido:
+        raise
+    except Exception as e:  # noqa: BLE001  (erro do provedor da LLM, não do pedido)
+        logging.getLogger("lastro.rapido").warning("LLM indisponível (%s); usando palavras-chave", type(e).__name__)
+        p = interpretar_simples(pergunta, cat)
+        p.avisos.append("O Gemini não respondeu agora; interpretei o pedido por palavras-chave.")
+        return p
+
+
+def modelo_gemini(chave: str, modelo: str = MODELO_GEMINI) -> Any:
     from langchain_google_genai import ChatGoogleGenerativeAI
 
     return ChatGoogleGenerativeAI(model=modelo, google_api_key=chave, temperature=0)

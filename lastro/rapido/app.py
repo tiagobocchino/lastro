@@ -145,7 +145,8 @@ def pergunte() -> None:
     pergunta = st.text_input("O que você quer ver?", placeholder="Ex.: vendas por região da obra por mês; quantos funcionários por setor")
     if pergunta:
         try:
-            plano = n.interpretar_llm(pergunta, cat, n.modelo_gemini(google)) if google else n.interpretar_simples(pergunta, cat)
+            llm = n.modelo_gemini(google, segredo("GEMINI_MODELO") or n.MODELO_GEMINI) if google else None
+            plano = n.interpretar(pergunta, cat, llm)
             colunas, linhas = n.executar(con, plano)
         except Exception as e:  # noqa: BLE001
             st.warning(f"Não consegui montar esse gráfico: {e}")

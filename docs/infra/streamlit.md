@@ -8,6 +8,8 @@ Grátis. São uns 15 minutos, e só o Tiago pode fazer: a conta é pessoal e ent
 - `lastro/rapido/requirements.txt`: as dependências. O Streamlit procura primeiro na pasta do app. Testado em 26/11 num ambiente limpo: o app sobe e responde.
 - `.streamlit/config.toml`: o tema da marca. Fica na raiz do repositório e não tem segredo nenhum.
 
+> As chaves deste app ficam **só nos Secrets do Streamlit**. O Render (servidor do Lastro) não precisa delas.
+
 ## 1. Pegar as duas chaves (antes de abrir o Streamlit)
 
 Nenhuma das duas vai para o chat, para arquivo ou para card. Elas só entram no campo Secrets do passo 3.
@@ -71,6 +73,7 @@ Nenhuma das duas vai para o chat, para arquivo ou para card. Elas só entram no 
 |---|---|
 | "Não consegui ler o BI (HTTPStatusError)" | Chave de leitura errada ou revogada. Confira o `LASTRO_CHAVE` em **Settings → Secrets**; a chave tem que começar com `lst_`. |
 | O app fica uns 30 s carregando na primeira vez do dia | O Render (plano grátis) estava dormindo. É normal: a próxima abertura é rápida. |
+| "O Gemini não respondeu agora; interpretei o pedido por palavras-chave" | O modelo do Google está fora do ar ou foi desligado. O app usa `gemini-flash-latest`, que sempre aponta para o Flash atual. Para fixar outro modelo, acrescente `GEMINI_MODELO = "nome-do-modelo"` nos Secrets e reinicie o app. |
 | "Sem chave do Gemini: interpretação por palavras-chave" | Falta o `GOOGLE_API_KEY` nos Secrets. O app funciona sem ele, só que com uma interpretação mais simples. |
 | O app "dorme" depois de alguns dias sem acesso | O Streamlit grátis hiberna apps parados. Basta abrir o link e clicar em **Yes, get this app back up!** |
 | Quero que só a empresa veja | Em **Share**, deixe o app privado e convide os e-mails. A chave de leitura já limita o app aos dados de uma empresa. |
