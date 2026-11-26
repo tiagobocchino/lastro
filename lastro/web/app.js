@@ -157,13 +157,15 @@ async function abrirDemanda(id) {
   const rastro = d.eventos?.length ? rastroHtml(d.eventos) : "";
   if (d.resposta && d.status === "aprovada") {
     const r = partesResultado(d);
-    html += `<nav class="ancoras" aria-label="Nesta demanda"><a href="#sec-painel">painel</a><a href="#sec-resposta">resposta</a><a href="#aud">auditoria</a><a href="#como">como chegamos aqui</a><a href="#rastro">rastro</a></nav>
+    html += `<nav class="ancoras" aria-label="Nesta demanda"><a href="#sec-painel">dashboard</a><a href="#sec-resposta">resposta</a><a href="#aud">auditoria</a><a href="#como">como chegamos aqui</a><a href="#rastro">rastro</a></nav>
       ${r.total}<div id="sec-painel"><div id="painel-dem"></div></div>${r.resposta}<div id="conversa-dem"></div>
       ${dobra("aud", r.auditoriaTitulo, r.auditoria)}${r.camada2}${dobra("como", "Como chegamos aqui", r.como)}${rastro ? dobra("rastro", "Rastro dos agentes", rastro) : ""}`;
   } else {
     if (d.resposta) {
       const r = partesResultado(d);  // em revisão: a auditoria fica aberta, é o que o revisor confere
-      html += `${r.total}${r.resposta}<h2>${r.auditoriaTitulo}</h2>${r.auditoria}${r.camada2}<h2>Como chegamos aqui</h2>${r.como}`;
+      const previa = d.status === "em_revisao" && ["revisor", "admin"].includes(sessao.papel)
+        ? `<h2>Dashboard <span class="status em_revisao">prévia · aguardando revisão</span></h2><div class="bloco"><p class="quem">Só revisor e admin veem esta prévia. Depois da aprovação, o dashboard aparece para todos da empresa.</p>${molduraDashboard("dash-previa")}</div>` : "";
+      html += `${r.total}${previa}${r.resposta}<h2>${r.auditoriaTitulo}</h2>${r.auditoria}${r.camada2}<h2>Como chegamos aqui</h2>${r.como}`;
     }
     if (rastro) html += `<h2>Rastro dos agentes</h2>${rastro}`;
   }
@@ -174,6 +176,7 @@ async function abrirDemanda(id) {
   if ($("#b-exec")) $("#b-exec").onclick = () => executar(d.id);
   document.querySelectorAll("[data-baixar]").forEach((b) => (b.onclick = () => baixar(d.id, b.dataset.baixar)));
   if ($("#f-rev")) $("#f-rev").onsubmit = (e) => revisar(e, d.id);
+  if ($("#dash-previa")) await carregarDashboard(d.id, "dash-previa");
   if ($("#painel-dem")) await telaPainel(d.id);
   if ($("#conversa-dem")) await telaConversa(d.id);
 }
@@ -540,21 +543,41 @@ async function telaBI(nova = null, teste = null, chave = null) {
 const TIPOS_VISUAL = { kpi: "número (KPI)", barras: "barras", linha: "linha no tempo", tabela: "tabela" };
 const AGREG = { soma: "soma", media: "média", contagem: "contagem", distintos: "distintos", minimo: "mínimo", maximo: "máximo" };
 
+// ---- Dashboard da demanda (LST-57): HTML do Lastro numa moldura isolada (sem acesso à sessão do portal) ----------------
+function molduraDashboard(id) {
+  return `<iframe id="${id}" class="dash" title="Dashboard da demanda" sandbox="allow-scripts" style="width:100%;height:640px;border:0;border-radius:8px;background:var(--chao);display:block"></iframe>`;
+}
+
+async function carregarDashboard(did, id) {
+  const ifr = $("#" + id);
+  if (!ifr) return;
+  try { ifr.srcdoc = await (await api(`/api/demandas/${did}/dashboard`)).text(); }
+  catch (err) { ifr.replaceWith(Object.assign(document.createElement("p"), { className: "erro-msg", textContent: `Não consegui montar o dashboard: ${err.message}` })); }
+}
+
+window.addEventListener("message", (ev) => {  // o dashboard avisa a altura: a moldura cresce junto, sem rolagem dupla
+  const h = Number(ev.data?.lastroAltura);
+  if (!h) return;
+  document.querySelectorAll("iframe.dash").forEach((f) => { if (f.contentWindow === ev.source) f.style.height = `${Math.min(h + 8, 6000)}px`; });
+});
+
 async function telaPainel(did, aviso = "") {
   const alvo = $("#painel-dem");
   const pode = ["admin", "demandante"].includes(sessao.papel);
   const e = await (await api(`/api/demandas/${did}/painel`)).json();
-  if (!e.spec) {
-    alvo.innerHTML = `<h2>Painel</h2><div class="bloco"><p class="quem">O designer do Lastro monta um painel com o resultado aprovado: o número principal, a quebra que você pediu e a evolução no tempo. Ele sai em HTML (abre em qualquer navegador) e como projeto do Power BI, ligado ao BI da sua empresa.</p>
-      ${pode ? `<div class="linha-btn"><button class="btn ouro" id="p-criar">montar painel</button></div>` : `<p class="quem">Quem demanda ou o admin pode montar o painel.</p>`}<p class="erro-msg" id="p-msg"></p></div>`;
+  if (!e.spec) {  // LST-57: o dashboard já aparece; personalizar cria a versão editável (HTML e Power BI)
+    alvo.innerHTML = `<h2>Dashboard</h2><div class="bloco">${molduraDashboard("p-previa")}
+      <p class="quem">Proposta do designer do Lastro a partir do resultado aprovado. Para trocar visuais, medidas ou eixos, e baixar o HTML e o projeto do Power BI, personalize o painel.</p>
+      ${pode ? `<div class="linha-btn"><button class="btn sec" id="p-criar">personalizar o painel</button></div>` : ""}<p class="erro-msg" id="p-msg"></p></div>`;
+    await carregarDashboard(did, "p-previa");
     if ($("#p-criar")) $("#p-criar").onclick = async (ev) => { ev.target.disabled = true; try { await api(`/api/demandas/${did}/painel`, { method: "POST" }); await abrirDemanda(did); } catch (err) { $("#p-msg").textContent = err.message; ev.target.disabled = false; } };
     return;
   }
   const s = e.spec, med = Object.fromEntries(s.medidas.map((m) => [m.id, m]));
   const opts = (lista, rot = (x) => x) => lista.map((x) => `<option value="${esc(x)}">${esc(rot(x))}</option>`).join("");
-  alvo.innerHTML = `<h2>Painel <span class="quem">· versão ${s.versao} de ${e.versoes.length}</span></h2>
+  alvo.innerHTML = `<h2>Dashboard <span class="quem">· versão ${s.versao} de ${e.versoes.length}</span></h2>
     <div class="bloco">
-      <iframe id="p-previa" title="Prévia do painel" sandbox="allow-scripts" style="width:100%;height:min(80vh,900px);border:1px solid var(--linha);border-radius:8px;background:var(--sup)"></iframe>
+      ${molduraDashboard("p-previa")}
       <div class="linha-btn"><button class="btn sec" id="p-html">baixar HTML</button><button class="btn sec" id="p-pbi">baixar projeto do Power BI</button><button class="btn sec" id="p-rel">relatório de entrega (Power BI)</button></div>
       <div class="tabela"><table><thead><tr><th>visual</th><th>tipo</th><th>medida</th><th>eixo</th>${pode ? "<th></th>" : ""}</tr></thead><tbody>
         ${s.visuais.map((v) => `<tr><td><code>${esc(v.id)}</code> ${esc(v.titulo)}</td><td>${esc(TIPOS_VISUAL[v.tipo] || v.tipo)}</td><td>${esc(med[v.medida]?.nome || v.medida)}</td><td>${esc(v.eixo || "—")}</td>${pode ? `<td style="text-align:right"><button class="btn sec" data-rem="${esc(v.id)}">remover</button></td>` : ""}</tr>`).join("")}
@@ -573,7 +596,7 @@ async function telaPainel(did, aviso = "") {
           <button class="btn" type="submit">adicionar medida</button></form></details>` : ""}
       <p class="${aviso.startsWith("ok:") ? "ok" : "erro-msg"}" id="p-msg" role="status">${esc(aviso.replace(/^ok:/, ""))}</p>
     </div>`;
-  try { $("#p-previa").srcdoc = await (await api(`/api/demandas/${did}/painel/html`)).text(); } catch { /* prévia é conveniência */ }
+  await carregarDashboard(did, "p-previa");
   $("#p-html").onclick = (ev) => baixarArquivo(`/api/demandas/${did}/painel/html`, ev.target);
   $("#p-pbi").onclick = (ev) => baixarArquivo(`/api/demandas/${did}/painel/powerbi`, ev.target);
   $("#p-rel").onclick = (ev) => baixarArquivo(`/api/demandas/${did}/relatorio/powerbi`, ev.target);

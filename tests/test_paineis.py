@@ -276,3 +276,22 @@ def test_painel_pelo_portal_com_rastro(api_aprovada):
     assert c.get(f"/api/demandas/{did}/painel", headers=intruso).status_code == 404
     assert c.post(f"/api/demandas/{did}/painel/mudancas", headers=intruso, json={"pedido": "remova o v1"}).status_code == 404
     assert c.get(f"/api/demandas/{did}/painel/html", headers=intruso).status_code == 404
+
+
+def test_dashboard_na_demanda_previa_so_para_o_revisor(api_aprovada):
+    """LST-57: o dashboard aparece sozinho na demanda; antes da aprovação, só revisor e admin veem a prévia marcada."""
+    _, c, cab, ana, rui, did = api_aprovada
+    adm = cab("adm@acme")
+    assert c.get(f"/api/demandas/{did}/dashboard", headers=ana).status_code == 403  # quem demandou espera a aprovação
+    for quem in (rui, adm):
+        h = c.get(f"/api/demandas/{did}/dashboard", headers=quem)
+        assert h.status_code == 200 and "Prévia para o revisor" in h.text and "ainda não foi entregue" in h.text
+        assert "14.030.477,92" in h.text and 'id="filtros"' in h.text  # mesmo número da resposta auditada
+    c.post(f"/api/demandas/{did}/revisao", headers=rui, json={"aprovado": True, "parecer": "ok"})
+    h = c.get(f"/api/demandas/{did}/dashboard", headers=ana)  # aprovada: sem clicar em "montar painel"
+    assert h.status_code == 200 and "gold aprovado" in h.text and "Prévia" not in h.text and "14.030.477,92" in h.text
+    assert c.get(f"/api/demandas/{did}/dashboard", headers=cab("adm@outra")).status_code == 404  # outra empresa não vê
+    c.post(f"/api/demandas/{did}/painel/mudancas", headers=ana, json={"pedido": "adicione um gráfico de barras de valor vendido por estado"})
+    c.post(f"/api/demandas/{did}/painel", headers=ana)
+    c.post(f"/api/demandas/{did}/painel/mudancas", headers=ana, json={"pedido": "adicione um gráfico de barras de valor vendido por estado"})
+    assert "por estado" in c.get(f"/api/demandas/{did}/dashboard", headers=rui).text  # o personalizado vale para todos

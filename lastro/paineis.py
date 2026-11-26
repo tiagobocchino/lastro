@@ -331,6 +331,8 @@ def _e(v: Any) -> str:
 
 
 def _origem(spec: dict, gerado_em: str) -> str:
+    if spec.get("modo") == "previa":  # LST-57: o revisor vê antes de aprovar; ninguém mais
+        return f"Prévia para o revisor · demanda {spec['demanda']} · gerado em {gerado_em} · aguardando revisão de negócio: ainda não foi entregue"
     if spec.get("modo") == "demonstracao":  # ADR 0010: ninguém aprovou; dizer o que é
         return f"Demonstração do Lastro · gerado em {gerado_em} · conferência automática, sem revisão humana · seus dados já foram apagados"
     return f"Painel da demanda {spec['demanda']} · versão {spec['versao']} · gerado em {gerado_em} pelo Lastro a partir do gold aprovado"

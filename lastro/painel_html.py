@@ -291,7 +291,7 @@ h1 {{ font:700 26px/1.2 var(--f-disp); margin:0 0 4px; text-wrap:balance }} h2 {
 .filtros label {{ display:grid; gap:4px; font:500 11px var(--f-dado); text-transform:uppercase; letter-spacing:.08em; color:var(--quieta) }}
 .filtros select {{ min-height:44px; min-width:150px; padding:0 12px; border-radius:8px; background:var(--sup); color:var(--tinta); border:1px solid var(--campo); font:15px var(--f-texto); text-transform:none; letter-spacing:0 }}
 .filtros button {{ min-height:44px; padding:0 14px; border-radius:8px; border:1px solid var(--campo); background:transparent; color:var(--tinta); font:600 14px var(--f-texto); cursor:pointer }}
-.cartoes {{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap:12px; margin-bottom:12px }}
+.cartoes {{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap:12px; margin-bottom:12px }}
 .cartao {{ background:var(--sup); border:1px solid var(--linha); border-radius:10px; padding:14px 16px; display:grid; gap:4px; min-width:0 }}
 .cartao .rot {{ font:500 11px var(--f-dado); text-transform:uppercase; letter-spacing:.08em; color:var(--quieta) }}
 .cartao b {{ font:700 28px/1.15 var(--f-disp); font-variant-numeric:tabular-nums; overflow-wrap:anywhere }}
@@ -396,6 +396,10 @@ _SCRIPT = r"""
       el.innerHTML = `<div class="rolar"><table><thead><tr><th>${esc(v.eixo.replace(/_/g, " "))}</th><th class="n">${esc(mv.nome)}</th>${tot != null ? '<th class="n">% do total</th>' : ""}</tr></thead><tbody>${g.map((x) => `<tr><td>${esc(x[0])}</td><td class="n">${num(x[1])}</td>${tot != null ? `<td class="n">${tot ? p1((x[1] || 0) / tot) : "—"}</td>` : ""}</tr>`).join("")}</tbody>${tot != null ? `<tfoot><tr><td>Total</td><td class="n">${num(tot)}</td><td class="n">100%</td></tr></tfoot>` : ""}</table></div>`;
     });
   }
+  // Dentro do portal (iframe isolado), avisa a altura para a moldura crescer junto: sem rolagem dupla (LST-57)
+  const avisar = () => { try { parent.postMessage({ lastroAltura: document.documentElement.scrollHeight }, "*"); } catch (e) { /* aberto direto */ } };
+  if ("ResizeObserver" in window) new ResizeObserver(avisar).observe(document.body);
+  avisar();
   const barra = document.getElementById("filtros");
   if (barra) {
     barra.hidden = false;

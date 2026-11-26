@@ -910,6 +910,39 @@ def mudar_painel(did: int, dados: MudancaPainel, s: Annotated[Sessao, Depends(se
     return novo
 
 
+PAPEIS_DA_PREVIA = ("revisor", "admin")
+
+
+@app.get("/api/demandas/{did}/dashboard", response_class=HTMLResponse)
+def dashboard(did: int, s: Annotated[Sessao, Depends(sessao)], p: Annotated[Plataforma, Depends(plataforma)]) -> str:
+    """Dashboard da demanda no portal (LST-57): mesmo padrão do Streamlit, montado na hora a partir do gold da demanda.
+
+    Aprovada: todos da empresa veem (a versão do painel, se alguém personalizou; senão a proposta inicial).
+    Aguardando revisor: só revisor e admin, como prévia marcada (regra 2: nada sai antes das duas camadas)."""
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    from . import paineis
+
+    d = p.repo.demanda(did)  # o repo já é da empresa do login: outra empresa recebe 404
+    if not d:
+        raise HTTPException(404, "demanda não encontrada")
+    if d["status"] == "em_revisao":
+        if s.papel not in PAPEIS_DA_PREVIA:
+            raise HTTPException(403, "o dashboard aparece depois que o revisor de negócio aprovar a demanda")
+    elif d["status"] != "aprovada":
+        raise HTTPException(409, "o dashboard nasce do resultado conferido: rode a demanda antes")
+    gold = p.pasta_demanda(did) / "gold"
+    try:
+        spec = (paineis.atual(p.pasta_demanda(did)) if d["status"] == "aprovada" else None) or paineis.inicial(d, gold)
+    except paineis.PedidoInvalido as e:
+        raise HTTPException(409, str(e)) from e
+    if d["status"] == "em_revisao":
+        spec = {**spec, "modo": "previa"}
+    agora = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M") + " (Brasília)"
+    return paineis.html_painel(spec, gold, agora)
+
+
 @app.get("/api/demandas/{did}/painel/html")
 def painel_html(did: int, p: Annotated[Plataforma, Depends(plataforma)]) -> FileResponse:
     from . import paineis
