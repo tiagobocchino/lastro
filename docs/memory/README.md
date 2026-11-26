@@ -17,3 +17,4 @@ Armadilhas e fatos operacionais. Uma linha por nota.
 - [power-bi-chave-de-leitura](power-bi-chave-de-leitura.md) — "Não foi possível autenticar" no Power BI = 401 do Lastro; ler interno.bi_recusas (motivo, tamanho e início) em vez de pedir a chave.
 - [powerbi-medida-com-nome-de-coluna](powerbi-medida-com-nome-de-coluna.md) — medida e coluna com o mesmo nome (sem diferenciar caixa) impedem o PBIP de abrir; TMDL não tem schema, só o Desktop acusa.
 - [lighthouse-nao-mede-375](lighthouse-nao-mede-375.md) — Lighthouse mobile emula 412 px e deu 100 com o site rolando para o lado em 375; medir scrollWidth no Playwright de 320 a 1440.
+- [gimi-teste-nomes-no-banco](gimi-teste-nomes-no-banco.md) — alfa/beta/gama/delta trocados direto no banco do BI em 26/11; publicar de novo volta os nomes antigos até recarregar a base pelo simulador atual.
