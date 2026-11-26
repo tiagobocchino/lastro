@@ -51,9 +51,11 @@ def rotulo(col: str) -> str:
     return t[:1].upper() + t[1:]
 
 
-def eixos(colunas: dict[str, str], pergunta: str) -> list[str]:
-    """Dimensões de texto da tabela pronta, as citadas na pergunta primeiro (interpretação, não regra de negócio)."""
-    cands = [c for c, t in colunas.items() if t == "string" and not FORA_DOS_EIXOS.search(c)]
+def eixos(colunas: dict[str, str], pergunta: str, distintos: dict[str, int] | None = None) -> list[str]:
+    """Dimensões de texto da tabela pronta, as citadas na pergunta primeiro (interpretação, não regra de negócio).
+    Coluna com um valor só (ou nenhum) não vira eixo: numa venda aprovada o status é sempre "Aprovado"."""
+    cands = [c for c, t in colunas.items() if t == "string" and not FORA_DOS_EIXOS.search(c)
+             and (distintos is None or distintos.get(c, 2) > 1)]
     p = _sem_acento(pergunta)
 
     def posicao(c: str) -> int:
@@ -103,7 +105,7 @@ def _visual(tipo: str, x: int, y: int, w: int, h: int, papeis: dict[str, list[di
 
 
 def projeto(did: int, pergunta: str, tabela: str, colunas: dict[str, str], medida: str | None, api: str,
-            chave: str = "COLE_A_CHAVE_DE_LEITURA") -> dict[str, str]:
+            chave: str = "COLE_A_CHAVE_DE_LEITURA", distintos: dict[str, int] | None = None) -> dict[str, str]:
     """Arquivos do PBIP (caminho → conteúdo). `colunas`: nome → tipo TMDL; `medida`: a coluna de valor do grill."""
     nome = f"Lastro_relatorio_{did}"
     sm, rp = f"{nome}.SemanticModel", f"{nome}.Report"
@@ -111,9 +113,10 @@ def projeto(did: int, pergunta: str, tabela: str, colunas: dict[str, str], medid
     tem_data = colunas.get("data") == "dateTime"
     valores = [c for c, tp in colunas.items() if tp == "double" or (tp == "int64" and not FORA_DOS_EIXOS.search(c))]
     principal = medida if medida in valores else (valores[0] if valores else None)
-    dims = eixos(colunas, pergunta)
-    regiao = next((c for c in ("projeto_regiao", "cliente_regiao") if c in colunas), None)
-    estado = next((c for c in ("projeto_estado", "cliente_estado") if c in colunas), None)
+    dims = eixos(colunas, pergunta, distintos)
+    tem = lambda c: c in colunas and (distintos is None or distintos.get(c, 2) > 1)
+    regiao = next((c for c in ("projeto_regiao", "cliente_regiao") if tem(c)), None)
+    estado = next((c for c in ("projeto_estado", "cliente_estado") if tem(c)), None)
 
     # ---- medidas (DAX): só soma, contagem e média; comparação com o mesmo período do ano anterior ----------------
     med: list[tuple[str, str, str]] = [("Registros", f"SUM({_tmdl_nome(t)}[registros])", "#,##0")]

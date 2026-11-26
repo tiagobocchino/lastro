@@ -334,6 +334,17 @@ class AcessoBI:
                 "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = %s AND table_name = %s "
                 "ORDER BY ordinal_position", (esquema, tabela))]
 
+    def distintos(self, esquema: str, tabela: str, cols: list[str]) -> dict[str, int]:
+        """Quantos valores diferentes (não vazios) cada coluna tem: coluna de um valor só não vira página de relatório."""
+        from psycopg import sql
+
+        if not cols or tabela not in self.tabelas_publicadas(esquema):
+            return {}
+        partes = sql.SQL(", ").join(sql.SQL("count(DISTINCT {}) AS {}").format(sql.Identifier(c), sql.Identifier(c)) for c in cols)
+        with self.banco._dono() as con:
+            r = con.execute(sql.SQL("SELECT {} FROM {}.{}").format(partes, sql.Identifier(esquema), sql.Identifier(tabela))).fetchone()
+        return {c: r[c] for c in cols}  # alias por coluna: sem ele todas se chamariam "count" e o dict colapsa
+
     def marcar_planilha(self, tenant: str, planilha_id: str | None) -> None:
         with self.banco._dono() as con:
             con.execute("UPDATE interno.bi_acessos SET planilha_id = %s, planilha_enviada_em = "

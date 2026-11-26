@@ -929,8 +929,10 @@ def relatorio_powerbi(did: int, request: Request, s: Annotated[Sessao, Depends(s
     if not tabela:
         raise HTTPException(409, "a tabela pronta desta demanda ainda não foi publicada: clique em publicar no BI")
     medida = ((d.get("resultado") or {}).get("modelo") or {}).get("medida")
-    arqs = rp.projeto(did, d["pergunta"], tabela, rp.colunas_do_postgres(bi.colunas(a["nome"], tabela)),
-                      ident(medida) if medida else None, _url_publica(request) + "/")
+    colunas = rp.colunas_do_postgres(bi.colunas(a["nome"], tabela))
+    distintos = bi.distintos(a["nome"], tabela, [c for c, tp in colunas.items() if tp == "string"])
+    arqs = rp.projeto(did, d["pergunta"], tabela, colunas, ident(medida) if medida else None, _url_publica(request) + "/",
+                      distintos=distintos)
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         for caminho, conteudo in arqs.items():

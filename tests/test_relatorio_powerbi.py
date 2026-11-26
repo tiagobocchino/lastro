@@ -74,3 +74,14 @@ def test_relatorio_de_rh_sem_valor_conta_registros_e_tem_paginas_por_setor_e_car
     assert titulos == ["Visão geral", "Registros por setor", "Registros por cargo", "Detalhe"]
     tab = arqs["Lastro_relatorio_18.SemanticModel/definition/tables/painel_18_rh.tmdl"]
     assert "measure Registros = SUM(painel_18_rh[registros])" in tab and "Total" not in tab.split("column")[0]
+
+
+def test_coluna_de_um_valor_so_nao_vira_pagina():
+    dist = {"status_nome": 1, "motivo_perda": 0, "vendedor_nome": 12, "grupo_nome": 6, "cliente_nome": 236, "company": 4,
+            "projeto_regiao": 5, "projeto_estado": 17, "projeto_cidade": 30, "cliente_cidade": 20, "cliente_estado": 7, "cliente_regiao": 4}
+    arqs = rp.projeto(15, "Quanto cada vendedor vendeu, em valor de produtos, nos contratos aprovados?",
+                      "painel_15_vendas", VENDAS, "valores_produtos", "https://lastro.exemplo/", distintos=dist)
+    jsons = _validar(arqs)
+    pgs = jsons["Lastro_relatorio_15.Report/definition/pages/pages.json"]["pageOrder"]
+    assert pgs == ["visao_geral", "por_vendedor_nome", "por_cliente_nome", "por_grupo_nome", "geografia", "detalhe"]
+    assert not any(d["visual"]["visualType"] == "funnel" for k, d in jsons.items() if k.endswith("visual.json"))  # status de um valor só
