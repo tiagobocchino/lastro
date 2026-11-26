@@ -176,3 +176,29 @@ def test_rede_fora_vira_erro_do_espelho_e_a_carga_vira_aviso(monkeypatch, tmp_pa
     cid = repo.criar_carga(fid, "rdstation_crm", "negocios", {}, modo="sandbox")
     r = cargas.executar(banco, CofreLocal(cfg.home), cfg, repo.carga(cid), 1_795_600_000, espelho=esp)
     assert r["status"] == "falhou" and "Storage inacessível" in r["aviso"]  # aviso no portal, sem exceção solta
+
+
+def test_pasta_que_nao_esta_vazia_tambem_recebe_o_que_falta(monkeypatch, tmp_path: Path, storage):
+    """26/11: a pasta da empresa demo nasce ao subir o servidor (política e planilha de exemplo). Como não estava vazia,
+    o espelho não restaurava nada, e as fontes enviadas e o gold das demandas sumiam depois do deploy."""
+    falso, esp = storage
+    monkeypatch.setenv("LASTRO_HOME", str(tmp_path))
+    cfg = carregar()
+    con = conectar(cfg.banco)
+    criar_tenant(con, "demo", "Demo")
+    repo = Repo(con, "demo")
+    plat = Plataforma(cfg, repo, esp)
+    enviada = plat.pasta / "fontes" / "enviada_pelo_cliente.csv"
+    enviada.parent.mkdir(parents=True)
+    shutil.copy(EXEMPLO, enviada)
+    plat.sincronizar()
+    shutil.rmtree(plat.pasta)  # deploy: o disco sumiu
+    (plat.pasta / "politica.yaml").parent.mkdir(parents=True)
+    (plat.pasta / "politica.yaml").write_text("plano: operacao\n")  # o servidor recria isto ao subir
+    novo = EspelhoStorage("https://projeto.supabase.co", CHAVE, http=httpx.Client(transport=falso.transporte()))  # processo novo
+    Plataforma(cfg, repo, novo)
+    assert enviada.exists() and enviada.read_bytes() == EXEMPLO.read_bytes()
+    assert (plat.pasta / "politica.yaml").read_text() == "plano: operacao\n"  # o que já está no disco não é sobrescrito
+    envios = falso.envios
+    Plataforma(cfg, repo, novo)  # pedidos seguintes do mesmo processo não listam o Storage de novo
+    assert falso.envios == envios

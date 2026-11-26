@@ -6,6 +6,7 @@ import argparse
 import os
 import shutil
 import sys
+from pathlib import Path
 
 from .banco import abrir_banco
 from .caixa import Caixa
@@ -36,13 +37,17 @@ def preparar_demo() -> tuple[Plataforma, int]:
         pol.plano = "operacao"
         arq_politica.parent.mkdir(parents=True, exist_ok=True)
         pol.salvar(arq_politica)
+    origem = RAIZ / "exemplos" / "orcamentos.csv"
     existentes = [f for f in repo.fontes() if f["nome"] == "orcamentos"]
+    # O disco do Render é apagado a cada deploy, mas o cadastro da fonte fica no banco (26/11: "No files found ...
+    # orcamentos.csv"). Por isso a planilha de exemplo é recolocada sempre que falta, no caminho que o cadastro aponta.
+    destino = Path(existentes[0]["caminho"]) if existentes and existentes[0].get("caminho") else (
+        cfg.pasta_tenant(DEMO_TENANT) / "fontes" / "orcamentos.csv")
+    if not destino.exists():
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(origem, destino)
     if existentes:
         return Plataforma(cfg, repo), existentes[0]["id"]
-    origem = RAIZ / "exemplos" / "orcamentos.csv"
-    destino = cfg.pasta_tenant(DEMO_TENANT) / "fontes" / "orcamentos.csv"
-    destino.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy(origem, destino)
     fid = repo.adicionar_fonte("orcamentos", "arquivo", str(destino))
     return Plataforma(cfg, repo), fid
 

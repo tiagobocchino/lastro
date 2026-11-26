@@ -36,6 +36,7 @@ class EspelhoStorage:
         # Chave secreta nova (sb_secret_...) vai só no apikey: não é JWT e quebra no Authorization.
         # A service_role antiga (JWT, "eyJ...") ainda aceita os dois (docs/infra/fontes/supabase-chaves-api.txt).
         self._cab = {"apikey": chave} | ({"Authorization": f"Bearer {chave}"} if chave.startswith("eyJ") else {})
+        self._restaurados: set[str] = set()  # empresas já conferidas contra o Storage neste processo
 
     # ---- API do Storage ----------------------------------------------------------------
     def _pedir(self, metodo: str, url: str, **kw) -> httpx.Response:  # noqa: ANN003
@@ -87,15 +88,23 @@ class EspelhoStorage:
 
     # ---- espelho da pasta da empresa ------------------------------------------------------
     def restaurar(self, pasta: Path, tenant: str) -> int:
-        if pasta.exists() and any(pasta.iterdir()):
-            return 0
+        """Baixa o que falta no disco, uma vez por empresa a cada vez que o servidor sobe.
+
+        Antes só restaurava pasta vazia. Em 26/11 a pasta da empresa demo nascia ao subir o servidor (política e planilha
+        de exemplo), não estava vazia, e as fontes enviadas e o gold das demandas nunca voltavam depois do deploy."""
+        if tenant in self._restaurados and pasta.exists() and any(pasta.iterdir()):
+            return 0  # já conferida neste processo; pasta vazia (disco apagado) sempre restaura
         baixados = 0
         for chave_obj in self.listar(tenant):
             destino = pasta / chave_obj[len(tenant) + 1:]
+            if destino.exists():  # o disco tem a versão mais nova (ou a mesma): nunca sobrescreve
+                continue
             destino.parent.mkdir(parents=True, exist_ok=True)
             destino.write_bytes(self.baixar(chave_obj))
             baixados += 1
-        self._salvar_manifesto(pasta, self._estado(pasta))
+        if pasta.exists():
+            self._salvar_manifesto(pasta, self._estado(pasta))
+        self._restaurados.add(tenant)
         return baixados
 
     def sincronizar(self, pasta: Path, tenant: str) -> int:

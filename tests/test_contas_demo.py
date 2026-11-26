@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from lastro import cli
@@ -45,3 +47,14 @@ def test_tela_de_login_em_producao_nao_mostra_as_contas_mesmo_ligadas(monkeypatc
     monkeypatch.setenv("LASTRO_AMBIENTE", "producao")  # /api/config lê o ambiente a cada pedido
     monkeypatch.setenv("LASTRO_CONTAS_DEMO", "1")
     assert TestClient(modulo.app).get("/api/config").json() == {"contas_demo": False}
+
+
+def test_planilha_de_exemplo_volta_quando_o_disco_e_apagado(producao):
+    """26/11: no Render o disco some a cada deploy, mas a fonte fica cadastrada no banco ("No files found ... orcamentos.csv")."""
+    producao.setenv("LASTRO_CONTAS_DEMO", "1")
+    plat, fid = cli.preparar_demo()
+    caminho = Path(plat.repo.fontes([fid])[0]["caminho"])
+    caminho.unlink()  # o deploy apagou o disco
+    plat2, fid2 = cli.preparar_demo()  # o servidor sobe de novo
+    assert fid2 == fid and caminho.exists() and caminho.read_bytes() == (cli.RAIZ / "exemplos" / "orcamentos.csv").read_bytes()
+    assert len([f for f in plat2.repo.fontes() if f["nome"] == "orcamentos"]) == 1  # sem fonte duplicada
