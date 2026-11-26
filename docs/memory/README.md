@@ -14,3 +14,4 @@ Armadilhas e fatos operacionais. Uma linha por nota.
 - [dockerignore-e-copy](dockerignore-e-copy.md) — COPY de pasta no .dockerignore quebra o deploy do Render ("failed to compute cache key"); teste em tests/test_infra.py.
 - [planilha-do-mundo-real](planilha-do-mundo-real.md) — aspas no nome da coluna, moeda em texto "R$ 1.234,56" e nº de processo somado como valor; nomes do gold só por construtores.ident; testes em tests/test_nomes_de_coluna.py.
 - [disco-efemero-no-render](disco-efemero-no-render.md) — arquivo pode sumir do servidor: publicar o BI só apaga o que recria; confira os avisos antes de reenviar fontes (em 25/11 os arquivos sobreviveram ao deploy).
+- [power-bi-chave-de-leitura](power-bi-chave-de-leitura.md) — "Não foi possível autenticar" no Power BI = 401 do Lastro; ler interno.bi_recusas (motivo, tamanho e início) em vez de pedir a chave.
