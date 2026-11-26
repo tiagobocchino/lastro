@@ -45,6 +45,8 @@ CREATE TABLE IF NOT EXISTS eventos (
 CREATE TABLE IF NOT EXISTS demo_eventos (
   id INTEGER PRIMARY KEY, em REAL NOT NULL, etapa TEXT NOT NULL, duracao_ms INTEGER, faixa_tamanho TEXT,
   n_colunas INTEGER, visual TEXT, motivo TEXT);
+CREATE TABLE IF NOT EXISTS erros_api (
+  id INTEGER PRIMARY KEY, em REAL NOT NULL, metodo TEXT NOT NULL, rota TEXT NOT NULL, status INTEGER NOT NULL, mensagem TEXT);
 CREATE TABLE IF NOT EXISTS metricas_api (
   hora REAL PRIMARY KEY, requisicoes INTEGER NOT NULL DEFAULT 0, erros_4xx INTEGER NOT NULL DEFAULT 0,
   erros_5xx INTEGER NOT NULL DEFAULT 0, latencia_ms INTEGER NOT NULL DEFAULT 0);
@@ -292,6 +294,15 @@ class BancoSqlite:
         sql = SQL_METRICA.format(t="metricas_api", h="?", p="?")
         self.con.execute(sql, (hora_cheia(agora), int(400 <= status < 500), int(status >= 500), ms))
         self.con.commit()
+
+    def registrar_erro(self, metodo: str, rota: str, status: int, mensagem: str | None) -> None:
+        self.con.execute("INSERT INTO erros_api (em, metodo, rota, status, mensagem) VALUES (?,?,?,?,?)",
+                         (time.time(), metodo, rota[:200], status, (mensagem or "")[:500] or None))
+        self.con.execute("DELETE FROM erros_api WHERE em < ?", (time.time() - 30 * 86400,))
+        self.con.commit()
+
+    def erros(self, limite: int = 50) -> list[dict]:
+        return [dict(r) for r in self.con.execute("SELECT * FROM erros_api ORDER BY id DESC LIMIT ?", (limite,))]
 
     def metricas(self) -> list[dict]:
         return [dict(r) for r in self.con.execute("SELECT * FROM metricas_api ORDER BY hora")]

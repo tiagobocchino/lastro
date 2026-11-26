@@ -497,3 +497,15 @@ def test_site_serve_fontes_e_imagens_com_cache_longo(api):
     assert f.status_code == 200 and "immutable" in f.headers["cache-control"]
     assert i.status_code == 200 and "max-age=604800" in i.headers["cache-control"]
     assert "max-age" not in h.headers.get("cache-control", "")
+
+
+def test_erros_que_o_usuario_viu_ficam_registrados_sem_dado_pessoal(api):
+    """26/11: para acompanhar os testes sem os logs do Render, cada 4xx/5xx vira uma linha (rota, status, mensagem)."""
+    modulo, c, _ = api
+    c.post("/api/demo/sessoes", files={"arquivo": ("dados.txt", b"a,b\n1,2\n")})  # 400: formato
+    c.get("/api/demandas")  # 401 sem login: não conta
+    c.post("/api/login", json={"email": "alguem@empresa.com", "senha": "errada-123"})  # 401 com e-mail: conta, sem o e-mail
+    erros = modulo.banco.erros()
+    assert [(e["metodo"], e["rota"], e["status"]) for e in erros] == [("POST", "/api/login", 401), ("POST", "/api/demo/sessoes", 400)]
+    assert "CSV ou Excel" in erros[1]["mensagem"]
+    assert "alguem@empresa.com" not in str(erros)

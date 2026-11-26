@@ -78,13 +78,30 @@ async def medir(request, call_next):
         resposta = await call_next(request)
         status = resposta.status_code
         return resposta
+    except Exception as e:
+        request.state.erro = f"{type(e).__name__}: {e}"
+        raise
     finally:
         if not request.url.path.startswith(NAO_MEDIR):
             ms = int((time.perf_counter() - inicio) * 1000)
             try:
                 await run_in_threadpool(banco.registrar_metrica, status, ms)
+                # erros que alguém viu (26/11): 401 de quem não está logado não conta
+                sem_login = status == 401 and "authorization" not in request.headers and request.url.path != "/api/login"
+                if status >= 400 and not sem_login:
+                    rota = getattr(request.scope.get("route"), "path", request.url.path)
+                    await run_in_threadpool(banco.registrar_erro, request.method, rota, status, getattr(request.state, "erro", None))
             except Exception as e:  # noqa: BLE001
                 log.warning("métrica não gravada: %s", type(e).__name__)
+
+
+@app.exception_handler(HTTPException)
+async def guardar_motivo(request, exc: HTTPException):  # noqa: ANN201
+    """Guarda a mensagem devolvida ao usuário para o registro de erros; a resposta é a padrão do FastAPI."""
+    from fastapi.exception_handlers import http_exception_handler
+
+    request.state.erro = str(exc.detail)
+    return await http_exception_handler(request, exc)
 
 
 class Sessao(BaseModel):

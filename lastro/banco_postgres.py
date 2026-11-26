@@ -64,6 +64,16 @@ class BancoPostgres:
         with self._dono() as con:
             con.execute(sql, (hora_cheia(agora), int(400 <= status < 500), int(status >= 500), ms))
 
+    def registrar_erro(self, metodo: str, rota: str, status: int, mensagem: str | None) -> None:
+        with self._dono() as con:
+            con.execute("INSERT INTO interno.erros_api (metodo, rota, status, mensagem) VALUES (%s,%s,%s,%s)",
+                        (metodo, rota[:200], status, (mensagem or "")[:500] or None))
+            con.execute("DELETE FROM interno.erros_api WHERE em < now() - interval '30 days'")
+
+    def erros(self, limite: int = 50) -> list[dict]:
+        with self._dono() as con:
+            return [dict(r) for r in con.execute("SELECT * FROM interno.erros_api ORDER BY id DESC LIMIT %s", (limite,))]
+
     def registrar_demo(self, etapa: str, **campos: object) -> None:
         e = evento_demo(etapa, **campos)  # type: ignore[arg-type]
         with self._dono() as con:
